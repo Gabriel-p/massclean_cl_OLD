@@ -1,22 +1,34 @@
 #!/bin/bash
 
 
+##  MASSCLEAN V2.0123 ##
 
-# This script generates the synthetic clusters for the specified initial mass and distance ranges
-# and stores the files in the corresponding folders. The first run with the smallest initial
-# mass should be done manually to also generate the field stars field.plot files for each
-# distance and A_V set of parameters.
+# This script generates the synthetic clusters for the specified initial mass distance,
+# age and metallicity ranges and stores the files in the corresponding folders.
+
+# The first run with the smallest initial mass should be done manually to also generate
+# the field stars field.plot files for each distance and A_V set of parameters.
 
 
 
 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-# 1- This script should be located inside the 'massclean2.012' folder.
-# 2- The sub folders inside the CODE_DIR directory should already be created since
-# the script will not work otherwise. The convention is xx_yyyy where 'xx' is the initial mass
-# of the clusters (2 chars) and 'yyyy' is the distance in parsecs (3 or 4 chars)
+# 1- The 'massclean2.013' folder should be a sub-folder of the one where this
+#    script is located.
+# 2- The convention for the names of the created folders is xx_yyyy where 'xx' is the initial mass
+#    of the clusters (2 chars) and 'yyyy' is the distance in parsecs (3 or 4 chars)
 
 
 
+# Current directory.
+CDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+# Location of the cluster.ini file.
+CLUSTER_INI=$CDIR"/massclean2.013/ini.files/cluster.ini"
+
+# Change to code directory.
+cd $CDIR"/massclean2.013"
+
+# Clean left over files from previous run.
+./clean.all
 
 # To generate field.plot files. Only run these commands once (for the smallest
 # initial mass so it will be faster) since the rest of the clusters will use
@@ -29,53 +41,86 @@
 #./add_field
 
 
-# Location of the cluster.ini file.
-CLUSTER_INI=~/Descargas/massclean2.012/ini.files/cluster.ini
-
-#Declare arrays of initial mass and distance.
-INIT_MASS=('01' '02' '03' '04' '05' '06' '07' '08')
-INIT_MASS2=('100' '200' '300' '400' '500' '600' '700' '800')
-DIST=('500' '1000' '1500' '2000' '2500' '3000')
-AV=('0.5' '1.0' '1.5' '2.0' '2.5' '3.0')
-# get number of elements in the initial mass array
-MASSES=${#INIT_MASS[@]}
+# Declare arrays of metallicities, ages, initial masses and distance.
+METAL=('002' '008' '019' '030')
+AGES=('0650' '0700' '0750' '0800' '0850' '0900' '0950')
+INIT_MASS=('02' '04' '06' '08')
+INIT_MASS2=('200' '400' '600' '800')
+DIST=('500' '1000' '1500' '2000')
+AV=('0.5' '1.0' '1.5' '2.0')
+# Get number of elements in the initial metallicity array.
+METAL_n=${#METAL[@]}
+# Same for ages.
+AGES_n=${#AGES[@]}
+# Same for masses.
+MASSES_n=${#INIT_MASS[@]}
 # Same for distances.
-DISTANCES=${#DIST[@]}
+DISTANCES_n=${#DIST[@]}
+
 
 # Iterate through all initial masses.
-for (( i=0;i<$MASSES;i++)); do
-    
-    # Iterate through all distances.
-    for (( j=0;j<$DISTANCES;j++)); do
-        #echo ${INIT_MASS[${i}]}, ${DIST[${j}]}
-        
-        # Modify 'cluster.ini' file.
-        sed -i "40s/.*/${INIT_MASS2[${i}]}    (2)/" $CLUSTER_INI
-        sed -i "41s/.*/${DIST[${j}]}    (3)/" $CLUSTER_INI
-        sed -i "51s/.*/${AV[${j}]}    (13)/" $CLUSTER_INI
-        
-        # Generate clusters with different ages according to the parameters set above.
-        ./clean.all
-        ./all.run
-        
-        # Set dir to move the files to.
-        CODE_DIR="/media/rest/Dropbox/GABRIEL/CARRERA/3-POS-DOC/trabajo/codigo/massclean/${INIT_MASS[${i}]}_${DIST[${j}]}"
-        echo "${INIT_MASS[${i}]}_${DIST[${j}]}"
-        # Define cluster's ages to copy.
-        file1=~/Descargas/massclean2.012/data/iso.trek/is1_p019_0650.trek
-        file2=~/Descargas/massclean2.012/data/iso.trek/is1_p019_0700.trek
-        file3=~/Descargas/massclean2.012/data/iso.trek/is1_p019_0750.trek
-        file4=~/Descargas/massclean2.012/data/iso.trek/is1_p019_0800.trek
-        file5=~/Descargas/massclean2.012/data/iso.trek/is1_p019_0850.trek
-        file6=~/Descargas/massclean2.012/data/iso.trek/is1_p019_0900.trek
-        file7=~/Descargas/massclean2.012/data/iso.trek/is1_p019_0950.trek
-        # Move cluster files to code folder.
-        cp $file1 $file2 $file3 $file4 $file5 $file6 $file7 $CODE_DIR
-        # Copy used cluster.ini file to folder.
-        cp $CLUSTER_INI $CODE_DIR
-        
-    done 
-    
-done 
+for (( i=0;i<$METAL_n;i++)); do
 
-echo 'Done'
+    # Use set.ini file for standard UBVI photometry.
+    cp ./ini.files/default/sets.ini1  ./ini.files/sets.ini
+    # Remove previously used isochrones.
+    rm ./isochrones/iso.to.use/*.*
+    # Select which isochrones to use (metallicity and age)
+    for (( h=0;h<$AGES_n;h++)); do
+        # Define isoch to use.
+        file_a="./isochrones/padova/${METAL[${i}]}/is1_p${METAL[${i}]}_${AGES[${h}]}.PADOVA"
+        # Copy it to /iso.to.use folder.
+        cp $file_a ./isochrones/iso.to.use
+    done
+
+    #read -p "1 Press [Enter] key to continue..."
+
+    # Iterate through all initial masses.
+    for (( j=0;j<$MASSES_n;j++)); do
+        
+        # Iterate through all distances.
+        for (( k=0;k<$DISTANCES_n;k++)); do
+            #echo ${METAL[${i}]}, ${INIT_MASS[${j}]}, ${DIST[${k}]}
+            
+            # Modify 'cluster.ini' file.
+            sed -i "45s/.*/${INIT_MASS2[${j}]}    (2)/" $CLUSTER_INI
+            sed -i "46s/.*/${DIST[${k}]}    (3)/" $CLUSTER_INI
+            sed -i "56s/.*/${AV[${k}]}    (13)/" $CLUSTER_INI
+
+            #read -p "Press [Enter] key to continue..."
+            
+            # Generate clusters with different ages and metallicities
+            # according to the parameters set above.
+
+            # Clean left over files from previous run.
+            ./clean.all
+
+            # Sequence to replace ./all.run.
+            ./goimf2
+            ./goking2
+            ./goccm2
+
+            # Run final script to generate the synth clusters.
+            # Uses all the isochrones stored in folder /iso.to.use
+            ./gotrek2
+
+            # Generate field of stars.
+            ./gofield2
+            
+            # Set dir to move the synthetic clusters to.
+            CODE_DIR="./clusters/${INIT_MASS[${j}]}_${DIST[${k}]}"
+            # Create sub-folder if it does not exist.
+            mkdir -p $CODE_DIR
+
+            # Copy synth clusters files to output folder.
+            cp ./data/iso.trek/*.trek $CODE_DIR
+            # Copy field stars file to output folder.
+            cp ./data/field.plot $CODE_DIR
+            # Copy used cluster.ini file to folder.
+            cp $CLUSTER_INI $CODE_DIR
+
+        done
+    done
+done
+
+echo 'Done.'
