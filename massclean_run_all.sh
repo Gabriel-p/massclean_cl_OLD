@@ -27,19 +27,11 @@ CLUSTER_INI=$CDIR"/massclean2.013/ini.files/cluster.ini"
 # Change to code directory.
 cd $CDIR"/massclean2.013"
 
+# Remove *ALL* previous synth clusters created.
+rm -rfv clusters/*
+
 # Clean left over files from previous run.
 ./clean.all
-
-# To generate field.plot files. Only run these commands once (for the smallest
-# initial mass so it will be faster) since the rest of the clusters will use
-# these same fields.
-#./clean.all
-#./all.run
-#./goimage2
-#./gofield2
-#chmod u+x add_field
-#./add_field
-
 
 # Declare arrays of metallicities, ages, initial masses and distance.
 METAL=('002' '008' '019' '030')
