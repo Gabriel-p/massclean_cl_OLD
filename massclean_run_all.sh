@@ -43,7 +43,7 @@ cd $CDIR"/massclean2.013"
 
 # Declare arrays of metallicities, ages, initial masses and distance.
 METAL=('002' '008' '019' '030')
-AGES=('0650' '0700' '0750' '0800' '0850' '0900' '0950')
+AGES=('0600' '0750' '0900' '1000')
 INIT_MASS=('02' '04' '06' '08')
 INIT_MASS2=('200' '400' '600' '800')
 DIST=('500' '1000' '1500' '2000')
@@ -72,8 +72,6 @@ for (( i=0;i<$METAL_n;i++)); do
         # Copy it to /iso.to.use folder.
         cp $file_a ./isochrones/iso.to.use
     done
-
-    #read -p "1 Press [Enter] key to continue..."
 
     # Iterate through all initial masses.
     for (( j=0;j<$MASSES_n;j++)); do
@@ -111,6 +109,8 @@ for (( i=0;i<$METAL_n;i++)); do
             CODE_DIR="./clusters/${INIT_MASS[${j}]}_${DIST[${k}]}"
             # Create sub-folder if it does not exist.
             mkdir -p $CODE_DIR
+
+            #read -p "1 Press [Enter] key to continue..."
 
             # Copy synth clusters files to output folder.
             cp ./data/iso.trek/*.trek $CODE_DIR
