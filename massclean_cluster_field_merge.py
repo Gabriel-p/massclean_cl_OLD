@@ -29,7 +29,7 @@ def func(x):
     #a, d = 0., 0.
     b = 0.9
     c = -10.
-    d = 0.05
+    d = 0.015  # Minimum error value.
     return a * np.exp(b * x + c) + d
 
 
