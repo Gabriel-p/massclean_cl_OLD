@@ -97,14 +97,15 @@ for f_indx, sub_dir in enumerate(dir_files[0]):
     id_clust = [int('1' + str(i)) for i in range(len(x_data))]
 
     for idx in range(len(mag_data)):
-        # Randomly move mag and color through a Gaussian function.
-        mag_data[idx] = rd.gauss(mag_data[idx], e_mag[idx])
-        col1_data[idx] = rd.gauss(col1_data[idx], e_col[idx])
+        # Randomly increase errors.
+        e_mag[idx] = e_mag[idx] + abs(rd.gauss(0., e_mag[idx]))
+        e_col[idx] = e_col[idx] + abs(rd.gauss(0., e_col[idx]))
 
     for idx in range(len(mag_data)):
-        # Randomly increase errors.
-        e_mag[idx] = e_mag[idx] + abs(rd.gauss(e_mag[idx] / 7., e_mag[idx]))
-        e_col[idx] = e_col[idx] + abs(rd.gauss(e_col[idx] / 7., e_col[idx]))
+        # Randomly move mag and color through a Gaussian function given
+        # their error values.
+        mag_data[idx] = rd.gauss(mag_data[idx], e_mag[idx])
+        col1_data[idx] = rd.gauss(col1_data[idx], e_col[idx])
 
     # Read data from field stars file.
     data2 = np.loadtxt(join(sd_path, sub_dir, 'field.plot'), unpack=True)
@@ -135,17 +136,17 @@ for f_indx, sub_dir in enumerate(dir_files[0]):
     # An ID that stars with a 2 identifies the star as a field member.
     id_field = [int('2' + str(i)) for i in range(len(x_field))]
 
-    for idx in range(len(mag_field)):
-        # Randomly move mag and color through a Gaussian function.
-        mag_field[idx] = rd.gauss(mag_field[idx], e_mag_f[idx])
-        col1_field[idx] = rd.gauss(col1_field[idx], e_col_f[idx])
-
     for idx in range(len(id_field)):
         # Randomly increase errors.
         e_mag_f[idx] = e_mag_f[idx] + \
         abs(rd.gauss(e_mag_f[idx] / 7., e_mag_f[idx]))
         e_col_f[idx] = e_col_f[idx] + \
         abs(rd.gauss(e_col_f[idx] / 7., e_col_f[idx]))
+
+    for idx in range(len(mag_field)):
+        # Randomly move mag and color through a Gaussian function.
+        mag_field[idx] = rd.gauss(mag_field[idx], e_mag_f[idx])
+        col1_field[idx] = rd.gauss(col1_field[idx], e_col_f[idx])
 
     # Merge cluster and field.
     id_cl_fl = id_clust + id_field
@@ -219,7 +220,7 @@ for f_indx, sub_dir in enumerate(dir_files[0]):
     ax1.grid(b=True, which='major', color='gray', linestyle='--', lw=1)
     # Calculate total number of stars whitin cluster's radius.
     tot_stars = len(id_clust)
-    plt.text(0.55, 0.93, '$r \leq R_{cl}\,|\,N=%d$' % tot_stars,
+    plt.text(0.64, 0.93, '$N_{memb}=%d$' % tot_stars,
              transform=ax1.transAxes,
              bbox=dict(facecolor='white', alpha=0.5), fontsize=16)
     # Plot stars.
