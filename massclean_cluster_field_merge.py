@@ -25,7 +25,7 @@ def func(x):
     '''
     Exponential function.
     '''
-    a, b, c = 2.e-04, 0.35, 0.015
+    a, b, c = 2.e-05, 0.4, 0.015
     return a * np.exp(b * x) + c
 
 
@@ -167,8 +167,8 @@ for f_indx, sub_dir in enumerate(dir_files[0]):
     # Plot field + cluster.
     # figsize(x1, y1), GridSpec(y2, x2) --> To have square plots: x1/x2 =
     # y1/y2 = 2.5
-    fig = plt.figure(figsize=(15, 5))  # create the top-level container
-    gs = gridspec.GridSpec(2, 6)  # create a GridSpec object
+    fig = plt.figure(figsize=(10, 10))  # create the top-level container
+    gs = gridspec.GridSpec(4, 4)  # create a GridSpec object
 
     # x,y finding chart of cluster stars
     ax0 = plt.subplot(gs[0:2, 0:2])
@@ -183,8 +183,9 @@ for f_indx, sub_dir in enumerate(dir_files[0]):
     plt.ylabel('y (px)', fontsize=12)
     # Set minor ticks
     ax0.minorticks_on()
-    #circle = plt.Circle((1024., 1024.), 250., color='r', fill=False)
-    #fig.gca().add_artist(circle)
+    plt.text(0.8, 0.93, 'Cluster',
+             transform=ax0.transAxes,
+             bbox=dict(facecolor='white', alpha=0.5), fontsize=14)
     # Count the number of very bright stars in the field.
     range_10_perc = (max(mag_cl_fl) - min(mag_cl_fl)) / 10. + min(mag_cl_fl)
     bright_stars = len([i for i in mag_cl_fl if i < range_10_perc])
@@ -223,7 +224,7 @@ for f_indx, sub_dir in enumerate(dir_files[0]):
                 s=amplitude * np.exp(exp_factor * np.asarray(mag_cl_fl) ** 2.5))
 
     # Cluster's stars CMD (stars inside cluster's radius)
-    ax2 = plt.subplot(gs[0:2, 4:6])
+    ax2 = plt.subplot(gs[2:4, 0:2])
     #Set plot limits
     col1_min, col1_max = min(col1_cl_fl) - 0.2, max(col1_cl_fl) + 0.2
     mag_min, mag_max = max(mag_cl_fl) + 0.2, min(mag_cl_fl) - 0.2
@@ -238,10 +239,32 @@ for f_indx, sub_dir in enumerate(dir_files[0]):
     #ax1.xaxis.set_major_locator(MultipleLocator(1.0))
     # Set grid
     ax2.grid(b=True, which='major', color='gray', linestyle='--', lw=1)
+    plt.text(0.55, 0.93, 'Cluster sequence',
+             transform=ax2.transAxes,
+             bbox=dict(facecolor='white', alpha=0.5), fontsize=14)
+    # Plot stars.
+    plt.scatter(col1_temp, mag_temp, marker='o', c='r', s=15., lw=0.2)
+
+    # Cluster's stars CMD (stars inside cluster's radius)
+    ax3 = plt.subplot(gs[2:4, 2:4])
+    #Set plot limits
+    col1_min, col1_max = min(col1_cl_fl) - 0.2, max(col1_cl_fl) + 0.2
+    mag_min, mag_max = max(mag_cl_fl) + 0.2, min(mag_cl_fl) - 0.2
+    plt.xlim(col1_min, col1_max)
+    plt.ylim(mag_min, mag_max)
+    #Set axis labels
+    plt.xlabel('$(B-V)$', fontsize=18)
+    plt.ylabel('$V$', fontsize=18)
+    # Set minor ticks
+    ax3.minorticks_on()
+    # Only draw units on axis (ie: 1, 2, 3)
+    #ax1.xaxis.set_major_locator(MultipleLocator(1.0))
+    # Set grid
+    ax3.grid(b=True, which='major', color='gray', linestyle='--', lw=1)
     # Calculate total number of stars whitin cluster's radius.
     tot_stars = len(id_clust)
     plt.text(0.64, 0.93, '$N_{memb}=%d$' % tot_stars,
-             transform=ax2.transAxes,
+             transform=ax3.transAxes,
              bbox=dict(facecolor='white', alpha=0.5), fontsize=16)
     # Plot stars.
     plt.scatter(col1_field, mag_field, marker='o', c='k', s=2.5)
@@ -249,7 +272,7 @@ for f_indx, sub_dir in enumerate(dir_files[0]):
 
     fig.tight_layout()
     # Generate output file for each data file.
-    plt.savefig(join(out_path_sub, str(clust_name) + '.png'), dpi=100)
+    plt.savefig(join(out_path_sub, str(clust_name) + '.png'), dpi=150)
 
     # Close to release memory.
     plt.clf()
