@@ -84,10 +84,9 @@ for f_indx, sub_dir in enumerate(dir_files[0]):
             mag_data.append(mag_temp[idx])
             col1_data.append(col1_temp[idx])
 
-            # Re-scale cluster from 2048x2048 px to 250x250 px positioned in
-            # the middle of the frame.
-            x_data.append(x_temp[idx] * (125. / 512.) + 774.)
-            y_data.append(y_temp[idx] * (125. / 512.) + 774.)
+            # Move cluster to the middle of the frame.
+            x_data.append(x_temp[idx] + 899.)
+            y_data.append(y_temp[idx] + 899.)
 
             # Add errors.
             e_mag.append(func(mag_temp[idx]))
