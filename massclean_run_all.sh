@@ -41,8 +41,8 @@ sed -i "47s/.*/4.8    (4)/" $CLUSTER_INI
 sed -i "50s/.*/2048   (7)/" $CLUSTER_INI
 sed -i "51s/.*/2048   (8)/" $CLUSTER_INI
 
-# Set cluster size to 250x250 px: 250/2048 = 0.122
-sed -i "36s/.*/0.122    (3)/" $KING_INI
+# Set cluster r_t to 500px: 500/2048 = 0.244
+sed -i "36s/.*/0.244    (3)/" $KING_INI
 
 # Declare arrays of metallicities, ages, initial masses and distance.
 METAL=('002' '008' '019' '030')

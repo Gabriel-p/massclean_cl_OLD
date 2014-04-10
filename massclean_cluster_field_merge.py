@@ -51,6 +51,9 @@ for root, dirs, files in walk(sd_path):
                     dir_files[0].append(subdir)
                     dir_files[1].append(name)
 
+# Define maximum and minimum magnitude values.
+min_mag, max_mag = 12., 22.
+
 # Iterate through all synthetic clusters inside sub-dirs.
 for f_indx, sub_dir in enumerate(dir_files[0]):
 
@@ -78,15 +81,14 @@ for f_indx, sub_dir in enumerate(dir_files[0]):
     # cluster and discard stars with too large V values.
     for idx in range(len(x_temp)):
 
-        # Upper and lower limit for max V.
-        if mag_temp[idx] < 21.0 and mag_temp[idx] > 12.:
+        # Upper and lower limit for V.
+        if min_mag < mag_temp[idx] < max_mag:
 
             mag_data.append(mag_temp[idx])
             col1_data.append(col1_temp[idx])
 
-            # Move cluster to the middle of the frame.
-            x_data.append(x_temp[idx] + 899.)
-            y_data.append(y_temp[idx] + 899.)
+            x_data.append(x_temp[idx])
+            y_data.append(y_temp[idx])
 
             # Add errors.
             e_mag.append(func(mag_temp[idx]))
@@ -120,7 +122,7 @@ for f_indx, sub_dir in enumerate(dir_files[0]):
     for idx in range(len(x_f_temp)):
 
         # Upper and lower limit for V.
-        if mag_f_temp[idx] < 21.0 and mag_f_temp[idx] > 12.:
+        if min_mag < mag_f_temp[idx] < max_mag:
 
             mag_field.append(mag_f_temp[idx])
             col1_field.append(col1_f_temp[idx])
@@ -171,11 +173,36 @@ for f_indx, sub_dir in enumerate(dir_files[0]):
     # Plot field + cluster.
     # figsize(x1, y1), GridSpec(y2, x2) --> To have square plots: x1/x2 =
     # y1/y2 = 2.5
-    fig = plt.figure(figsize=(10, 5))  # create the top-level container
-    gs = gridspec.GridSpec(2, 4)  # create a GridSpec object
+    fig = plt.figure(figsize=(15, 5))  # create the top-level container
+    gs = gridspec.GridSpec(2, 6)  # create a GridSpec object
+
+    # x,y finding chart of cluster stars
+    ax0 = plt.subplot(gs[0:2, 0:2])
+    # Get max and min values in x,y
+    x_min, x_max = min(x_data), max(x_data)
+    y_min, y_max = min(y_data), max(y_data)
+    #Set plot limits
+    plt.xlim(x_min, x_max)
+    plt.ylim(y_min, y_max)
+    #Set axis labels
+    plt.xlabel('x (px)', fontsize=12)
+    plt.ylabel('y (px)', fontsize=12)
+    # Set minor ticks
+    ax0.minorticks_on()
+    #circle = plt.Circle((1024., 1024.), 250., color='r', fill=False)
+    #fig.gca().add_artist(circle)
+    # Count the number of very bright stars in the field.
+    range_10_perc = (max(mag_cl_fl) - min(mag_cl_fl)) / 10. + min(mag_cl_fl)
+    bright_stars = len([i for i in mag_cl_fl if i < range_10_perc])
+    # Set exponential factor for high and low density fields.
+    exp_factor = -0.0037
+    # Set a lower amplitude for fields with very bright stars.
+    amplitude = 500 if bright_stars < 10 else 200
+    plt.scatter(x_data, y_data, marker='o', c='black',
+                s=amplitude * np.exp(exp_factor * np.asarray(mag_cl_fl) ** 2.5))
 
     # x,y finding chart of full frame
-    ax0 = plt.subplot(gs[0:2, 0:2])
+    ax1 = plt.subplot(gs[0:2, 2:4])
     # Get max and min values in x,y
     x_min, x_max = 0., 2048.
     y_min, y_max = 0., 2048.
@@ -186,8 +213,8 @@ for f_indx, sub_dir in enumerate(dir_files[0]):
     plt.xlabel('x (px)', fontsize=12)
     plt.ylabel('y (px)', fontsize=12)
     # Set minor ticks
-    ax0.minorticks_on()
-    circle = plt.Circle((1024., 1024.), 250., color='r', fill=False)
+    ax1.minorticks_on()
+    circle = plt.Circle((1024., 1024.), 500., color='r', fill=False)
     fig.gca().add_artist(circle)
     # Count the number of very bright stars in the field.
     range_10_perc = (max(mag_cl_fl) - min(mag_cl_fl)) / 10. + min(mag_cl_fl)
@@ -196,31 +223,31 @@ for f_indx, sub_dir in enumerate(dir_files[0]):
     exp_factor = -0.0037
     # Set a lower amplitude for fields with very bright stars.
     amplitude = 500 if bright_stars < 10 else 200
-    plt.scatter(x_cl_fl, y_cl_fl, marker='o', c='black',
+    plt.scatter(x_field, y_field, marker='o', c='black',
+                s=amplitude * np.exp(exp_factor * np.asarray(mag_cl_fl) ** 2.5))
+    plt.scatter(x_data, y_data, marker='o', c='r',
                 s=amplitude * np.exp(exp_factor * np.asarray(mag_cl_fl) ** 2.5))
 
     # Cluster's stars CMD (stars inside cluster's radius)
-    ax1 = plt.subplot(gs[0:2, 2:4])
+    ax2 = plt.subplot(gs[0:2, 4:6])
     #Set plot limits
-    #col1_min, col1_max = min(col1_cl_fl), max(col1_cl_fl)
-    #mag_min, mag_max = max(mag_cl_fl), min(mag_cl_fl)
-    col1_min, col1_max = -0.9, 3.9
-    mag_min, mag_max = 21.9, 12.1
+    col1_min, col1_max = min(col1_cl_fl) - 0.2, max(col1_cl_fl) + 0.2
+    mag_min, mag_max = max(mag_cl_fl) + 0.2, min(mag_cl_fl) - 0.2
     plt.xlim(col1_min, col1_max)
     plt.ylim(mag_min, mag_max)
     #Set axis labels
     plt.xlabel('$(B-V)$', fontsize=18)
     plt.ylabel('$V$', fontsize=18)
     # Set minor ticks
-    ax1.minorticks_on()
+    ax2.minorticks_on()
     # Only draw units on axis (ie: 1, 2, 3)
     #ax1.xaxis.set_major_locator(MultipleLocator(1.0))
     # Set grid
-    ax1.grid(b=True, which='major', color='gray', linestyle='--', lw=1)
+    ax2.grid(b=True, which='major', color='gray', linestyle='--', lw=1)
     # Calculate total number of stars whitin cluster's radius.
     tot_stars = len(id_clust)
     plt.text(0.64, 0.93, '$N_{memb}=%d$' % tot_stars,
-             transform=ax1.transAxes,
+             transform=ax2.transAxes,
              bbox=dict(facecolor='white', alpha=0.5), fontsize=16)
     # Plot stars.
     plt.scatter(col1_field, mag_field, marker='o', c='k', s=2.5)
