@@ -25,6 +25,7 @@
 CDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 # Location of the cluster.ini file.
 CLUSTER_INI=$CDIR"/massclean2.013/ini.files/cluster.ini"
+KING_INI=$CDIR"/massclean2.013/ini.files/king.ini"
 
 # Change to code directory.
 cd $CDIR"/massclean2.013"
@@ -34,6 +35,14 @@ rm -rfv clusters/*
 
 # Clean left over files from previous run.
 ./clean.all
+
+# Set field size.
+sed -i "47s/.*/4.8    (4)/" $CLUSTER_INI
+sed -i "50s/.*/2048   (7)/" $CLUSTER_INI
+sed -i "51s/.*/2048   (8)/" $CLUSTER_INI
+
+# Set cluster size to 250x250 px: 250/2048 = 0.122
+sed -i "36s/.*/0.122    (3)/" $KING_INI
 
 # Declare arrays of metallicities, ages, initial masses and distance.
 METAL=('002' '008' '019' '030')
@@ -50,7 +59,6 @@ AGES_n=${#AGES[@]}
 MASSES_n=${#INIT_MASS[@]}
 # Same for distances.
 DISTANCES_n=${#DIST[@]}
-
 
 # Iterate through all initial masses.
 for (( i=0;i<$METAL_n;i++)); do
