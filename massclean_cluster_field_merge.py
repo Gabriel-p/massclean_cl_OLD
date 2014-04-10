@@ -25,12 +25,8 @@ def func(x):
     '''
     Exponential function.
     '''
-    a = 2.e-05
-    #a, d = 0., 0.
-    b = 0.9
-    c = -10.
-    d = 0.015  # Minimum error value.
-    return a * np.exp(b * x + c) + d
+    a, b, c = 2.e-04, 0.3, 0.015
+    return a * np.exp(b * x) + c
 
 
 # Path where the code is running
@@ -139,10 +135,8 @@ for f_indx, sub_dir in enumerate(dir_files[0]):
 
     for idx in range(len(id_field)):
         # Randomly increase errors.
-        e_mag_f[idx] = e_mag_f[idx] + \
-        abs(rd.gauss(e_mag_f[idx] / 7., e_mag_f[idx]))
-        e_col_f[idx] = e_col_f[idx] + \
-        abs(rd.gauss(e_col_f[idx] / 7., e_col_f[idx]))
+        e_mag_f[idx] = e_mag_f[idx] + abs(rd.gauss(0., e_mag_f[idx]))
+        e_col_f[idx] = e_col_f[idx] + abs(rd.gauss(0., e_col_f[idx]))
 
     for idx in range(len(mag_field)):
         # Randomly move mag and color through a Gaussian function.
