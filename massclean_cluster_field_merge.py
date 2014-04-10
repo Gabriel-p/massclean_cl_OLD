@@ -25,7 +25,7 @@ def func(x):
     '''
     Exponential function.
     '''
-    a, b, c = 2.e-04, 0.3, 0.015
+    a, b, c = 2.e-04, 0.35, 0.015
     return a * np.exp(b * x) + c
 
 
