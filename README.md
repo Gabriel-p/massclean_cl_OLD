@@ -1,29 +1,15 @@
 massclean_cl
 ============
 
-massclean_cl
+The bash script `massclean_run_all.sh` calls the MASSCLEAN package to generate a number of
+open clusters along with fields of stars created with the same parameter values.
 
+Within the script the metallicities, ages, distances, extinction and initial masses of the
+clusters can be set. The `MASSCLEAN` output files will be stores in the `/massclean2.013/clusters`
+folder.
 
-
-
-1) ** massclean_run_all.sh **
-
-Para generar cúmulos sintéticos con los cuales validar OCAAT utilizamos el código MASSCLEAN de Popescu. Se generaron
-336 cúmulos variando los parámetros masa inicial (100, 200, 300, 400, 500, 600, 700, 800) la cual es responsable de
-generar cúmulos con más miembros a medida que aumentamos su valor, la distancia (0.5, 1, 1.5, 2, 2.5, 3 kpc) con la
-absorción visual aumentando como 1mag/kpc y finalmente seleccionamos aquellos con determinadas edades cubriendo un
-rango que coincida con las isócronas de Girardi ($10^{n}$ yr; n = 6.5, 7, 7.5, 8, 8.5, 9, 9.5)
-
-Para cada valor de distancia se genera un campo artificial que acompañe a los cúmulos asociados a esa distancia.
-
-Para generar los cúmulos con MASSCLEAN primero fijamos los parámetros en el archivo 'cluster.ini' y 'field.ini' y
-luego corremos './all\_run' en el código.
-Para generar el archivo de campo ('field.plot') corremos en secuencia los comandos:
-./goimage2, ./gofield2, chmod u+x add\_field y finalmente ./add\_field.
-  
-  
-Los nombres de las carpetas están compuestos por (masa inicial)/100 en los dos primeros caracteres
-y la distancia en parsec en los caracteres luego del guión bajo.
+Each sub-folder respects the following naming convention: (initial mass)/100 for the first two characters
+and distance in parsecs for the characters after the underscore.
 
 Los archivos '*_field.plot' contienen a las estrellas de campo donde los caracteres antes del guión
 bajo corresponden a la distancia a la que se ubica el campo. Cada cúmulo debe fusionarse con el campo

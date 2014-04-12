@@ -41,16 +41,17 @@ sed -i "47s/.*/4.8    (4)/" $CLUSTER_INI
 sed -i "50s/.*/2048   (7)/" $CLUSTER_INI
 sed -i "51s/.*/2048   (8)/" $CLUSTER_INI
 
-# Set cluster r_t to 500px: 500/2048 = 0.244
+# Set cluster r_t to 250px: 250/(2048/2) = 0.244
 sed -i "36s/.*/0.244    (3)/" $KING_INI
 
 # Declare arrays of metallicities, ages, initial masses and distance.
 METAL=('002' '008' '019' '030')
-AGES=('0600' '0750' '0900' '1000')
+AGES=('0600' '0800' '0900' '1000')
 INIT_MASS=('02' '04' '06' '08')
 INIT_MASS2=('200' '400' '600' '800')
 DIST=('500' '1000' '1500' '2000')
 AV=('0.5' '1.0' '1.5' '2.0')
+
 # Get number of elements in the initial metallicity array.
 METAL_n=${#METAL[@]}
 # Same for ages.
@@ -124,5 +125,10 @@ for (( i=0;i<$METAL_n;i++)); do
         done
     done
 done
+
+# Change back to main directory.
+cd $CDIR
+# Run python script to merge the clusters and the fields.
+python massclean_cluster_field_merge.py
 
 echo 'Done.'

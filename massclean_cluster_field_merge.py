@@ -10,6 +10,7 @@ from os.path import join, realpath, dirname, exists
 from os import makedirs
 import numpy as np
 import random as rd
+import itertools
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 
@@ -27,6 +28,83 @@ def func(x):
     '''
     a, b, c = 2.e-05, 0.4, 0.015
     return a * np.exp(b * x) + c
+
+
+def compl_func(x, a):
+    '''
+    Function that mimics photometric incompleteness.
+    '''
+    return 1 / (1 + np.exp(x - a))
+
+
+def compl_rem(region):
+    '''
+    Remove random stars beyond a given magnitude limit according to a
+    completeness decreasing function.
+    '''
+
+    mag_data = region[3]
+    max_mag = max(mag_data)
+    # Number of bins.
+    bins1 = int((max(mag_data) - min(mag_data)) / 0.2)
+
+    #plt.hist(mag_data, bins=bins, color='blue')
+
+    # Histogram of magnitude values.
+    mag_hist, bin_edg = np.histogram(mag_data, bins1)
+    # Index of maximum magnitude bin, two mags below the max mag value.
+    max_indx = min(range(len(bin_edg)),
+        key=lambda i: abs(bin_edg[i] - (max_mag - 2.)))
+    n1, p1 = mag_hist[max_indx], 100.
+    # Get completeness percentages.
+    a = rd.uniform(2., 4.)
+    comp_perc = [compl_func(i, a) * 100.
+        for i in range(len(mag_hist[max_indx:]))]
+    # Number of stars that should be removed from each bin.
+    di = np.around((abs(mag_hist[max_indx:] - (n1 / p1) *
+        np.asarray(comp_perc))), 0)
+
+    # Store indexes of *all* elements in mag_data whose magnitude
+    # value falls between the ranges given.
+    c_indx = np.searchsorted(bin_edg[max_indx:], mag_data, side='left')
+    N = len(bin_edg[max_indx:])
+    mask = (c_indx > 0) & (c_indx < N)
+    elements = c_indx[mask]
+    indices = np.arange(c_indx.size)[mask]
+    sorting_idx = np.argsort(elements, kind='mergesort')
+    ind_sorted = indices[sorting_idx]
+    x = np.searchsorted(elements, range(N), side='right',
+        sorter=sorting_idx)
+    # Indexes.
+    rang_indx = [ind_sorted[x[i]:x[i + 1]] for i in range(N - 1)]
+
+    # Pick a number (given by the list 'di') of random elements in
+    # each range. Those are the indexes of the elements that
+    # should be removed from the three sub-lists.
+    rem_indx = []
+    for indx, num in enumerate(di):
+        if rang_indx[indx].any() and len(rang_indx[indx]) >= num:
+            rem_indx.append(np.random.choice(rang_indx[indx],
+                int(num), replace=False))
+        else:
+            rem_indx.append(rang_indx[indx])
+
+    # Remove items from list.
+    # itertools.chain() flattens the list of indexes and sorted()
+    # with reverse=True inverts them so we don't change the
+    # indexes of the elements in the lists after removing them.
+    d_i = sorted(list(itertools.chain(*rem_indx)), reverse=True)
+    # Remove those selected indexes from the three sub-lists.
+    clust_compl = np.delete(np.asarray(region), d_i, axis=1)
+
+    bins2 = int((max(clust_compl[3]) - min(clust_compl[3])) / 0.2)
+    #plt.hist(clust_compl[3], bins=bins2, color='red')
+    #plt.show()
+    #raw_input()
+
+    histos = [bins1, bins2, a]
+
+    return clust_compl, histos
 
 
 # Path where the code is running
@@ -48,7 +126,7 @@ for root, dirs, files in walk(sd_path):
                     dir_files[1].append(name)
 
 # Define maximum and minimum magnitude values.
-min_mag, max_mag = 12., 22.
+min_mag_lim, max_mag_lim = 12., 22.
 
 # Iterate through all synthetic clusters inside sub-dirs.
 for f_indx, sub_dir in enumerate(dir_files[0]):
@@ -59,8 +137,8 @@ for f_indx, sub_dir in enumerate(dir_files[0]):
     clust_name = myfile[:-5]
     print sub_dir, clust_name
 
-    # Output subdir.
-    #output_subdir = join(out_path, sub_dir)
+    mass, dist = str(int(sub_dir[:2]) * 100), str(int(sub_dir[3:]) / 1000)
+    metal, age = str('0.' + clust_name[5:8]), str(float(clust_name[9:]) / 100.)
 
     # Open cluster data file and process the data.
 
@@ -73,12 +151,12 @@ for f_indx, sub_dir in enumerate(dir_files[0]):
     data[6] - data[7]
 
     x_data, y_data, mag_data, e_mag, col1_data, e_col = [], [], [], [], [], []
-    # Go through all stars to add errors, re-scale the
-    # cluster and discard stars with too large V values.
+    # Go through all stars to add errors and discard stars outside the mag
+    # range.
     for idx in range(len(x_temp)):
 
         # Upper and lower limit for V.
-        if min_mag < mag_temp[idx] < max_mag:
+        if min_mag_lim < mag_temp[idx] < max_mag_lim:
 
             mag_data.append(mag_temp[idx])
             col1_data.append(col1_temp[idx])
@@ -90,7 +168,7 @@ for f_indx, sub_dir in enumerate(dir_files[0]):
             e_mag.append(func(mag_temp[idx]))
             e_col.append(func(mag_temp[idx]))
 
-    # An ID that stars with a 1 identifies the star as a cluster member.
+    # An ID that starts with a 1 identifies the star as a cluster member.
     id_clust = [int('1' + str(i)) for i in range(len(x_data))]
 
     for idx in range(len(mag_data)):
@@ -113,12 +191,12 @@ for f_indx, sub_dir in enumerate(dir_files[0]):
 
     x_field, y_field, mag_field, e_mag_f, col1_field, e_col_f = [], [], [],\
     [], [], []
-    # Go through all stars to add errors, reject too bright stars
-    # and add errors.
+    # Go through all stars to add errors and reject stars outside the mag
+    # range.
     for idx in range(len(x_f_temp)):
 
         # Upper and lower limit for V.
-        if min_mag < mag_f_temp[idx] < max_mag:
+        if min_mag_lim < mag_f_temp[idx] < max_mag_lim:
 
             mag_field.append(mag_f_temp[idx])
             col1_field.append(col1_f_temp[idx])
@@ -130,7 +208,7 @@ for f_indx, sub_dir in enumerate(dir_files[0]):
             e_mag_f.append(func(mag_f_temp[idx]))
             e_col_f.append(func(mag_f_temp[idx]))
 
-    # An ID that stars with a 2 identifies the star as a field member.
+    # An ID that starts with a 2 identifies the star as a field member.
     id_field = [int('2' + str(i)) for i in range(len(x_field))]
 
     for idx in range(len(id_field)):
@@ -144,13 +222,22 @@ for f_indx, sub_dir in enumerate(dir_files[0]):
         col1_field[idx] = rd.gauss(col1_field[idx], e_col_f[idx])
 
     # Merge cluster and field.
-    id_cl_fl = id_clust + id_field
-    x_cl_fl = x_data + x_field
-    y_cl_fl = y_data + y_field
-    mag_cl_fl = mag_data + mag_field
-    e_mag_cl_fl = e_mag + e_mag_f
-    col1_cl_fl = col1_data + col1_field
-    e_col_cl_fl = e_col + e_col_f
+    id_cl_fl_f = np.concatenate([id_clust, id_field])
+    x_cl_fl_f = np.concatenate([x_data, x_field])
+    y_cl_fl_f = np.concatenate([y_data, y_field])
+    mag_cl_fl_f = np.concatenate([mag_data, mag_field])
+    e_mag_cl_fl_f = np.concatenate([e_mag, e_mag_f])
+    col1_cl_fl_f = np.concatenate([col1_data, col1_field])
+    e_col_cl_fl_f = np.concatenate([e_col, e_col_f])
+
+    # Remove stars according to a completeness function.
+    # Call function.
+    region_full = [id_cl_fl_f, x_cl_fl_f, y_cl_fl_f, mag_cl_fl_f, e_mag_cl_fl_f,
+        col1_cl_fl_f, e_col_cl_fl_f]
+    region_compl, histos = compl_rem(region_full)
+    # Unpack lists of data after completeness removal.
+    id_cl_fl, x_cl_fl, y_cl_fl, mag_cl_fl, e_mag_cl_fl, col1_cl_fl, \
+    e_col_cl_fl = region_compl
 
     # Check if subdir already exists, if not create it
     out_path_sub = join(out_path, sub_dir)
@@ -167,14 +254,16 @@ for f_indx, sub_dir in enumerate(dir_files[0]):
     # Plot field + cluster.
     # figsize(x1, y1), GridSpec(y2, x2) --> To have square plots: x1/x2 =
     # y1/y2 = 2.5
-    fig = plt.figure(figsize=(10, 10))  # create the top-level container
-    gs = gridspec.GridSpec(4, 4)  # create a GridSpec object
+    fig = plt.figure(figsize=(15, 10))  # create the top-level container
+    gs = gridspec.GridSpec(4, 6)  # create a GridSpec object
 
-    # x,y finding chart of cluster stars
-    ax0 = plt.subplot(gs[0:2, 0:2])
+    # x,y finding chart of cluster stars.
+    ax1 = plt.subplot(gs[0:2, 0:2])
     # Get max and min values in x,y
-    x_min, x_max = min(x_data), max(x_data)
-    y_min, y_max = min(y_data), max(y_data)
+    x_delta, y_delta = (max(x_temp) - min(x_temp)) / 10., \
+    (max(y_temp) - min(y_temp)) / 10.
+    x_min, x_max = min(x_temp) - x_delta, max(x_temp) + x_delta
+    y_min, y_max = min(y_temp) - y_delta, max(y_temp) + y_delta
     #Set plot limits
     plt.xlim(x_min, x_max)
     plt.ylim(y_min, y_max)
@@ -182,22 +271,164 @@ for f_indx, sub_dir in enumerate(dir_files[0]):
     plt.xlabel('x (px)', fontsize=12)
     plt.ylabel('y (px)', fontsize=12)
     # Set minor ticks
+    ax1.minorticks_on()
+    plt.text(0.65, 0.94, '$N_{cluster} = %d$' % len(x_temp),
+             transform=ax1.transAxes,
+             bbox=dict(facecolor='white', alpha=0.5), fontsize=13)
+    plt.scatter(x_temp, y_temp, marker='o', c='r',
+        s=250. * np.exp(-0.0027 * np.asarray(mag_data) ** 2.5))
+
+    # Cluster's stars CMD.
+    ax0 = plt.subplot(gs[0:2, 2:4])
+    #Set plot limits
+    col1_min, col1_max = min(col1_cl_fl) - 0.2, max(col1_cl_fl) + 0.2
+    mag_min, mag_max = max(max_mag_lim + 0.5, max(mag_temp) + 0.2), \
+    min(min_mag_lim - 0.5, min(mag_temp) - 0.2)
+    plt.xlim(col1_min, col1_max)
+    plt.ylim(mag_min, mag_max)
+    #Set axis labels
+    plt.xlabel('$(B-V)$', fontsize=18)
+    plt.ylabel('$V$', fontsize=18)
+    # Set minor ticks
     ax0.minorticks_on()
-    plt.text(0.8, 0.93, 'Cluster',
-             transform=ax0.transAxes,
-             bbox=dict(facecolor='white', alpha=0.5), fontsize=14)
-    # Count the number of very bright stars in the field.
-    range_10_perc = (max(mag_cl_fl) - min(mag_cl_fl)) / 10. + min(mag_cl_fl)
-    bright_stars = len([i for i in mag_cl_fl if i < range_10_perc])
-    # Set exponential factor for high and low density fields.
-    exp_factor = -0.0037
-    # Set a lower amplitude for fields with very bright stars.
-    amplitude = 500 if bright_stars < 10 else 200
-    plt.scatter(x_data, y_data, marker='o', c='black',
-                s=amplitude * np.exp(exp_factor * np.asarray(mag_cl_fl) ** 2.5))
+    # Set grid
+    ax0.grid(b=True, which='major', color='gray', linestyle='--', lw=1)
+    text1 = '$N_{cluster} = %d$' '\n' % len(col1_temp)
+    text2 = '$\Delta V = [%0.1f, \, %0.1f]$' '\n' % (min_mag_lim, max_mag_lim)
+    text3 = '$log[age \, (Gyr)] = %s$' '\n' % age
+    text4 = '$z = %s$' '\n' % metal
+    text5 = '$dist = %s \,kpc$' '\n' % dist
+    text6 = '$A_V = %s \, mag$' '\n' % dist
+    text7 = '$M = %s \, M_{\odot}$' % mass
+    text = text1 + text2 + text3 + text4 + text5 + text6 + text7
+    plt.text(0.58, 0.63, text, transform=ax0.transAxes,
+        bbox=dict(facecolor='white', alpha=0.5), fontsize=13)
+    # Plot stars.
+    plt.scatter(col1_temp, mag_temp, marker='o', c='r', s=15., lw=0.3)
+    plt.axhline(y=min_mag_lim, linestyle='-', color='green', lw=1.5)
+    plt.axhline(y=max_mag_lim, linestyle='-', color='green', lw=1.5)
+
+    # Separate cluster from field stars BEFORE completeness function.
+    mag_data_f, e_mag_data_f, e_col_data_f, mag_field_f, e_mag_field_f,\
+    e_col_field_f = [], [], [], [], [], []
+    for idx, id_star in enumerate(id_cl_fl_f):
+        # Cluster star.
+        if str(id_star)[0] == '1':
+            mag_data_f.append(mag_cl_fl_f[idx])
+            e_mag_data_f.append(e_mag_cl_fl_f[idx])
+            e_col_data_f.append(e_col_cl_fl_f[idx])
+        # Field star.
+        elif str(id_star)[0] == '2':
+            mag_field_f.append(mag_cl_fl_f[idx])
+            e_mag_field_f.append(e_mag_cl_fl_f[idx])
+            e_col_field_f.append(e_col_cl_fl_f[idx])
+
+    # V magnitude error
+    ax3 = plt.subplot(gs[0, 4:6])
+    #Set plot limits
+    #plt.xlim(min(mag_data) - 0.5, max(mag_data) + 0.5)
+    plt.ylim(-0.005, max(e_mag_cl_fl) + 0.1)
+    #Set axis labels
+    plt.ylabel('$\sigma_{V}$', fontsize=18)
+    plt.xlabel('$V$', fontsize=18)
+    # Set minor ticks
+    ax3.minorticks_on()
+    plt.text(0.25, 0.85, '$N_{cluster} = %d$' % len(mag_data_f),
+             transform=ax3.transAxes,
+             bbox=dict(facecolor='white', alpha=0.5), fontsize=13)
+    # Plot stars errors.
+    plt.scatter(mag_field_f, e_mag_field_f, marker='o', c='k', s=1)
+    plt.scatter(mag_data_f, e_mag_data_f, marker='o', c='r', lw=0., s=4,
+        zorder=3)
+    plt.axvline(x=min_mag_lim, linestyle='-', color='green', lw=1.5)
+    plt.axvline(x=max_mag_lim, linestyle='-', color='green', lw=1.5)
+
+    # (B-V) color error
+    ax4 = plt.subplot(gs[1, 4:6])
+    #Set plot limits
+    #plt.xlim(min(mag_data) - 0.5, max(mag_data) + 0.5)
+    plt.ylim(-0.005, max(e_col_cl_fl) + 0.1)
+    #Set axis labels
+    plt.ylabel('$\sigma_{(B-V)}$', fontsize=18)
+    plt.xlabel('$V$', fontsize=18)
+    # Set minor ticks
+    ax4.minorticks_on()
+    # Plot stars errors.
+    plt.scatter(mag_field_f, e_col_field_f, marker='o', c='k', s=1)
+    plt.scatter(mag_data_f, e_col_data_f, marker='o', c='r', lw=0., s=4,
+        zorder=3)
+    plt.axvline(x=min_mag_lim, linestyle='-', color='green', lw=1.5)
+    plt.axvline(x=max_mag_lim, linestyle='-', color='green', lw=1.5)
+
+    # Separate cluster from field stars AFTER completeness function.
+    x_data_c, y_data_c, mag_data_c, e_mag_data_c, col1_data_c, e_col_data_c,\
+    x_field_c, y_field_c, mag_field_c, e_mag_field_c, col1_field_c, \
+    e_col_field_c = [], [], [], [], [], [], [], [], [], [], [], []
+    for idx, id_star in enumerate(id_cl_fl):
+        # Cluster star.
+        if str(id_star)[0] == '1':
+            x_data_c.append(x_cl_fl[idx])
+            y_data_c.append(y_cl_fl[idx])
+            mag_data_c.append(mag_cl_fl[idx])
+            e_mag_data_c.append(e_mag_cl_fl[idx])
+            col1_data_c.append(col1_cl_fl[idx])
+            e_col_data_c.append(e_col_cl_fl[idx])
+        # Field star.
+        elif str(id_star)[0] == '2':
+            x_field_c.append(x_cl_fl[idx])
+            y_field_c.append(y_cl_fl[idx])
+            mag_field_c.append(mag_cl_fl[idx])
+            e_mag_field_c.append(e_mag_cl_fl[idx])
+            col1_field_c.append(col1_cl_fl[idx])
+            e_col_field_c.append(e_col_cl_fl[idx])
+
+    # Histograms
+    ax2 = plt.subplot(gs[2:4, 0:2])
+    #Set plot limits
+    #Set axis labels
+    plt.xlabel('$V$', fontsize=18)
+    plt.ylabel('$N$', fontsize=18)
+    # Set minor ticks
+    ax2.minorticks_on()
+    # Plot stars.
+    plt.hist(region_full[3], bins=histos[0], color='blue',
+        label='Before removal (N=%d)' % len(region_full[3]))
+    plt.hist(mag_cl_fl, bins=histos[1], color='red',
+        label='After removal    (N=%d)' % len(mag_cl_fl))
+    plt.text(0.05, 0.75, '$\\frac{1}{1 + exp(x - %0.2f)}$' % histos[2],
+             transform=ax2.transAxes,
+             bbox=dict(facecolor='white', alpha=0.5), fontsize=16)
+    # Legends.
+    leg2 = plt.legend(fancybox=True, loc='upper left', numpoints=1,
+        fontsize=10)
+    # Set the alpha value of the legend.
+    leg2.get_frame().set_alpha(0.7)
+
+    # Full region CMD.
+    ax5 = plt.subplot(gs[2:4, 2:4])
+    #Set plot limits
+    col1_min, col1_max = min(col1_cl_fl) - 0.2, max(col1_cl_fl) + 0.2
+    mag_min, mag_max = max(mag_cl_fl) + 0.2, min(mag_cl_fl) - 0.2
+    plt.xlim(col1_min, col1_max)
+    plt.ylim(mag_min, mag_max)
+    #Set axis labels
+    plt.xlabel('$(B-V)$', fontsize=18)
+    plt.ylabel('$V$', fontsize=18)
+    # Set minor ticks
+    ax5.minorticks_on()
+    # Set grid
+    ax5.grid(b=True, which='major', color='gray', linestyle='--', lw=1)
+    # Calculate total number of stars whitin cluster's radius.
+    plt.text(0.65, 0.93, '$N_{cluster} = %d$' % len(col1_data_c),
+             transform=ax5.transAxes,
+             bbox=dict(facecolor='white', alpha=0.5), fontsize=13)
+    # Plot stars.
+    plt.scatter(col1_field_c, mag_field_c, marker='o', c='k', s=2.5)
+    plt.scatter(col1_data_c, mag_data_c, marker='o', c='r', s=12., lw=0.5,
+        zorder=2)
 
     # x,y finding chart of full frame
-    ax1 = plt.subplot(gs[0:2, 2:4])
+    ax6 = plt.subplot(gs[2:4, 4:6])
     # Get max and min values in x,y
     x_min, x_max = 0., 2048.
     y_min, y_max = 0., 2048.
@@ -208,67 +439,13 @@ for f_indx, sub_dir in enumerate(dir_files[0]):
     plt.xlabel('x (px)', fontsize=12)
     plt.ylabel('y (px)', fontsize=12)
     # Set minor ticks
-    ax1.minorticks_on()
-    circle = plt.Circle((1024., 1024.), 500., color='r', fill=False)
+    ax6.minorticks_on()
+    circle = plt.Circle((1024., 1024.), 250., color='r', fill=False)
     fig.gca().add_artist(circle)
-    # Count the number of very bright stars in the field.
-    range_10_perc = (max(mag_cl_fl) - min(mag_cl_fl)) / 10. + min(mag_cl_fl)
-    bright_stars = len([i for i in mag_cl_fl if i < range_10_perc])
-    # Set exponential factor for high and low density fields.
-    exp_factor = -0.0037
-    # Set a lower amplitude for fields with very bright stars.
-    amplitude = 500 if bright_stars < 10 else 200
-    plt.scatter(x_field, y_field, marker='o', c='black',
-                s=amplitude * np.exp(exp_factor * np.asarray(mag_cl_fl) ** 2.5))
-    plt.scatter(x_data, y_data, marker='o', c='r',
-                s=amplitude * np.exp(exp_factor * np.asarray(mag_cl_fl) ** 2.5))
-
-    # Cluster's stars CMD (stars inside cluster's radius)
-    ax2 = plt.subplot(gs[2:4, 0:2])
-    #Set plot limits
-    col1_min, col1_max = min(col1_cl_fl) - 0.2, max(col1_cl_fl) + 0.2
-    mag_min, mag_max = max(mag_cl_fl) + 0.2, min(mag_cl_fl) - 0.2
-    plt.xlim(col1_min, col1_max)
-    plt.ylim(mag_min, mag_max)
-    #Set axis labels
-    plt.xlabel('$(B-V)$', fontsize=18)
-    plt.ylabel('$V$', fontsize=18)
-    # Set minor ticks
-    ax2.minorticks_on()
-    # Only draw units on axis (ie: 1, 2, 3)
-    #ax1.xaxis.set_major_locator(MultipleLocator(1.0))
-    # Set grid
-    ax2.grid(b=True, which='major', color='gray', linestyle='--', lw=1)
-    plt.text(0.55, 0.93, 'Cluster sequence',
-             transform=ax2.transAxes,
-             bbox=dict(facecolor='white', alpha=0.5), fontsize=14)
-    # Plot stars.
-    plt.scatter(col1_temp, mag_temp, marker='o', c='r', s=15., lw=0.2)
-
-    # Cluster's stars CMD (stars inside cluster's radius)
-    ax3 = plt.subplot(gs[2:4, 2:4])
-    #Set plot limits
-    col1_min, col1_max = min(col1_cl_fl) - 0.2, max(col1_cl_fl) + 0.2
-    mag_min, mag_max = max(mag_cl_fl) + 0.2, min(mag_cl_fl) - 0.2
-    plt.xlim(col1_min, col1_max)
-    plt.ylim(mag_min, mag_max)
-    #Set axis labels
-    plt.xlabel('$(B-V)$', fontsize=18)
-    plt.ylabel('$V$', fontsize=18)
-    # Set minor ticks
-    ax3.minorticks_on()
-    # Only draw units on axis (ie: 1, 2, 3)
-    #ax1.xaxis.set_major_locator(MultipleLocator(1.0))
-    # Set grid
-    ax3.grid(b=True, which='major', color='gray', linestyle='--', lw=1)
-    # Calculate total number of stars whitin cluster's radius.
-    tot_stars = len(id_clust)
-    plt.text(0.64, 0.93, '$N_{memb}=%d$' % tot_stars,
-             transform=ax3.transAxes,
-             bbox=dict(facecolor='white', alpha=0.5), fontsize=16)
-    # Plot stars.
-    plt.scatter(col1_field, mag_field, marker='o', c='k', s=2.5)
-    plt.scatter(col1_data, mag_data, marker='o', c='r', s=8., lw=0.5, zorder=2)
+    plt.scatter(x_field_c, y_field_c, marker='o', c='black',
+        s=250. * np.exp(-0.0037 * np.asarray(mag_field_c) ** 2.5))
+    plt.scatter(x_data_c, y_data_c, marker='o', c='r',
+        s=250. * np.exp(-0.0037 * np.asarray(mag_data_c) ** 2.5))
 
     fig.tight_layout()
     # Generate output file for each data file.
@@ -277,7 +454,5 @@ for f_indx, sub_dir in enumerate(dir_files[0]):
     # Close to release memory.
     plt.clf()
     plt.close()
-
-    #raw_input()
 
 print 'End.'
