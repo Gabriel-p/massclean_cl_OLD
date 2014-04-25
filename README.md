@@ -5,16 +5,17 @@ The bash script `massclean_run_all.sh` calls the [MASSCLEAN](http://www.physics.
 package to generate a number of open clusters along with fields of stars created with the same parameter values.
 
 Within the script the metallicities, ages, distances, extinction and initial masses of the
-clusters can be set. The `MASSCLEAN` output files will be stored in the `/massclean2.013/clusters`
+clusters can be set. The *MASSCLEAN* output files will be stored in the `/massclean2.013/clusters/`
 folder.
 
-Each sub-folder respects the following naming convention: (initial mass)/100 for the first two characters
+Each sub-folder respects the following naming convention: `(initial mass)/100` for the first two characters
 and distance in parsecs for the characters after the underscore.
 
 After the synthetic clusters and field plots are generated the script calls the `massclean_cluster_field_merge.py`
-code to merge cluster and field while adding errors and removing stars mimicking completeness in the frame.
+code to merge cluster and field while adding errors and removing random stars in the frame, mimicking
+completeness effects.
 The final merged `.DAT` files are stored in `/synth_clusters/` where images for each synthetic cluster
-are generated.
+are also generated.
 
 
 
