@@ -5,40 +5,17 @@ The bash script `massclean_run_all.sh` calls the MASSCLEAN package to generate a
 open clusters along with fields of stars created with the same parameter values.
 
 Within the script the metallicities, ages, distances, extinction and initial masses of the
-clusters can be set. The `MASSCLEAN` output files will be stores in the `/massclean2.013/clusters`
+clusters can be set. The `MASSCLEAN` output files will be stored in the `/massclean2.013/clusters`
 folder.
 
 Each sub-folder respects the following naming convention: (initial mass)/100 for the first two characters
 and distance in parsecs for the characters after the underscore.
 
-Los archivos '*_field.plot' contienen a las estrellas de campo donde los caracteres antes del guión
-bajo corresponden a la distancia a la que se ubica el campo. Cada cúmulo debe fusionarse con el campo
-que le corresponde de acuerdo a la distancia.
+After the synthetic clusters and field plots are generated the script calls the `massclean_cluster_field_merge.py`
+code to merge cluster and field while adding errors and removing stars mimicking completeness in the frame.
+The final merged `.DAT` files are stored in `/synth_clusters/` where images for each synthetic cluster
+are generated.
 
-
-El proceso para generar los archivos del cúmulo y el campo son los siguientes:
-
-1- Modifico los valores de masa inicial, distancia y Av en 'cluster.ini' (el archivo 'field.ini' no
-hace falta modificarlo)
-2- Corro 
-
-./all.run
-
-para generar los archivos *.trek que me dan los cúmulos sintéticos en diferentes
-edades para los valores de masa inicial, distancia y Av. Guardo estos archivos (para las 9 edades utilizadas)
-en su carpeta correspondiente.
-3- Genero el archivo de campo sólo una vez (a la vez que genero los cúmulos con la menor masa inicial)
-de la siguiente manera:
-
-a- ./goimage2
-b- ./gofield2
-c- chmod u+x add_field
-d- ./add_field
-
-Lo cual genera el archivo 'field.plot' con estrellas de campo a una dada distancia y Av.
-
-4- Corro ./clean.all para limpiar todos los archivos generados.
-5- Vuelvo a 1.
 
 
 
