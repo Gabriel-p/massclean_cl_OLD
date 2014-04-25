@@ -46,11 +46,11 @@ sed -i "36s/.*/0.244    (3)/" $KING_INI
 
 # Declare arrays of metallicities, ages, initial masses and distance.
 METAL=('002' '008' '019' '030')
-AGES=('0600' '0800' '0900' '1000')
-INIT_MASS=('02' '04' '06' '08')
-INIT_MASS2=('200' '400' '600' '800')
-DIST=('500' '1000' '1500' '2000')
-AV=('0.5' '1.0' '1.5' '2.0')
+AGES=('0700' '0800' '0900')
+INIT_MASS=('04' '06' '08')
+INIT_MASS2=('400' '600' '800')
+DIST=('500' '1000' '3000' '5000')
+AV=('0.1' '0.5' '1.0' '3.0')
 
 # Get number of elements in the initial metallicity array.
 METAL_n=${#METAL[@]}

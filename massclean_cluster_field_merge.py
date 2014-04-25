@@ -126,7 +126,7 @@ for root, dirs, files in walk(sd_path):
                     dir_files[1].append(name)
 
 # Define maximum and minimum magnitude values.
-min_mag_lim, max_mag_lim = 12., 22.
+max_mag_lim = 22.
 
 # Iterate through all synthetic clusters inside sub-dirs.
 for f_indx, sub_dir in enumerate(dir_files[0]):
@@ -137,8 +137,8 @@ for f_indx, sub_dir in enumerate(dir_files[0]):
     clust_name = myfile[:-5]
     print sub_dir, clust_name
 
-    mass, dist = str(int(sub_dir[:2]) * 100), str(int(sub_dir[3:]) / 1000)
-    metal, age = str('0.' + clust_name[5:8]), str(float(clust_name[9:]) / 100.)
+    mass, dist = float(sub_dir[:2]) * 100., float(sub_dir[3:]) / 1000.
+    metal, age = float('0.' + clust_name[5:8]), float(clust_name[9:]) / 100.
 
     # Open cluster data file and process the data.
 
@@ -155,8 +155,8 @@ for f_indx, sub_dir in enumerate(dir_files[0]):
     # range.
     for idx in range(len(x_temp)):
 
-        # Upper and lower limit for V.
-        if min_mag_lim < mag_temp[idx] < max_mag_lim:
+        # Lower limit for V.
+        if mag_temp[idx] < max_mag_lim:
 
             mag_data.append(mag_temp[idx])
             col1_data.append(col1_temp[idx])
@@ -195,8 +195,8 @@ for f_indx, sub_dir in enumerate(dir_files[0]):
     # range.
     for idx in range(len(x_f_temp)):
 
-        # Upper and lower limit for V.
-        if min_mag_lim < mag_f_temp[idx] < max_mag_lim:
+        # Limit for V.
+        if mag_f_temp[idx] < max_mag_lim:
 
             mag_field.append(mag_f_temp[idx])
             col1_field.append(col1_f_temp[idx])
@@ -283,7 +283,7 @@ for f_indx, sub_dir in enumerate(dir_files[0]):
     #Set plot limits
     col1_min, col1_max = min(col1_cl_fl) - 0.2, max(col1_cl_fl) + 0.2
     mag_min, mag_max = max(max_mag_lim + 0.5, max(mag_temp) + 0.2), \
-    min(min_mag_lim - 0.5, min(mag_temp) - 0.2)
+    min(mag_temp) - 0.2
     plt.xlim(col1_min, col1_max)
     plt.ylim(mag_min, mag_max)
     #Set axis labels
@@ -294,18 +294,17 @@ for f_indx, sub_dir in enumerate(dir_files[0]):
     # Set grid
     ax0.grid(b=True, which='major', color='gray', linestyle='--', lw=1)
     text1 = '$N_{cluster} = %d$' '\n' % len(col1_temp)
-    text2 = '$\Delta V = [%0.1f, \, %0.1f]$' '\n' % (min_mag_lim, max_mag_lim)
-    text3 = '$log[age \, (Gyr)] = %s$' '\n' % age
-    text4 = '$z = %s$' '\n' % metal
-    text5 = '$dist = %s \,kpc$' '\n' % dist
-    text6 = '$A_V = %s \, mag$' '\n' % dist
-    text7 = '$M = %s \, M_{\odot}$' % mass
+    text2 = '$V_{min} = %0.1f$' '\n' % max_mag_lim
+    text3 = '$log[age/yr] = %.1f$' '\n' % age
+    text4 = '$z = %.4f$' '\n' % metal
+    text5 = '$dist = %.1f \,kpc$' '\n' % dist
+    text6 = '$A_V = %.1f \, mag$' '\n' % dist
+    text7 = '$M = %d \, M_{\odot}$' % mass
     text = text1 + text2 + text3 + text4 + text5 + text6 + text7
     plt.text(0.58, 0.63, text, transform=ax0.transAxes,
         bbox=dict(facecolor='white', alpha=0.5), fontsize=13)
     # Plot stars.
     plt.scatter(col1_temp, mag_temp, marker='o', c='r', s=15., lw=0.3)
-    plt.axhline(y=min_mag_lim, linestyle='-', color='green', lw=1.5)
     plt.axhline(y=max_mag_lim, linestyle='-', color='green', lw=1.5)
 
     # Separate cluster from field stars BEFORE completeness function.
@@ -340,7 +339,6 @@ for f_indx, sub_dir in enumerate(dir_files[0]):
     plt.scatter(mag_field_f, e_mag_field_f, marker='o', c='k', s=1)
     plt.scatter(mag_data_f, e_mag_data_f, marker='o', c='r', lw=0., s=4,
         zorder=3)
-    plt.axvline(x=min_mag_lim, linestyle='-', color='green', lw=1.5)
     plt.axvline(x=max_mag_lim, linestyle='-', color='green', lw=1.5)
 
     # (B-V) color error
@@ -357,7 +355,6 @@ for f_indx, sub_dir in enumerate(dir_files[0]):
     plt.scatter(mag_field_f, e_col_field_f, marker='o', c='k', s=1)
     plt.scatter(mag_data_f, e_col_data_f, marker='o', c='r', lw=0., s=4,
         zorder=3)
-    plt.axvline(x=min_mag_lim, linestyle='-', color='green', lw=1.5)
     plt.axvline(x=max_mag_lim, linestyle='-', color='green', lw=1.5)
 
     # Separate cluster from field stars AFTER completeness function.
