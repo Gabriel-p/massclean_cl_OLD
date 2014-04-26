@@ -45,12 +45,17 @@ sed -i "51s/.*/2048   (8)/" $CLUSTER_INI
 sed -i "36s/.*/0.244    (3)/" $KING_INI
 
 # Declare arrays of metallicities, ages, initial masses and distance.
-METAL=('002' '008' '019' '030')
-AGES=('0700' '0800' '0900')
-INIT_MASS=('04' '06' '08')
-INIT_MASS2=('400' '600' '800')
-DIST=('500' '1000' '3000' '5000')
-AV=('0.1' '0.5' '1.0' '3.0')
+# METAL=('002' '008' '019' '030')
+# AGES=('0700' '0800' '0900')
+# INIT_MASS=('400' '600' '800')
+# DIST=('500' '1000' '3000' '5000')
+# AV=('0.1' '0.5' '1.0' '3.0')
+
+METAL=('002')
+AGES=('0700')
+INIT_MASS=('400')
+DIST=('500')
+AV=('0.1')
 
 # Get number of elements in the initial metallicity array.
 METAL_n=${#METAL[@]}
@@ -84,7 +89,7 @@ for (( i=0;i<$METAL_n;i++)); do
             #echo ${METAL[${i}]}, ${INIT_MASS[${j}]}, ${DIST[${k}]}
             
             # Modify 'cluster.ini' file.
-            sed -i "45s/.*/${INIT_MASS2[${j}]}    (2)/" $CLUSTER_INI
+            sed -i "45s/.*/${INIT_MASS[${j}]}    (2)/" $CLUSTER_INI
             sed -i "46s/.*/${DIST[${k}]}    (3)/" $CLUSTER_INI
             sed -i "56s/.*/${AV[${k}]}    (13)/" $CLUSTER_INI
 
@@ -109,7 +114,7 @@ for (( i=0;i<$METAL_n;i++)); do
             ./gofield2
             
             # Set dir to move the synthetic clusters to.
-            CODE_DIR="./clusters/${INIT_MASS[${j}]}_${DIST[${k}]}"
+            CODE_DIR="./clusters/${INIT_MASS[${j}]}_${DIST[${k}]}_${AV[${k}]}"
             # Create sub-folder if it does not exist.
             mkdir -p $CODE_DIR
 

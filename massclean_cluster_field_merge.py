@@ -137,11 +137,11 @@ for f_indx, sub_dir in enumerate(dir_files[0]):
     clust_name = myfile[:-5]
     print sub_dir, clust_name
 
-    mass, dist = float(sub_dir[:2]) * 100., float(sub_dir[3:]) / 1000.
+    # Separate mass, distance, visual absorption, metallicity and age values.
+    mass, dist, vis_abs = map(float, sub_dir.split('_'))
     metal, age = float('0.' + clust_name[5:8]), float(clust_name[9:]) / 100.
 
     # Open cluster data file and process the data.
-
     # Loads the data in 'myfile' as a list of N lists where N is the number
     # of columns. Each of the N lists contains all the data for the column.
     data = np.loadtxt(join(sd_path, sub_dir, myfile), unpack=True)
@@ -297,11 +297,11 @@ for f_indx, sub_dir in enumerate(dir_files[0]):
     text2 = '$V_{min} = %0.1f$' '\n' % max_mag_lim
     text3 = '$log[age/yr] = %.1f$' '\n' % age
     text4 = '$z = %.4f$' '\n' % metal
-    text5 = '$dist = %.1f \,kpc$' '\n' % dist
-    text6 = '$A_V = %.1f \, mag$' '\n' % dist
+    text5 = '$dist = %.1f \,kpc$' '\n' % (dist / 1000.)
+    text6 = '$A_V = %.1f \, mag$' '\n' % vis_abs
     text7 = '$M = %d \, M_{\odot}$' % mass
     text = text1 + text2 + text3 + text4 + text5 + text6 + text7
-    plt.text(0.58, 0.63, text, transform=ax0.transAxes,
+    plt.text(0.63, 0.63, text, transform=ax0.transAxes,
         bbox=dict(facecolor='white', alpha=0.5), fontsize=13)
     # Plot stars.
     plt.scatter(col1_temp, mag_temp, marker='o', c='r', s=15., lw=0.3)
@@ -336,7 +336,8 @@ for f_indx, sub_dir in enumerate(dir_files[0]):
              transform=ax3.transAxes,
              bbox=dict(facecolor='white', alpha=0.5), fontsize=13)
     # Plot stars errors.
-    plt.scatter(mag_field_f, e_mag_field_f, marker='o', c='k', s=1)
+    plt.scatter(mag_field_f, e_mag_field_f, marker='o', c='k', s=12, lw=0.25,
+        facecolors='none')
     plt.scatter(mag_data_f, e_mag_data_f, marker='o', c='r', lw=0., s=4,
         zorder=3)
     plt.axvline(x=max_mag_lim, linestyle='-', color='green', lw=1.5)
@@ -352,7 +353,8 @@ for f_indx, sub_dir in enumerate(dir_files[0]):
     # Set minor ticks
     ax4.minorticks_on()
     # Plot stars errors.
-    plt.scatter(mag_field_f, e_col_field_f, marker='o', c='k', s=1)
+    plt.scatter(mag_field_f, e_col_field_f, marker='o', c='k', s=12, lw=0.25,
+        facecolors='none')
     plt.scatter(mag_data_f, e_col_data_f, marker='o', c='r', lw=0., s=4,
         zorder=3)
     plt.axvline(x=max_mag_lim, linestyle='-', color='green', lw=1.5)
@@ -389,9 +391,10 @@ for f_indx, sub_dir in enumerate(dir_files[0]):
     ax2.minorticks_on()
     # Plot stars.
     plt.hist(region_full[3], bins=histos[0], color='blue',
-        label='Before removal (N=%d)' % len(region_full[3]))
+        label='Before removal (N=%d)' % len(region_full[3]), histtype='step')
     plt.hist(mag_cl_fl, bins=histos[1], color='red',
-        label='After removal    (N=%d)' % len(mag_cl_fl))
+        label='After removal    (N=%d)' % len(mag_cl_fl), histtype='step',
+        ls='dashed', hatch="/")
     plt.text(0.05, 0.75, '$\\frac{1}{1 + exp(x - %0.2f)}$' % histos[2],
              transform=ax2.transAxes,
              bbox=dict(facecolor='white', alpha=0.5), fontsize=16)
@@ -420,7 +423,8 @@ for f_indx, sub_dir in enumerate(dir_files[0]):
              transform=ax5.transAxes,
              bbox=dict(facecolor='white', alpha=0.5), fontsize=13)
     # Plot stars.
-    plt.scatter(col1_field_c, mag_field_c, marker='o', c='k', s=2.5)
+    plt.scatter(col1_field_c, mag_field_c, marker='o', c='k', s=12, lw=0.25,
+        facecolors='none')
     plt.scatter(col1_data_c, mag_data_c, marker='o', c='r', s=12., lw=0.5,
         zorder=2)
 
