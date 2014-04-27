@@ -389,12 +389,17 @@ for f_indx, sub_dir in enumerate(dir_files[0]):
     plt.ylabel('$N$', fontsize=18)
     # Set minor ticks
     ax2.minorticks_on()
+    # Backg color.
+    ax2.set_axis_bgcolor('#D8D8D8')
+    # Set grid
+    ax2.grid(b=True, which='major', color='w', linestyle='-', lw=1, zorder=1)
     # Plot stars.
     plt.hist(region_full[3], bins=histos[0], color='blue',
-        label='Before removal (N=%d)' % len(region_full[3]), histtype='step')
+        label='Before removal (N=%d)' % len(region_full[3]), histtype='step',
+        zorder=4)
     plt.hist(mag_cl_fl, bins=histos[1], color='red',
         label='After removal    (N=%d)' % len(mag_cl_fl), histtype='step',
-        ls='dashed', hatch="/")
+        ls='dashed', hatch="/", zorder=4)
     plt.text(0.05, 0.75, '$\\frac{1}{1 + exp(x - %0.2f)}$' % histos[2],
              transform=ax2.transAxes,
              bbox=dict(facecolor='white', alpha=0.5), fontsize=16)
@@ -439,9 +444,11 @@ for f_indx, sub_dir in enumerate(dir_files[0]):
     #Set axis labels
     plt.xlabel('x (px)', fontsize=12)
     plt.ylabel('y (px)', fontsize=12)
+    plt.text(0.65, 0.93, '$r_{tidal} = 250 px$', transform=ax6.transAxes,
+             bbox=dict(facecolor='white', alpha=0.9), fontsize=13)
     # Set minor ticks
     ax6.minorticks_on()
-    circle = plt.Circle((1024., 1024.), 250., color='r', fill=False)
+    circle = plt.Circle((1024., 1024.), 250., color='r', fill=False, lw=2.)
     fig.gca().add_artist(circle)
     plt.scatter(x_field_c, y_field_c, marker='o', c='black',
         s=250. * np.exp(-0.0037 * np.asarray(mag_field_c) ** 2.5))
