@@ -15,14 +15,8 @@ import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 
 
-'''
-Merge cluster and field output files from MASSCLEAN to feed OCAAT.
-Calculates errors and applies gaussian noise to data.
-'''
-
-
 # Define exponential function to assign errors.
-def func(x):
+def exp_func(x):
     '''
     Exponential function.
     '''
@@ -37,7 +31,7 @@ def compl_func(x, a):
     return 1 / (1 + np.exp(x - a))
 
 
-def compl_rem(region):
+def compl_removal(region):
     '''
     Remove random stars beyond a given magnitude limit according to a
     completeness decreasing function.
@@ -107,69 +101,74 @@ def compl_rem(region):
     return clust_compl, histos
 
 
-# Path where the code is running
-mypath = realpath(join(getcwd(), dirname(__file__)))
-# Path where the synth clusters are stored.
-sd_path = join(mypath + '/massclean2.013/clusters/')
-# Path where the .DAT output files will be stored.
-out_path = join(mypath + '/synth_clusters/')
+def get_clust_names():
+    '''
+    Return names and paths of synthetic clusters.
+    '''
+    # Path where the code is running
+    mypath = realpath(join(getcwd(), dirname(__file__)))
+    # Path where the synth clusters are stored.
+    sc_path = join(mypath + '/massclean2.013/clusters/')
+    # Path where the .DAT output files will be stored.
+    out_path = join(mypath + '/synth_clusters/')
 
-# Store subdir names [0] and file names [1] inside each subdir.
-dir_files = [[], []]
-for root, dirs, files in walk(sd_path):
-    if dirs:
-        for subdir in dirs:
-            for name in listdir(join(sd_path, subdir)):
-                # Check to see if it's a valid data file.
-                if name.endswith(('.trek')):
-                    dir_files[0].append(subdir)
-                    dir_files[1].append(name)
+    # Store subdir names [0] and file names [1] inside each subdir.
+    dir_files = [[], []]
+    for root, dirs, files in walk(sc_path):
+        if dirs:
+            for subdir in dirs:
+                for name in listdir(join(sc_path, subdir)):
+                    # Check to see if it's a valid data file.
+                    if name.endswith(('.trek')):
+                        dir_files[0].append(subdir)
+                        dir_files[1].append(name)
 
-# Define maximum and minimum magnitude values.
-max_mag_lim = 22.
+    return dir_files, sc_path, out_path
 
-# Iterate through all synthetic clusters inside sub-dirs.
-for f_indx, sub_dir in enumerate(dir_files[0]):
 
-    # Store name of file in 'myfile'.
-    myfile = dir_files[1][f_indx]
+def error_scatter(id_cl_fl, myfile):
+    '''
+    Reject stars in either the cluster or a field according to the magnitude
+    limit set, add errors to the photometric data and scatter in mag and color
+    given that errors.
+    '''
 
-    clust_name = myfile[:-5]
-    print sub_dir, clust_name
-
-    # Separate mass, distance, visual absorption, metallicity and age values.
-    mass, dist, vis_abs = map(float, sub_dir.split('_'))
-    metal, age = float('0.' + clust_name[5:8]), float(clust_name[9:]) / 100.
-
-    # Open cluster data file and process the data.
+    # Open cluster/field data file and process the data.
     # Loads the data in 'myfile' as a list of N lists where N is the number
     # of columns. Each of the N lists contains all the data for the column.
-    data = np.loadtxt(join(sd_path, sub_dir, myfile), unpack=True)
+    data = np.loadtxt(join(sc_path, sub_dir, myfile), unpack=True)
 
-    # Store values.
-    x_temp, y_temp, mag_temp, col1_temp = data[13], data[14], data[7], \
-    data[6] - data[7]
+    if id_cl_fl == 'cluster':
+        # Define indexes.
+        i1, i2, i3, i4 = 13, 14, 7, 6
+    elif id_cl_fl == 'field':
+        i1, i2, i3, i4 = 8, 9, 2, 1
+    # Store raw MASSCLEAN values.
+    x_raw, y_raw, mag_raw, col_raw = data[i1], data[i2], data[i3], \
+    data[i4] - data[i3]
 
-    x_data, y_data, mag_data, e_mag, col1_data, e_col = [], [], [], [], [], []
+    x_data, y_data, mag_data, e_mag, col_data, e_col = [], [], [], [], [], []
     # Go through all stars to add errors and discard stars outside the mag
-    # range.
-    for idx in range(len(x_temp)):
+    # limit.
+    for idx in range(len(x_raw)):
 
         # Lower limit for V.
-        if mag_temp[idx] < max_mag_lim:
+        if mag_raw[idx] < max_mag_lim:
 
-            mag_data.append(mag_temp[idx])
-            col1_data.append(col1_temp[idx])
+            mag_data.append(mag_raw[idx])
+            col_data.append(col_raw[idx])
 
-            x_data.append(x_temp[idx])
-            y_data.append(y_temp[idx])
+            x_data.append(x_raw[idx])
+            y_data.append(y_raw[idx])
 
             # Add errors.
-            e_mag.append(func(mag_temp[idx]))
-            e_col.append(func(mag_temp[idx]))
+            e_mag.append(exp_func(mag_raw[idx]))
+            e_col.append(exp_func(mag_raw[idx]))
 
     # An ID that starts with a 1 identifies the star as a cluster member.
-    id_clust = [int('1' + str(i)) for i in range(len(x_data))]
+    # An ID that starts with a 2 identifies the star as a field member.
+    k = '1' if id_cl_fl == 'cluster' else '2'
+    id_cl_fl = [int(k + str(i)) for i in range(len(x_data))]
 
     for idx in range(len(mag_data)):
         # Randomly increase errors.
@@ -180,61 +179,67 @@ for f_indx, sub_dir in enumerate(dir_files[0]):
         # Randomly move mag and color through a Gaussian function given
         # their error values.
         mag_data[idx] = rd.gauss(mag_data[idx], e_mag[idx])
-        col1_data[idx] = rd.gauss(col1_data[idx], e_col[idx])
+        col_data[idx] = rd.gauss(col_data[idx], e_col[idx])
 
-    # Read data from field stars file.
-    data2 = np.loadtxt(join(sd_path, sub_dir, 'field.plot'), unpack=True)
+    if id_cl_fl == 'cluster':
+        x_vals, y_vals, mag_vals, col_vals = [x_raw, x_data], [y_raw, y_data],\
+        [mag_raw, mag_data], [col_raw, col_data]
+    else:
+        x_vals, y_vals, mag_vals, col_vals = x_data, y_data, mag_data, col_data
 
-    # Store values.
-    x_f_temp, y_f_temp, mag_f_temp, col1_f_temp = data2[8], data2[9], \
-    data2[2], data2[1] - data2[2]
+    return id_cl_fl, x_vals, y_vals, mag_vals, col_vals, e_mag, e_col
 
-    x_field, y_field, mag_field, e_mag_f, col1_field, e_col_f = [], [], [],\
-    [], [], []
-    # Go through all stars to add errors and reject stars outside the mag
-    # range.
-    for idx in range(len(x_f_temp)):
 
-        # Limit for V.
-        if mag_f_temp[idx] < max_mag_lim:
+'''
+Merge cluster and field output files from MASSCLEAN to feed OCAAT.
+Calculates errors and applies gaussian noise to data.
+'''
 
-            mag_field.append(mag_f_temp[idx])
-            col1_field.append(col1_f_temp[idx])
+# Define cut-off minimum magnitude value.
+max_mag_lim = 22.
 
-            x_field.append(x_f_temp[idx])
-            y_field.append(y_f_temp[idx])
+# Get names and paths of synthetic clusters.
+dir_files, sc_path, out_path = get_clust_names()
 
-            # Add errors.
-            e_mag_f.append(func(mag_f_temp[idx]))
-            e_col_f.append(func(mag_f_temp[idx]))
+# Iterate through all synthetic clusters inside sub-dirs.
+for f_indx, sub_dir in enumerate(dir_files[0]):
 
-    # An ID that starts with a 2 identifies the star as a field member.
-    id_field = [int('2' + str(i)) for i in range(len(x_field))]
+    # Store name of file in 'myfile'.
+    cl_file = dir_files[1][f_indx]
 
-    for idx in range(len(id_field)):
-        # Randomly increase errors.
-        e_mag_f[idx] = e_mag_f[idx] + abs(rd.gauss(0., e_mag_f[idx]))
-        e_col_f[idx] = e_col_f[idx] + abs(rd.gauss(0., e_col_f[idx]))
+    clust_name = cl_file[:-5]
+    print sub_dir, clust_name
 
-    for idx in range(len(mag_field)):
-        # Randomly move mag and color through a Gaussian function.
-        mag_field[idx] = rd.gauss(mag_field[idx], e_mag_f[idx])
-        col1_field[idx] = rd.gauss(col1_field[idx], e_col_f[idx])
+    # Separate mass, distance, visual absorption, metallicity and age values.
+    mass, dist, vis_abs = map(float, sub_dir.split('_'))
+    metal, age = float('0.' + clust_name[5:8]), float(clust_name[9:]) / 100.
+
+    # Get raw data and error-scattered photometric data for the cluster.
+    id_clust, x_cl, y_cl, mag_cl, col_cl, e_mag_c, e_col_c = \
+    error_scatter('cluster', cl_file)
+    x_raw, y_raw, mag_raw, col_raw = x_cl[0], y_cl[0], mag_cl[0], \
+    col_cl[0]
+    x_clust, y_clust, mag_clust, col_clust = x_cl[1], y_cl[1], mag_cl[1], \
+    col_cl[1]
+
+    # Get raw data and error-scattered photometric data for the field.
+    id_field, x_field, y_field, mag_field, col_field, e_mag_f, e_col_f = \
+    error_scatter('field', 'field.plot')
 
     # Merge cluster and field.
     id_cl_fl_f = np.concatenate([id_clust, id_field])
-    x_cl_fl_f = np.concatenate([x_data, x_field])
-    y_cl_fl_f = np.concatenate([y_data, y_field])
-    mag_cl_fl_f = np.concatenate([mag_data, mag_field])
-    e_mag_cl_fl_f = np.concatenate([e_mag, e_mag_f])
-    col1_cl_fl_f = np.concatenate([col1_data, col1_field])
-    e_col_cl_fl_f = np.concatenate([e_col, e_col_f])
+    x_cl_fl_f = np.concatenate([x_clust, x_field])
+    y_cl_fl_f = np.concatenate([y_clust, y_field])
+    mag_cl_fl_f = np.concatenate([mag_clust, mag_field])
+    e_mag_cl_fl_f = np.concatenate([e_mag_c, e_mag_f])
+    col1_cl_fl_f = np.concatenate([col_clust, col_field])
+    e_col_cl_fl_f = np.concatenate([e_col_c, e_col_f])
 
     # Remove stars according to a completeness function.
     # Call function.
     region_full = [id_cl_fl_f, x_cl_fl_f, y_cl_fl_f, mag_cl_fl_f, e_mag_cl_fl_f,
         col1_cl_fl_f, e_col_cl_fl_f]
-    region_compl, histos = compl_rem(region_full)
+    region_compl, histos = compl_removal(region_full)
     # Unpack lists of data after completeness removal.
     id_cl_fl, x_cl_fl, y_cl_fl, mag_cl_fl, e_mag_cl_fl, col1_cl_fl, \
     e_col_cl_fl = region_compl
@@ -243,7 +248,7 @@ for f_indx, sub_dir in enumerate(dir_files[0]):
     out_path_sub = join(out_path, sub_dir)
     if not exists(out_path_sub):
         makedirs(out_path_sub)
-
+    # Store merged cluster+field data to file.
     with open(join(out_path_sub, str(clust_name) + '.DAT'), "w") as f_out:
         f_out.write('# id  x  y  V  eV  BV  eBV\n')
         for idx, item in enumerate(id_cl_fl):
@@ -260,10 +265,10 @@ for f_indx, sub_dir in enumerate(dir_files[0]):
     # x,y finding chart of cluster stars.
     ax1 = plt.subplot(gs[0:2, 0:2])
     # Get max and min values in x,y
-    x_delta, y_delta = (max(x_temp) - min(x_temp)) / 10., \
-    (max(y_temp) - min(y_temp)) / 10.
-    x_min, x_max = min(x_temp) - x_delta, max(x_temp) + x_delta
-    y_min, y_max = min(y_temp) - y_delta, max(y_temp) + y_delta
+    x_delta, y_delta = (max(x_raw) - min(x_raw)) / 10., \
+    (max(y_raw) - min(y_raw)) / 10.
+    x_min, x_max = min(x_raw) - x_delta, max(x_raw) + x_delta
+    y_min, y_max = min(y_raw) - y_delta, max(y_raw) + y_delta
     #Set plot limits
     plt.xlim(x_min, x_max)
     plt.ylim(y_min, y_max)
@@ -272,18 +277,18 @@ for f_indx, sub_dir in enumerate(dir_files[0]):
     plt.ylabel('y (px)', fontsize=12)
     # Set minor ticks
     ax1.minorticks_on()
-    plt.text(0.65, 0.94, '$N_{cluster} = %d$' % len(x_temp),
+    plt.text(0.65, 0.94, '$N_{cluster} = %d$' % len(x_raw),
              transform=ax1.transAxes,
              bbox=dict(facecolor='white', alpha=0.5), fontsize=13)
-    plt.scatter(x_temp, y_temp, marker='o', c='r',
-        s=250. * np.exp(-0.0027 * np.asarray(mag_data) ** 2.5))
+    plt.scatter(x_raw, y_raw, marker='o', c='r',
+        s=250. * np.exp(-0.0027 * np.asarray(mag_clust) ** 2.5))
 
     # Cluster's stars CMD.
     ax0 = plt.subplot(gs[0:2, 2:4])
     #Set plot limits
     col1_min, col1_max = min(col1_cl_fl) - 0.2, max(col1_cl_fl) + 0.2
-    mag_min, mag_max = max(max_mag_lim + 0.5, max(mag_temp) + 0.2), \
-    min(mag_temp) - 0.2
+    mag_min, mag_max = max(max_mag_lim + 0.5, max(mag_raw) + 0.2), \
+    min(mag_raw) - 0.2
     plt.xlim(col1_min, col1_max)
     plt.ylim(mag_min, mag_max)
     #Set axis labels
@@ -293,7 +298,7 @@ for f_indx, sub_dir in enumerate(dir_files[0]):
     ax0.minorticks_on()
     # Set grid
     ax0.grid(b=True, which='major', color='gray', linestyle='--', lw=1)
-    text1 = '$N_{cluster} = %d$' '\n' % len(col1_temp)
+    text1 = '$N_{cluster} = %d$' '\n' % len(col_raw)
     text2 = '$V_{min} = %0.1f$' '\n' % max_mag_lim
     text3 = '$log[age/yr] = %.1f$' '\n' % age
     text4 = '$z = %.4f$' '\n' % metal
@@ -304,7 +309,7 @@ for f_indx, sub_dir in enumerate(dir_files[0]):
     plt.text(0.63, 0.63, text, transform=ax0.transAxes,
         bbox=dict(facecolor='white', alpha=0.5), fontsize=13)
     # Plot stars.
-    plt.scatter(col1_temp, mag_temp, marker='o', c='r', s=15., lw=0.3)
+    plt.scatter(col_raw, mag_raw, marker='o', c='r', s=15., lw=0.3)
     plt.axhline(y=max_mag_lim, linestyle='-', color='green', lw=1.5)
 
     # Separate cluster from field stars BEFORE completeness function.
