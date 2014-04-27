@@ -42,8 +42,6 @@ def compl_removal(region):
     # Number of bins.
     bins1 = int((max(mag_data) - min(mag_data)) / 0.2)
 
-    #plt.hist(mag_data, bins=bins, color='blue')
-
     # Histogram of magnitude values.
     mag_hist, bin_edg = np.histogram(mag_data, bins1)
     # Index of maximum magnitude bin, two mags below the max mag value.
@@ -92,9 +90,6 @@ def compl_removal(region):
     clust_compl = np.delete(np.asarray(region), d_i, axis=1)
 
     bins2 = int((max(clust_compl[3]) - min(clust_compl[3])) / 0.2)
-    #plt.hist(clust_compl[3], bins=bins2, color='red')
-    #plt.show()
-    #raw_input()
 
     histos = [bins1, bins2, a]
 
@@ -168,7 +163,7 @@ def error_scatter(id_cl_fl, myfile):
     # An ID that starts with a 1 identifies the star as a cluster member.
     # An ID that starts with a 2 identifies the star as a field member.
     k = '1' if id_cl_fl == 'cluster' else '2'
-    id_cl_fl = [int(k + str(i)) for i in range(len(x_data))]
+    ids = [int(k + str(i)) for i in range(len(x_data))]
 
     for idx in range(len(mag_data)):
         # Randomly increase errors.
@@ -187,7 +182,7 @@ def error_scatter(id_cl_fl, myfile):
     else:
         x_vals, y_vals, mag_vals, col_vals = x_data, y_data, mag_data, col_data
 
-    return id_cl_fl, x_vals, y_vals, mag_vals, col_vals, e_mag, e_col
+    return ids, x_vals, y_vals, mag_vals, col_vals, e_mag, e_col
 
 
 '''
@@ -235,11 +230,13 @@ for f_indx, sub_dir in enumerate(dir_files[0]):
     col1_cl_fl_f = np.concatenate([col_clust, col_field])
     e_col_cl_fl_f = np.concatenate([e_col_c, e_col_f])
 
-    # Remove stars according to a completeness function.
-    # Call function.
+    # Store lists into single list of merged data.
     region_full = [id_cl_fl_f, x_cl_fl_f, y_cl_fl_f, mag_cl_fl_f, e_mag_cl_fl_f,
         col1_cl_fl_f, e_col_cl_fl_f]
+
+    # Call completeness removal function.
     region_compl, histos = compl_removal(region_full)
+
     # Unpack lists of data after completeness removal.
     id_cl_fl, x_cl_fl, y_cl_fl, mag_cl_fl, e_mag_cl_fl, col1_cl_fl, \
     e_col_cl_fl = region_compl
