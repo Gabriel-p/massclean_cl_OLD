@@ -26,6 +26,7 @@ CDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 # Location of the cluster.ini file.
 CLUSTER_INI=$CDIR"/massclean2.013/ini.files/cluster.ini"
 KING_INI=$CDIR"/massclean2.013/ini.files/king.ini"
+FIELD_INI=$CDIR"/massclean2.013/ini.files/field.ini"
 
 # Change to code directory.
 cd $CDIR"/massclean2.013"
@@ -35,6 +36,16 @@ rm -rfv clusters/*
 
 # Clean left over files from previous run.
 ./clean.all
+
+# Set maximum magnitude for field stars.
+# Use J band as per Popescus' recommendation.
+sed -i "34s/.*/J         (1)/" $FIELD_INI
+# Number of stars.
+sed -i "36s/.*/12000      (3)/" $FIELD_INI
+# Minimum magnitude.
+sed -i "37s/.*/21        (4)/" $FIELD_INI
+# Maximum magnitude.
+sed -i "38s/.*/9         (5)/" $FIELD_INI
 
 # Set field size.
 sed -i "47s/.*/4.8    (4)/" $CLUSTER_INI
@@ -92,8 +103,6 @@ for (( i=0;i<$METAL_n;i++)); do
             sed -i "45s/.*/${INIT_MASS[${j}]}    (2)/" $CLUSTER_INI
             sed -i "46s/.*/${DIST[${k}]}    (3)/" $CLUSTER_INI
             sed -i "56s/.*/${AV[${k}]}    (13)/" $CLUSTER_INI
-
-            #read -p "Press [Enter] key to continue..."
             
             # Generate clusters with different ages and metallicities
             # according to the parameters set above.

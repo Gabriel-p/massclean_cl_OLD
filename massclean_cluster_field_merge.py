@@ -37,6 +37,10 @@ def compl_removal(region):
     completeness decreasing function.
     '''
 
+    # Magnitude value below the minumum magnitude where the completeness
+    # removal should start.
+    c_mags = 2.5
+
     mag_data = region[3]
     max_mag = max(mag_data)
     # Number of bins.
@@ -44,9 +48,9 @@ def compl_removal(region):
 
     # Histogram of magnitude values.
     mag_hist, bin_edg = np.histogram(mag_data, bins1)
-    # Index of maximum magnitude bin, two mags below the max mag value.
+    # Index of maximum magnitude bin, c_mags mags below the max mag value.
     max_indx = min(range(len(bin_edg)),
-        key=lambda i: abs(bin_edg[i] - (max_mag - 2.)))
+        key=lambda i: abs(bin_edg[i] - (max_mag - c_mags)))
     n1, p1 = mag_hist[max_indx], 100.
     # Get completeness percentages.
     a = rd.uniform(2., 4.)
