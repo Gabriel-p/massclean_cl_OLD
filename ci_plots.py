@@ -40,11 +40,13 @@ for line in skip_comments(f):
 
 # Separate into masses, distances, metallicities and ages of MASSCLEAN
 # clusters.
-mass, dist, metal, age = [], [], [], []
+mass, dist, extinc, metal, age = [], [], [], [], []
 for clust_str in names:
     first, second = clust_str.split('/')
-    mass.append(float(first[:2]) * 100.)
-    dist.append(float(first[3:]) / 1000.)
+    first_a, first_b, first_c = first.split('_')
+    mass.append(float(first_a))
+    dist.append(float(first_b) / 1000.)
+    extinc.append(float(first_c) / 3.1)
     metal.append(float('0.' + second[5:8]))
     age.append(float(second[9:]) / 100.)
 
@@ -96,7 +98,6 @@ ax0.grid(b=True, which='both', color='gray', linestyle='--', lw=0.5)
 #categories = np.array(categ)
 
 plt.scatter(dist, ci, s=((np.array(mass) / 40.) ** 2), facecolors='none')
-#plt.colorbar()
 
 
 ax1 = plt.subplot(gs[4:7, 0:3])
@@ -115,22 +116,21 @@ plt.scatter(delta_age, ci, s=mass)
 
 
 ax3 = plt.subplot(gs[8:11, 0:3])
-plt.xlim(-1.5, 1.5)
+#plt.xlim(-1.5, 1.5)
 plt.xlabel('dist', fontsize=12)
 plt.ylabel('CI', fontsize=12)
-delta_dist = np.array(dist) - np.array(dist_ocaat)
-print np.array(dist)
-print np.array(dist_ocaat)
-plt.scatter(delta_dist, ci)
-
+dist_ocaat_kpc = 10 ** (0.2 * (np.array(dist_ocaat) + 5)) / 1000.
+delta_dist = np.array(dist) - dist_ocaat_kpc
+cm = plt.cm.get_cmap('RdYlBu_r')
+plt.scatter(delta_dist, ci, c=dist_ocaat_kpc, cmap=cm,
+    s=((np.array(mass) / 40.) ** 2))
+plt.colorbar()
 
 ax4 = plt.subplot(gs[8:11, 4:7])
 plt.xlim(-1.5, 1.5)
 plt.xlabel('E(B-V)', fontsize=12)
 plt.ylabel('CI', fontsize=12)
-delta_ext = np.array(dist) / 3.1 - np.array(ext_ocaat)
-
-
+delta_ext = np.array(extinc) - np.array(ext_ocaat)
 plt.scatter(delta_ext, ci)
 
 # Output png file.
