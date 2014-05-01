@@ -70,8 +70,8 @@ for par_str in params:
     e_dist.append(float(par_str[20]))
 
 
-fig = plt.figure(figsize=(20, 35))  # create the top-level container
-gs = gridspec.GridSpec(14, 8)  # create a GridSpec object
+fig = plt.figure(figsize=(20, 70))  # create the top-level container
+gs = gridspec.GridSpec(28, 8)  # create a GridSpec object
 cm = plt.cm.get_cmap('RdYlBu_r')
 
 cent_diff = np.sqrt((np.array(cenx) - 1024.) ** 2 +
@@ -79,17 +79,24 @@ cent_diff = np.sqrt((np.array(cenx) - 1024.) ** 2 +
 rad_diff = np.array(rad) - 250.
 delta_met = np.array(metal) - np.array(metal_ocaat)
 delta_age = np.array(age) - np.array(age_ocaat)
-dist_ocaat_kpc = 10 ** (0.2 * (np.array(dist_ocaat) + 5)) / 1000.
-delta_dist = np.array(dist) - dist_ocaat_kpc
+dist_mod = np.log10(np.array(dist) * 1000.) * 5 - 5
+delta_dist = np.array(dist_mod) - np.array(dist_ocaat)
 delta_ext = np.array(extinc) - np.array(ext_ocaat)
+
+# Order.
+order = np.argsort(-((np.array(mass) / 40.) ** 2))
+z1 = np.take(((np.array(mass) / 40.) ** 2), order)
+z2 = np.take(dist, order)
 
 ax0 = plt.subplot(gs[0:3, 0:3])
 plt.xlabel('log(age/yr)', fontsize=12)
 plt.ylabel('CI', fontsize=12)
 #ax0.minorticks_on()
 ax0.grid(b=True, which='both', color='gray', linestyle='--', lw=0.5)
-plt.scatter(age, ci, c=dist, cmap=cm,
-    s=((np.array(mass) / 40.) ** 2))
+# Order before plotting.
+x = np.take(age, order)
+y = np.take(ci, order)
+plt.scatter(x, y, c=z2, cmap=cm, s=z1)
 cbar = plt.colorbar()
 cbar.set_ticks([0.5, 1., 3., 5.])
 cbar.set_ticklabels([0.5, 1., 3., 5.])
@@ -102,8 +109,11 @@ plt.xlim(0., min(max(ci) + 0.1, 1))
 ax00.grid(b=True, which='both', color='gray', linestyle='--', lw=0.5)
 # make these tick labels invisible
 plt.setp(ax00.get_xticklabels(), visible=False)
-plt.scatter(ci, cent_diff, c=dist, cmap=cm,
-    s=((np.array(mass) / 40.) ** 2))
+# Order before plotting.
+x = np.take(ci, order)
+y = np.take(cent_diff, order)
+plt.scatter(x, y, c=z2, cmap=cm, s=z1)
+#plt.scatter(ci, cent_diff, c=dist, cmap=cm, s=((np.array(mass) / 40.) ** 2))
 cbar = plt.colorbar()
 cbar.set_ticks([0.5, 1., 3., 5.])
 cbar.set_ticklabels([0.5, 1., 3., 5.])
@@ -111,12 +121,15 @@ cbar.set_label('dist (kpc)')
 
 ax01 = plt.subplot(gs[2:4, 4:8])
 plt.xlabel('CI', fontsize=12)
-plt.ylabel('$\Delta r_{cl}\,px$', fontsize=14)
+plt.ylabel('$\Delta r_{cl}\,(px)$', fontsize=14)
 plt.xlim(0., min(max(ci) + 0.1, 1))
 #ax01.minorticks_on()
 ax01.grid(b=True, which='both', color='gray', linestyle='--', lw=0.5)
-ax01.scatter(ci, rad_diff, c=dist, cmap=cm,
-    s=((np.array(mass) / 40.) ** 2))
+# Order before plotting.
+x = np.take(ci, order)
+y = np.take(rad_diff, order)
+plt.scatter(x, y, c=z2, cmap=cm, s=z1)
+#ax01.scatter(ci, rad_diff, c=dist, cmap=cm, s=((np.array(mass) / 40.) ** 2))
 cbar = plt.colorbar()
 cbar.set_ticks([0.5, 1., 3., 5.])
 cbar.set_ticklabels([0.5, 1., 3., 5.])
@@ -124,11 +137,15 @@ cbar.set_label('dist (kpc)')
 
 ax1 = plt.subplot(gs[5:8, 0:3])
 plt.xlim(-0.06, 0.06)
-plt.xlabel('metal', fontsize=12)
+plt.xlabel('$\Delta metal$', fontsize=14)
 plt.ylabel('CI', fontsize=12)
 ax1.grid(b=True, which='both', color='gray', linestyle='--', lw=0.5)
-plt.scatter(delta_met, ci, c=dist, cmap=cm,
-    s=((np.array(mass) / 40.) ** 2))
+# Order before plotting.
+x = np.take(delta_met, order)
+y = np.take(ci, order)
+plt.scatter(x, y, c=z2, cmap=cm, s=z1)
+#plt.scatter(delta_met, ci, c=dist, cmap=cm, s=((np.array(mass) / 40.) ** 2))
+plt.errorbar(delta_met, ci, xerr=e_met, ls='none', color='k', elinewidth=0.8)
 cbar = plt.colorbar()
 cbar.set_ticks([0.5, 1., 3., 5.])
 cbar.set_ticklabels([0.5, 1., 3., 5.])
@@ -136,11 +153,15 @@ cbar.set_label('dist (kpc)')
 
 ax2 = plt.subplot(gs[5:8, 4:7])
 plt.xlim(-4, 4)
-plt.xlabel('log(age)', fontsize=12)
+plt.xlabel('$\Delta log(age/yr)$', fontsize=14)
 plt.ylabel('CI', fontsize=12)
 ax2.grid(b=True, which='both', color='gray', linestyle='--', lw=0.5)
-plt.scatter(delta_age, ci, c=dist, cmap=cm,
-    s=((np.array(mass) / 40.) ** 2))
+# Order before plotting.
+x = np.take(delta_age, order)
+y = np.take(ci, order)
+plt.scatter(x, y, c=z2, cmap=cm, s=z1)
+#plt.scatter(delta_age, ci, c=dist, cmap=cm, s=((np.array(mass) / 40.) ** 2))
+plt.errorbar(delta_age, ci, xerr=e_age, ls='none', color='k', elinewidth=0.8)
 cbar = plt.colorbar()
 cbar.set_ticks([0.5, 1., 3., 5.])
 cbar.set_ticklabels([0.5, 1., 3., 5.])
@@ -148,11 +169,15 @@ cbar.set_label('dist (kpc)')
 
 ax3 = plt.subplot(gs[9:12, 0:3])
 #plt.xlim(-1.5, 1.5)
-plt.xlabel('dist', fontsize=12)
+plt.xlabel('$\Delta dist\,mod$', fontsize=14)
 plt.ylabel('CI', fontsize=12)
 ax3.grid(b=True, which='both', color='gray', linestyle='--', lw=0.5)
-plt.scatter(delta_dist, ci, c=dist, cmap=cm,
-    s=((np.array(mass) / 40.) ** 2))
+# Order before plotting.
+x = np.take(delta_dist, order)
+y = np.take(ci, order)
+plt.scatter(x, y, c=z2, cmap=cm, s=z1)
+#plt.scatter(delta_dist, ci, c=dist, cmap=cm, s=((np.array(mass) / 40.) ** 2))
+plt.errorbar(delta_dist, ci, xerr=e_dist, ls='none', color='k', elinewidth=0.8)
 cbar = plt.colorbar()
 cbar.set_ticks([0.5, 1., 3., 5.])
 cbar.set_ticklabels([0.5, 1., 3., 5.])
@@ -160,11 +185,30 @@ cbar.set_label('dist (kpc)')
 
 ax4 = plt.subplot(gs[9:12, 4:7])
 plt.xlim(-1.5, 1.5)
-plt.xlabel('E(B-V)', fontsize=12)
+plt.xlabel('$\Delta E_{(B-V)}$', fontsize=14)
 plt.ylabel('CI', fontsize=12)
 ax4.grid(b=True, which='both', color='gray', linestyle='--', lw=0.5)
-plt.scatter(delta_ext, ci, c=dist, cmap=cm,
-    s=((np.array(mass) / 40.) ** 2))
+# Order before plotting.
+x = np.take(delta_ext, order)
+y = np.take(ci, order)
+plt.scatter(x, y, c=z2, cmap=cm, s=z1)
+#plt.scatter(delta_ext, ci, c=dist, cmap=cm, s=((np.array(mass) / 40.) ** 2))
+plt.errorbar(delta_ext, ci, xerr=e_ext, ls='none', color='k', elinewidth=0.8)
+cbar = plt.colorbar()
+cbar.set_ticks([0.5, 1., 3., 5.])
+cbar.set_ticklabels([0.5, 1., 3., 5.])
+cbar.set_label('dist (kpc)')
+
+ax5 = plt.subplot(gs[13:16, 0:3])
+#plt.xlim(-1.5, 1.5)
+plt.xlabel('prob', fontsize=12)
+plt.ylabel('CI', fontsize=12)
+ax5.grid(b=True, which='both', color='gray', linestyle='--', lw=0.5)
+# Order before plotting.
+x = np.take(prob, order)
+y = np.take(ci, order)
+plt.scatter(x, y, c=z2, cmap=cm, s=z1)
+#plt.scatter(prob, ci, c=dist, cmap=cm, s=((np.array(mass) / 40.) ** 2))
 cbar = plt.colorbar()
 cbar.set_ticks([0.5, 1., 3., 5.])
 cbar.set_ticklabels([0.5, 1., 3., 5.])
