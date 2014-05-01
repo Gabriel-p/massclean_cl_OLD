@@ -72,66 +72,103 @@ for par_str in params:
 
 fig = plt.figure(figsize=(20, 35))  # create the top-level container
 gs = gridspec.GridSpec(14, 8)  # create a GridSpec object
+cm = plt.cm.get_cmap('RdYlBu_r')
+
+cent_diff = np.sqrt((np.array(cenx) - 1024.) ** 2 +
+    (np.array(ceny) - 1024.) ** 2)
+rad_diff = np.array(rad) - 250.
+delta_met = np.array(metal) - np.array(metal_ocaat)
+delta_age = np.array(age) - np.array(age_ocaat)
+dist_ocaat_kpc = 10 ** (0.2 * (np.array(dist_ocaat) + 5)) / 1000.
+delta_dist = np.array(dist) - dist_ocaat_kpc
+delta_ext = np.array(extinc) - np.array(ext_ocaat)
 
 ax0 = plt.subplot(gs[0:3, 0:3])
-plt.xlabel('dist (kpc)', fontsize=12)
+plt.xlabel('log(age/yr)', fontsize=12)
 plt.ylabel('CI', fontsize=12)
-ax0.minorticks_on()
+#ax0.minorticks_on()
 ax0.grid(b=True, which='both', color='gray', linestyle='--', lw=0.5)
-#cm = plt.cm.get_cmap('jet')  # ('RdYlBu')
-#import matplotlib.colors as mcolors
-#cm = mcolors.ListedColormap([(0, 0, 1),
-                               #(0, 1, 0),
-                               #(1, 0, 0)])
-#categ = []
-#for clust in age:
-    #if clust == 6.0:
-        #categ.append(0)
-    #elif clust == 8.0:
-        #categ.append(1)
-    #elif clust == 9.0:
-        #categ.append(2)
-    #elif clust == 10.0:
-        #categ.append(3)
+plt.scatter(age, ci, c=dist, cmap=cm,
+    s=((np.array(mass) / 40.) ** 2))
+cbar = plt.colorbar()
+cbar.set_ticks([0.5, 1., 3., 5.])
+cbar.set_ticklabels([0.5, 1., 3., 5.])
+cbar.set_label('dist (kpc)')
 
-#colormap = np.array(['b', 'g', 'y', 'r'])
-#categories = np.array(categ)
+ax00 = plt.subplot(gs[0:2, 4:8])
+plt.ylabel('$\Delta center\,(px)$', fontsize=14)
+plt.xlim(0., min(max(ci) + 0.1, 1))
+#ax00.minorticks_on()
+ax00.grid(b=True, which='both', color='gray', linestyle='--', lw=0.5)
+# make these tick labels invisible
+plt.setp(ax00.get_xticklabels(), visible=False)
+plt.scatter(ci, cent_diff, c=dist, cmap=cm,
+    s=((np.array(mass) / 40.) ** 2))
+cbar = plt.colorbar()
+cbar.set_ticks([0.5, 1., 3., 5.])
+cbar.set_ticklabels([0.5, 1., 3., 5.])
+cbar.set_label('dist (kpc)')
 
-plt.scatter(dist, ci, s=((np.array(mass) / 40.) ** 2), facecolors='none')
+ax01 = plt.subplot(gs[2:4, 4:8])
+plt.xlabel('CI', fontsize=12)
+plt.ylabel('$\Delta r_{cl}\,px$', fontsize=14)
+plt.xlim(0., min(max(ci) + 0.1, 1))
+#ax01.minorticks_on()
+ax01.grid(b=True, which='both', color='gray', linestyle='--', lw=0.5)
+ax01.scatter(ci, rad_diff, c=dist, cmap=cm,
+    s=((np.array(mass) / 40.) ** 2))
+cbar = plt.colorbar()
+cbar.set_ticks([0.5, 1., 3., 5.])
+cbar.set_ticklabels([0.5, 1., 3., 5.])
+cbar.set_label('dist (kpc)')
 
-
-ax1 = plt.subplot(gs[4:7, 0:3])
+ax1 = plt.subplot(gs[5:8, 0:3])
 plt.xlim(-0.06, 0.06)
 plt.xlabel('metal', fontsize=12)
 plt.ylabel('CI', fontsize=12)
-delta_met = np.array(metal) - np.array(metal_ocaat)
-plt.scatter(delta_met, ci)
+ax1.grid(b=True, which='both', color='gray', linestyle='--', lw=0.5)
+plt.scatter(delta_met, ci, c=dist, cmap=cm,
+    s=((np.array(mass) / 40.) ** 2))
+cbar = plt.colorbar()
+cbar.set_ticks([0.5, 1., 3., 5.])
+cbar.set_ticklabels([0.5, 1., 3., 5.])
+cbar.set_label('dist (kpc)')
 
-ax2 = plt.subplot(gs[4:7, 4:7])
+ax2 = plt.subplot(gs[5:8, 4:7])
 plt.xlim(-4, 4)
 plt.xlabel('log(age)', fontsize=12)
 plt.ylabel('CI', fontsize=12)
-delta_age = np.array(age) - np.array(age_ocaat)
-plt.scatter(delta_age, ci, s=mass)
+ax2.grid(b=True, which='both', color='gray', linestyle='--', lw=0.5)
+plt.scatter(delta_age, ci, c=dist, cmap=cm,
+    s=((np.array(mass) / 40.) ** 2))
+cbar = plt.colorbar()
+cbar.set_ticks([0.5, 1., 3., 5.])
+cbar.set_ticklabels([0.5, 1., 3., 5.])
+cbar.set_label('dist (kpc)')
 
-
-ax3 = plt.subplot(gs[8:11, 0:3])
+ax3 = plt.subplot(gs[9:12, 0:3])
 #plt.xlim(-1.5, 1.5)
 plt.xlabel('dist', fontsize=12)
 plt.ylabel('CI', fontsize=12)
-dist_ocaat_kpc = 10 ** (0.2 * (np.array(dist_ocaat) + 5)) / 1000.
-delta_dist = np.array(dist) - dist_ocaat_kpc
-cm = plt.cm.get_cmap('RdYlBu_r')
-plt.scatter(delta_dist, ci, c=dist_ocaat_kpc, cmap=cm,
+ax3.grid(b=True, which='both', color='gray', linestyle='--', lw=0.5)
+plt.scatter(delta_dist, ci, c=dist, cmap=cm,
     s=((np.array(mass) / 40.) ** 2))
-plt.colorbar()
+cbar = plt.colorbar()
+cbar.set_ticks([0.5, 1., 3., 5.])
+cbar.set_ticklabels([0.5, 1., 3., 5.])
+cbar.set_label('dist (kpc)')
 
-ax4 = plt.subplot(gs[8:11, 4:7])
+ax4 = plt.subplot(gs[9:12, 4:7])
 plt.xlim(-1.5, 1.5)
 plt.xlabel('E(B-V)', fontsize=12)
 plt.ylabel('CI', fontsize=12)
-delta_ext = np.array(extinc) - np.array(ext_ocaat)
-plt.scatter(delta_ext, ci)
+ax4.grid(b=True, which='both', color='gray', linestyle='--', lw=0.5)
+plt.scatter(delta_ext, ci, c=dist, cmap=cm,
+    s=((np.array(mass) / 40.) ** 2))
+cbar = plt.colorbar()
+cbar.set_ticks([0.5, 1., 3., 5.])
+cbar.set_ticklabels([0.5, 1., 3., 5.])
+cbar.set_label('dist (kpc)')
 
 # Output png file.
 plt.savefig('ci_out.png', dpi=150)
