@@ -70,8 +70,8 @@ for par_str in params:
     e_dist.append(float(par_str[20]))
 
 
-fig = plt.figure(figsize=(20, 70))  # create the top-level container
-gs = gridspec.GridSpec(28, 8)  # create a GridSpec object
+fig = plt.figure(figsize=(30, 70))  # create the top-level container
+gs = gridspec.GridSpec(28, 12)  # create a GridSpec object
 cm = plt.cm.get_cmap('RdYlBu_r')
 
 cent_diff = np.sqrt((np.array(cenx) - 1024.) ** 2 +
@@ -84,8 +84,8 @@ delta_dist = np.array(dist_mod) - np.array(dist_ocaat)
 delta_ext = np.array(extinc) - np.array(ext_ocaat)
 
 # Order.
-order = np.argsort(-((np.array(mass) / 40.) ** 2))
-z1 = np.take(((np.array(mass) / 40.) ** 2), order)
+order = np.argsort(-((np.array(mass) / 50.) ** 2))
+z1 = np.take(((np.array(mass) / 50.) ** 2), order)
 z2 = np.take(dist, order)
 
 ax0 = plt.subplot(gs[0:3, 0:3])
@@ -151,7 +151,26 @@ cbar.set_ticks([0.5, 1., 3., 5.])
 cbar.set_ticklabels([0.5, 1., 3., 5.])
 cbar.set_label('dist (kpc)')
 
-ax2 = plt.subplot(gs[5:8, 4:7])
+ax11 = plt.subplot(gs[5:8, 4:7], aspect=1)
+plt.xlim(-0.01, 0.04)
+plt.ylim(-0.01, 0.04)
+plt.xlabel('$metal_{ocaat}$', fontsize=14)
+plt.ylabel('$metal_{real}$', fontsize=14)
+ax11.grid(b=True, which='both', color='gray', linestyle='--', lw=0.5)
+# Order before plotting.
+x = np.take(metal_ocaat, order)
+y = np.take(metal, order)
+plt.scatter(x, y, c=z2, cmap=cm, s=z1)
+plt.errorbar(metal_ocaat, metal, xerr=e_met, ls='none', color='grey',
+    elinewidth=0.8)
+# 1:1 line
+plt.plot([0., 0.01, 0.02, 0.03], [0., 0.01, 0.02, 0.03], 'k-', ls='--')
+cbar = plt.colorbar()
+cbar.set_ticks([0.5, 1., 3., 5.])
+cbar.set_ticklabels([0.5, 1., 3., 5.])
+cbar.set_label('dist (kpc)')
+
+ax2 = plt.subplot(gs[9:12, 0:3])
 plt.xlim(-4, 4)
 plt.xlabel('$\Delta log(age/yr)$', fontsize=14)
 plt.ylabel('CI', fontsize=12)
@@ -167,7 +186,26 @@ cbar.set_ticks([0.5, 1., 3., 5.])
 cbar.set_ticklabels([0.5, 1., 3., 5.])
 cbar.set_label('dist (kpc)')
 
-ax3 = plt.subplot(gs[9:12, 0:3])
+ax12 = plt.subplot(gs[9:12, 4:7], aspect=1)
+plt.xlim(6., 10.)
+plt.ylim(6., 10.)
+plt.xlabel('$age_{ocaat}$', fontsize=14)
+plt.ylabel('$age_{real}$', fontsize=14)
+ax12.grid(b=True, which='both', color='gray', linestyle='--', lw=0.5)
+# Order before plotting.
+x = np.take(age_ocaat, order)
+y = np.take(age, order)
+plt.scatter(x, y, c=z2, cmap=cm, s=z1)
+plt.errorbar(age_ocaat, age, xerr=e_age, ls='none', color='grey',
+    elinewidth=0.8)
+# 1:1 line
+plt.plot([6., 7., 8., 9., 10.], [6., 7., 8., 9., 10.], 'k-', ls='--')
+cbar = plt.colorbar()
+cbar.set_ticks([0.5, 1., 3., 5.])
+cbar.set_ticklabels([0.5, 1., 3., 5.])
+cbar.set_label('dist (kpc)')
+
+ax3 = plt.subplot(gs[13:16, 0:3])
 #plt.xlim(-1.5, 1.5)
 plt.xlabel('$\Delta dist\,mod$', fontsize=14)
 plt.ylabel('CI', fontsize=12)
@@ -183,7 +221,26 @@ cbar.set_ticks([0.5, 1., 3., 5.])
 cbar.set_ticklabels([0.5, 1., 3., 5.])
 cbar.set_label('dist (kpc)')
 
-ax4 = plt.subplot(gs[9:12, 4:7])
+ax13 = plt.subplot(gs[13:16, 4:7], aspect=1)
+plt.xlim(6., 16.)
+plt.ylim(6., 16.)
+plt.xlabel('$DM_{ocaat}$', fontsize=14)
+plt.ylabel('$DM_{real}$', fontsize=14)
+ax13.grid(b=True, which='both', color='gray', linestyle='--', lw=0.5)
+# Order before plotting.
+x = np.take(dist_ocaat, order)
+y = np.take(dist_mod, order)
+plt.scatter(x, y, c=z2, cmap=cm, s=z1)
+plt.errorbar(dist_ocaat, dist_mod, xerr=e_dist, ls='none', color='grey',
+    elinewidth=0.8)
+# 1:1 line
+plt.plot([6., 8., 10., 12., 16.], [6., 8., 10., 12., 16.], 'k-', ls='--')
+cbar = plt.colorbar()
+cbar.set_ticks([0.5, 1., 3., 5.])
+cbar.set_ticklabels([0.5, 1., 3., 5.])
+cbar.set_label('dist (kpc)')
+
+ax4 = plt.subplot(gs[17:20, 0:3])
 plt.xlim(-1.5, 1.5)
 plt.xlabel('$\Delta E_{(B-V)}$', fontsize=14)
 plt.ylabel('CI', fontsize=12)
@@ -199,7 +256,26 @@ cbar.set_ticks([0.5, 1., 3., 5.])
 cbar.set_ticklabels([0.5, 1., 3., 5.])
 cbar.set_label('dist (kpc)')
 
-ax5 = plt.subplot(gs[13:16, 0:3])
+ax14 = plt.subplot(gs[17:20, 4:7], aspect=1)
+plt.xlim(-0.3, 1.2)
+plt.ylim(-0.3, 1.2)
+plt.xlabel('$E(B-V)_{ocaat}$', fontsize=14)
+plt.ylabel('$E(B-V)_{real}$', fontsize=14)
+ax14.grid(b=True, which='both', color='gray', linestyle='--', lw=0.5)
+# Order before plotting.
+x = np.take(ext_ocaat, order)
+y = np.take(extinc, order)
+plt.scatter(x, y, c=z2, cmap=cm, s=z1)
+plt.errorbar(ext_ocaat, extinc, xerr=e_dist, ls='none', color='grey',
+    elinewidth=0.8)
+# 1:1 line
+plt.plot([-0.3, 0.5, 1.5], [-0.3, 0.5, 1.5], 'k-', ls='--')
+cbar = plt.colorbar()
+cbar.set_ticks([0.5, 1., 3., 5.])
+cbar.set_ticklabels([0.5, 1., 3., 5.])
+cbar.set_label('dist (kpc)')
+
+ax5 = plt.subplot(gs[21:24, 0:3])
 #plt.xlim(-1.5, 1.5)
 plt.xlabel('prob', fontsize=12)
 plt.ylabel('CI', fontsize=12)
