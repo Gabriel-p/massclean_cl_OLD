@@ -40,7 +40,7 @@ The results are plotted.
 
 
 * Files read by this code:
-    
+
 ** All files with the cluster's data (.DAT files) to count the number of true
    cluster members, as produced by MASSCLEAN:
    dir_dat_files + subdirs + *.DAT
@@ -48,7 +48,7 @@ The results are plotted.
 ** All files with membership probabilities assigned to store the number and
    weights of all the stars saved as most probable members:
    dir_memb_files + sub_dir + *_memb.dat
-   
+
 ** File that stores all the output from running the 'cluster analysis' code
    over the synthetic clusters using a given decontamination algorithm:
    dir_memb_files + data_output
@@ -63,10 +63,10 @@ The results are plotted.
 ** This data file is used by the 'massclean_avrg_MI_algors' code to plot the
    MI vs CI relation curves:
    dir_memb_files + algor_analisys_+algor_sr+.MI-CI.data
-    
-** Output PNG images for each member index calculated. 
+
+** Output PNG images for each member index calculated.
    dir_memb_files + algor_analisys_+algor_sr+_MI_+mi_num+.png
-    
+
 '''
 
 
@@ -96,8 +96,8 @@ algor_sr = 'KDE-Scott'
 #algor_sr = 'random'
 
 ###############################################################################
-    
-    
+
+
 # Location of the data files generated from the MASSCLEAN cluster + field
 # files.
 dir_dat_files = '/media/rest/Dropbox/GABRIEL/CARRERA/3-POS-DOC/trabajo/\
@@ -105,16 +105,15 @@ codigo/massclean/MASSCLEAN_clusters/'
 
 # File that stores all the output from running the 'cluster analysis' code
 # over the synthetic clusters using a given decontamination algorithm.
-data_out_file = dir_memb_files+'data_output'
+data_out_file = dir_memb_files + 'data_output'
 
 # Output data file. Stores the names and parameters values of each cluster
 # along with the CI and MI indexes.
-out_data = dir_memb_files+'algor_analisys_%s.data' % (algor_sr)
+out_data = dir_memb_files + 'algor_analisys_%s.data' % (algor_sr)
 
 # MI + CI file. This data file is used by the 'massclean_avrg_MI_algors'
 # code to plot the MI vs CI relation curves.
-out_MI_CI = dir_memb_files+'algor_analisys_%s.MI-CI.data' % (algor_sr)  
-
+out_MI_CI = dir_memb_files + 'algor_analisys_%s.MI-CI.data' % (algor_sr)
 
 
 def members_index(mi_num, N_T, memb_w, not_memb_w):
@@ -123,42 +122,42 @@ def members_index(mi_num, N_T, memb_w, not_memb_w):
     that particular cluster. Values below 0.5 mean the algorithm did a very
     poor job at identifying true cluster members. A value > 1 means something
     went wrong and too many stars were identified as true members.
-    
+
     N_T is the real number of cluster stars in the MASSCLEAN data file
     fed to the code. memb_list contains the weights of all stars identified
     as members by the algorithm that are members. not_memb_list is equivalent
     but for field stars that were incorrectly identified as members.
     '''
-   
+
     if mi_num == 1:
         # Somewhat equivalent to the TPR_90 index in UPMASK. It's the ratio of
         # true cluster members recovered and the total number of true cluster
         # members.
-        if (len(memb_w)+len(not_memb_w)) != 0:
-            memb_index = float(len(memb_w))/float(N_T)
+        if (len(memb_w) + len(not_memb_w)) != 0:
+            memb_index = float(len(memb_w)) / float(N_T)
         else:
             memb_index = 0
     elif mi_num == 2:
         # Ratio of true cluster members recovered and total number of stars
         # assigned as cluster members.
-        if (len(memb_w)+len(not_memb_w)) != 0:
-            memb_index = float(len(memb_w))/float(len(memb_w)+len(not_memb_w))
+        if (len(memb_w) + len(not_memb_w)) != 0:
+            memb_index = float(len(memb_w)) / float(len(memb_w) +
+            len(not_memb_w))
         else:
-            memb_index = 0        
+            memb_index = 0
     elif mi_num == 3:
        # Punishes field stars assigned as cluster members according to the
        # weights assigned to them.
-        memb_index = (sum(memb_w)-sum(not_memb_w))/N_T
+        memb_index = (sum(memb_w) - sum(not_memb_w)) / N_T
 #    elif mi_num == 3:
-#        # Similar to the one above but also punishes if the total number of stars
-#        # assigned as cluster members is different from the actual number
-#        # of star members.
+#        # Similar to the one above but also punishes if the total number of
+#        # stars assigned as cluster members is different from the actual
+#        # number of star members.
 #        memb_index = (sum(memb_w)-sum(not_memb_w)-abs(N_T-(len(memb_w)+\
 #        len(not_memb_w))))/N_T
-    
+
     return memb_index
-    
-    
+
 
 # Store subdir names [0] and file names [1] inside each subdir.
 dir_files = [[], []]
@@ -172,11 +171,10 @@ for root, dirs, files in walk(dir_dat_files):
                     dir_files[1].append(name)
 
 
-
 # Calculate and plot this number of indexes.
 for mi_indx in range(3):
 
-    mi_num = int(mi_indx+1)
+    mi_num = int(mi_indx + 1)
 
     # This is the list that will hold the values for each cluster.
     # [0]: cont_index, [1]: memb_index, [2]: init mass, [4]: age
@@ -186,47 +184,44 @@ for mi_indx in range(3):
     clus_param_2000 = [[], [], [], []]
     clus_param_2500 = [[], [], [], []]
     clus_param_3000 = [[], [], [], []]
-    
-        
-    # Lists that will hold all the member and contamination index values. 
+
+    # Lists that will hold all the member and contamination index values.
     memb_ind_lst, cont_ind_lst = [], []
-    
+
     # Initialize files remaining counter.
-    i=0
+    i = 0
     # Iterate through all files inside all sub-dirs.
     for f_indx, sub_dir in enumerate(dir_files[0]):
 
         # dir_files[1][f_indx] is the name of the file being processed.
-        clust_name = dir_files[1][f_indx][:-4]    
-        
+        clust_name = dir_files[1][f_indx][:-4]
+
         ####### First step: get N_T value for the cluster.
-    
+
         # Loads the data in file as a list of N lists where N is the number
         # of columns. Each of the N lists contains all the data for the column.
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             data = np.loadtxt(join(dir_dat_files, sub_dir,
                                    dir_files[1][f_indx]), unpack=True)
-        
+
         # Initiate true members counter.
         N_T = 0
         for star_id in data[0]:
             # Increase counter for true members.
             N_T += 1 if star_id == 1 else 0
 
-        
         ####### Second step: get weights for the stars identified as cluster
         # members by the code.
-        
-        data2 = np.loadtxt(join(dir_memb_files, sub_dir, 
-                                str(clust_name)+'_memb.dat'), unpack=True)
-    
+        data2 = np.loadtxt(join(dir_memb_files, sub_dir,
+                                str(clust_name) + '_memb.dat'), unpack=True)
+
         # Read number of stars in file
-        num_stars = len(open(join(dir_memb_files, sub_dir, 
-                                  str(clust_name)+'_memb.dat')).readlines())
+        num_stars = len(open(join(dir_memb_files, sub_dir,
+                                  str(clust_name) + '_memb.dat')).readlines())
         # Remove first line: header.
         num_stars = num_stars - 1
-        
+
         # Initiate empty lists.
         memb_w, not_memb_w = [], []
         if len(data2) != 0:
@@ -243,65 +238,62 @@ for mi_indx in range(3):
                         memb_w.append(data2[7][ind])
                     else:
                         not_memb_w.append(data2[7][ind])
-               
-                
+
         ####### Third step: get 'memb_index'.
-        
         memb_ind = members_index(mi_num, N_T, memb_w, not_memb_w)
         # Append value to list to get the average value at the end.
         memb_ind_lst.append(memb_ind)
-        
-        
+
         ####### Fourth step: get 'cont_ind' index for the cluster.
-        
         data3 = np.genfromtxt(data_out_file, dtype=None)
         # Transpose list since unpack=True apparently doesn't work above.
         data3 = zip(*data3)
-    
+
         for ind, cluster in enumerate(data3[0]):
             if cluster[:-14] == sub_dir and cluster[-13:] == clust_name:
                 cont_ind = data3[4][ind]
                 cont_ind_lst.append(cont_ind)
-                
-    
+
         ####### Fifth step: put cluster's values in a list.
-        
         # Define parameters values.
         init_mass = float(sub_dir[:2])  # In solar masses.
         dist = float(sub_dir[3:])       # In pc.
         age = float(clust_name[-4:])    # In log[age(yr)].
-        
-        
+
         # Store cluster's name, init mass, z, age (Gyr), E(B-V), dist_mod,
         # dist (kpc) and cont index.
             # Only do this once.
         if mi_num == 1:
             try:
-                # File already exists -> don't create a new one, append new lines.
-                with open(out_data): pass
+                # File already exists -> don't create a new one, append
+                # new lines.
+                with open(out_data):
+                    pass
             # File doesn't exist -> create new one.
             except IOError:
-                out_data_file = open(out_data,'w')
-                out_data_file.write('#Name IM z age(Gyr) E(B-V) dist_mod dist(kpc) CI\n')
+                out_data_file = open(out_data, 'w')
+                out_data_file.write('#Name IM z age(Gyr) E(B-V) dist_mod \
+dist(kpc) CI\n')
                 out_data_file.close()
-                
-            line = [sub_dir+'/'+clust_name, str(init_mass), '0.019',
-                    str(round(10**(float(age)/100.)/1.e09, 3)),
-                    str(round(dist/3100.,2)), str(round((-5+5*np.log10(dist)),2)),\
-                    str(round(dist/1000.,2)), str(cont_ind)]
+
+            line = [sub_dir + '/' + clust_name, str(init_mass), '0.019',
+                    str(round(10 ** (float(age) / 100.) / 1.e09, 3)),
+                    str(round(dist / 3100., 2)), str(round((-5 + 5 *
+                    np.log10(dist)), 2)),
+                    str(round(dist / 1000., 2)), str(cont_ind)]
 
             # "a" opens the file for appending
             with open(out_data, "a") as f_out:
-                f_out.write('{:<22} {:>8} {:>8} {:>8} {:>8} {:>8} {:>8} {:>8}'.format(*line))
-                f_out.write('\n')        
+                f_out.write('{:<22} {:>8} {:>8} {:>8} {:>8} {:>8} {:>8} \
+{:>8}'.format(*line))
+                f_out.write('\n')
 
-        
         # Store in list (divide age and multiply initial mass for plotting
         # purposes).
-        to_append = [cont_ind, memb_ind, init_mass*10., age/100.]
-        
+        to_append = [cont_ind, memb_ind, init_mass * 10., age / 100.]
+
         # Append all values related to cluster to final list according to the
-        # distances, also for plotting purposes.    
+        # distances, also for plotting purposes.
         if dist == 500.:
             for x, y in izip(clus_param_500, to_append):
                 x.append(y)
@@ -320,28 +312,27 @@ for mi_indx in range(3):
         elif dist == 3000.:
             for x, y in izip(clus_param_3000, to_append):
                 x.append(y)
-        
-        print len(dir_files[0])-i, sub_dir[:2], dist, age, cont_ind, memb_ind
-        i += 1    
-        
-        
-        
+
+        print len(dir_files[0]) - i, sub_dir[:2], dist, age, cont_ind, memb_ind
+        i += 1
+
     # At this point all files inside all subdirs have been processed for a given
     # MI.
-    
-    # Store all lists in one single list.    
+
+    # Store all lists in one single list.
     list_all_params = [clus_param_500, clus_param_1000, clus_param_1500,
                        clus_param_2000, clus_param_2500, clus_param_3000]
-                     
-    # Create list with average memb_ind value for a given interval of cont_index.
+
+    # Create list with average memb_ind value for a given interval of
+    # cont_index.
     cont_ind_range = np.arange(0., 1.01, 0.05)
     cont_ind_avrg = np.arange(0.025, 1., 0.05)
-    
+
     # List where average (in CI interval) member_index values are stored.
-    memb_ind_avrg = []    
+    memb_ind_avrg = []
     for i in range(len(cont_ind_avrg)):
         mask = np.logical_and(cont_ind_lst > cont_ind_range[i],
-                              cont_ind_lst < cont_ind_range[i+1])
+                              cont_ind_lst < cont_ind_range[i + 1])
         # Filter list.
     #    filtered_lst = [i for indx,i in enumerate(memb_ind_lst) if mask[indx]]
     #    filtered_lst = [i for (i, v) in zip(memb_ind_lst, mask) if v]
@@ -352,107 +343,104 @@ for mi_indx in range(3):
         else:
             # If list is empty, use last value stored.
             mean = memb_ind_avrg[-1]
-        memb_ind_avrg.append(round(mean,2))
-    
+        memb_ind_avrg.append(round(mean, 2))
+
     # Get *total* average value for member_ind_avrg.
-    memb_ind_mean, memb_ind_std = np.mean(memb_ind_avrg), np.std(memb_ind_avrg)    
+    memb_ind_mean, memb_ind_std = np.mean(memb_ind_avrg), np.std(memb_ind_avrg)
     # Repeat value of mean in list to be able to store in output file.
-    memb_ind_mean_list = [memb_ind_mean]*len(cont_ind_avrg)
-    
+    memb_ind_mean_list = [memb_ind_mean] * len(cont_ind_avrg)
+
     # Add MI ID, cont_index and member_index to file for plotting later on.
     # Check if file already exists. If it does append new values instead of
     # deleting/creating the file again.
     try:
         # File already exists -> don't create a new one and append new lines.
-        with open(out_MI_CI): pass
+        with open(out_MI_CI):
+            pass
         print('\nOutput MI_CI file already exists.')
     # File doesn't exist -> create new one.
     except IOError:
-        out_data_file = open(out_MI_CI,'w')
+        out_data_file = open(out_MI_CI, 'w')
         out_data_file.write('#MI_i CI MI mean\n')
         out_data_file.close()
-        
+
     # List of member index IDs.
-    mi_id = [mi_num]*len(cont_ind_avrg)        
-        
+    mi_id = [mi_num] * len(cont_ind_avrg)
+
     line = zip(*[mi_id, cont_ind_avrg.tolist(), memb_ind_avrg,
                  memb_ind_mean_list])
-    
+
     # "a" opens the file for appending
     with open(out_MI_CI, "a") as f_out:
         for item in line:
             f_out.write('{:<3} {:>5} {:>5} {:>5}'.format(*item))
             f_out.write('\n')
-        
-        
-        
-        
-        
+
+    #
     # Make plot.
     fig = plt.figure()
     ax = fig.add_subplot(111)
-    
+
     plt.xlabel('CI')
     plt.ylabel(r'MI$_{%d}$' % mi_num)
     plt.title('Algorithm: %s' % algor_sr)
     plt.xlim(0., 1.0)
-    
+
     miny = []
     for indx, lst in enumerate(list_all_params):
         miny.append(min(lst[1]))
-        
-    plt.ylim(min(miny)-0.1, 1.0)
-    
+
+    plt.ylim(min(miny) - 0.1, 1.0)
+
     ax.yaxis.set_major_locator(MultipleLocator(0.2))
-    
+
     # Plot grid
     plt.grid(b=True, which='major', color='gray', linestyle='--', zorder=1)
-    
+
     # Define color map.
     cm = plt.cm.get_cmap('RdYlBu_r')
-    
+
     # Color is associated with the age; size with the initial mass and
     # the marker with the distance.
-    plt.scatter(clus_param_500[0], clus_param_500[1], marker='o', 
-                c=clus_param_500[3], s=clus_param_500[2], cmap=cm, lw=0.2, 
+    plt.scatter(clus_param_500[0], clus_param_500[1], marker='o',
+                c=clus_param_500[3], s=clus_param_500[2], cmap=cm, lw=0.2,
                 vmin=6.5, vmax=9.5, zorder=2, label='0.5 kpc')
-                
-    plt.scatter(clus_param_1000[0], clus_param_1000[1], marker='s', 
-                c=clus_param_1000[3], s=clus_param_1000[2], cmap=cm, lw=0.2, 
+
+    plt.scatter(clus_param_1000[0], clus_param_1000[1], marker='s',
+                c=clus_param_1000[3], s=clus_param_1000[2], cmap=cm, lw=0.2,
                 vmin=6.5, vmax=9.5, zorder=2, label='1.0 kpc')
-                
-    plt.scatter(clus_param_1500[0], clus_param_1500[1], marker='^', 
-                c=clus_param_1500[3], s=clus_param_1500[2], cmap=cm, lw=0.2, 
+
+    plt.scatter(clus_param_1500[0], clus_param_1500[1], marker='^',
+                c=clus_param_1500[3], s=clus_param_1500[2], cmap=cm, lw=0.2,
                 vmin=6.5, vmax=9.5, zorder=2, label='1.5 kpc')
-                
-    plt.scatter(clus_param_2000[0], clus_param_2000[1], marker='p', 
-                c=clus_param_2000[3], s=clus_param_2000[2], cmap=cm, lw=0.2, 
+
+    plt.scatter(clus_param_2000[0], clus_param_2000[1], marker='p',
+                c=clus_param_2000[3], s=clus_param_2000[2], cmap=cm, lw=0.2,
                 vmin=6.5, vmax=9.5, zorder=2, label='2.0 kpc')
-                
-    plt.scatter(clus_param_2500[0], clus_param_2500[1], marker='*', 
-                c=clus_param_2500[3], s=clus_param_2500[2], cmap=cm, lw=0.2, 
+
+    plt.scatter(clus_param_2500[0], clus_param_2500[1], marker='*',
+                c=clus_param_2500[3], s=clus_param_2500[2], cmap=cm, lw=0.2,
                 vmin=6.5, vmax=9.5, zorder=2, label='2.5 kpc')
-                
-    plt.scatter(clus_param_3000[0], clus_param_3000[1], marker='D', 
-               c=clus_param_3000[3], s=clus_param_3000[2], cmap=cm, lw=0.2, 
+
+    plt.scatter(clus_param_3000[0], clus_param_3000[1], marker='D',
+               c=clus_param_3000[3], s=clus_param_3000[2], cmap=cm, lw=0.2,
                 vmin=6.5, vmax=9.5, zorder=2, label='3.0 kpc')
-        
+
     # Plot regression line.
     ci_range = np.linspace(cont_ind_avrg.min(), cont_ind_avrg.max(),
                            len(memb_ind_avrg))
     A = np.vstack([ci_range, np.ones(len(ci_range))]).T
     m, c = np.linalg.lstsq(A, memb_ind_avrg)[0]
-    plt.plot(ci_range, m*ci_range+c, c='k', ls='--')
-    
-        
+    plt.plot(ci_range, m * ci_range + c, c='k', ls='--')
+
     plt.legend(loc="upper right", markerscale=0.7, scatterpoints=1, fontsize=10)
-               
+
     # Add average value text box.
-#    text = r'$\overline{MI_{%d}}$ = %0.2f $\pm$ %0.2f' % (mi_num, memb_ind_mean,\
-#            memb_ind_std)
+#    text = r'$\overline{MI_{%d}}$ = %0.2f $\pm$ %0.2f' % (mi_num,
+#             memb_ind_mean, memb_ind_std)
 #    plt.text(0.37, 0.95, text, transform=ax.transAxes,
 #             bbox=dict(facecolor='white', alpha=0.6), fontsize=10)
-             
+
     # Add text box
     if mi_num == 1:
         text = r'$MI_{%d}$ = $n_m/N_T$' % (mi_num)
@@ -461,17 +449,17 @@ for mi_indx in range(3):
         text = r'$MI_{%d}$ = $\frac{n_m}{n_m+n_f}$' % (mi_num)
         x_align, y_align = 0.38, 0.9
 #    elif mi_num == 2:
-#        text = r'$MI_{%d}$ = $\frac{\left(\sum^{n_m}{w_m} - \sum^{n_f}{w_f}\right)}{N_T}$' % (mi_num)
+#        text = r'$MI_{%d}$ = $\frac{\left(\sum^{n_m}{w_m} - \
+#               \sum^{n_f}{w_f}\right)}{N_T}$' % (mi_num)
 #        x_align, y_align = 0.38, 0.9
 #    elif mi_num == 3:
-#        text = r'$MI_{%d}$ = $\frac{\left(\sum^{n_m}{w_m} - \sum^{n_f}{w_f}\right) - |N_T - (n_m+n_f)|}{N_T}$' % (mi_num)
+#        text = r'$MI_{%d}$ = $\frac{\left(\sum^{n_m}{w_m} - \
+#               \sum^{n_f}{w_f}\right) - |N_T - (n_m+n_f)|}{N_T}$' % (mi_num)
 #        x_align, y_align = 0.2, 0.91
 #    plt.text(x_align, y_align, text, transform=ax.transAxes,
 #             bbox=dict(facecolor='white', alpha=0.6), fontsize=12)
-      
-    
-    
-    # Plot memb_index average line 
+
+    # Plot memb_index average line
 #    plt.axhline(y=memb_ind_mean, linestyle='--', color='r', zorder=3)
     # Plot line marking half of the members recovered for each MI.
     if mi_num == 1:
@@ -482,15 +470,15 @@ for mi_indx in range(3):
 #        plt.axhline(y=0., linestyle='--', color='r', zorder=3)
 #    elif mi_num == 3:
 #        plt.axhline(y=0., linestyle='--', color='r', zorder=3)
-        
-                
-    cbar = plt.colorbar(ticks = [6.5, 7., 7.5, 8., 8.5, 9., 9.5])
+
+    cbar = plt.colorbar(ticks=[6.5, 7., 7.5, 8., 8.5, 9., 9.5])
     cbar.ax.set_yticklabels(['6.5', '7.0', '7.5', '8.0', '8.5', '9.0', '9.5'])
-    cbar.set_label(r'Age ($10^n$ yr)')       
-                
+    cbar.set_label(r'Age ($10^n$ yr)')
+
     # Generate output plot.
     # Output png file.
-    out_png = dir_memb_files+'algor_analisys_%s_MI_%d.png' % (algor_sr, mi_num)
+    out_png = dir_memb_files + 'algor_analisys_%s_MI_%d.png' % (algor_sr,
+        mi_num)
     plt.savefig(out_png, dpi=150)
 
 

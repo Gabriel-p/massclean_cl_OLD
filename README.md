@@ -28,11 +28,6 @@ CI vs MI diagram for each member index defined.
 Plots the average member_index values for all the decontamination algorithms used, for each of the member indexes defined.
 
 
-5) ** massclean_real_vs_fit_params.py **
-Plots the real parameter values (z, E(B-V), age, dist) of MASSCLEAN clusters versus the ones obtained with the
-automatic isochrone fitting algorithm.
-
-
 
 Los parámetros CI y MI son respectivamente el 'contamination index' y el 'member index'. El primero estima la contaminación de estrellas
 de campo presente en la región del cúmulo (definida por el centro y radio asignados) e implica un cúmulo más contaminado para valores
