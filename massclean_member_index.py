@@ -15,6 +15,49 @@ from matplotlib.ticker import MultipleLocator
 from itertools import compress
 
 
+def members_index(mi_num, N_T, memb_w, not_memb_w):
+    '''
+    This is the index that indicates how well the algorithm behaved for
+    that particular cluster. Values below 0.5 mean the algorithm did a very
+    poor job at identifying true cluster members. A value > 1 means something
+    went wrong and too many stars were identified as true members.
+
+    N_T is the real number of cluster stars in the MASSCLEAN data file
+    fed to the code. memb_list contains the weights of all stars identified
+    as members by the algorithm that are members. not_memb_list is equivalent
+    but for field stars that were incorrectly identified as members.
+    '''
+
+    if mi_num == 1:
+        # Somewhat equivalent to the TPR_90 index in UPMASK. It's the ratio of
+        # true cluster members recovered and the total number of true cluster
+        # members.
+        if (len(memb_w) + len(not_memb_w)) != 0:
+            memb_index = float(len(memb_w)) / float(N_T)
+        else:
+            memb_index = 0
+    elif mi_num == 2:
+        # Ratio of true cluster members recovered and total number of stars
+        # assigned as cluster members.
+        if (len(memb_w) + len(not_memb_w)) != 0:
+            memb_index = float(len(memb_w)) / float(len(memb_w) +
+            len(not_memb_w))
+        else:
+            memb_index = 0
+    elif mi_num == 3:
+       # Punishes field stars assigned as cluster members according to the
+       # weights assigned to them.
+        memb_index = (sum(memb_w) - sum(not_memb_w)) / N_T
+#    elif mi_num == 3:
+#        # Similar to the one above but also punishes if the total number of
+#        # stars assigned as cluster members is different from the actual
+#        # number of star members.
+#        memb_index = (sum(memb_w)-sum(not_memb_w)-abs(N_T-(len(memb_w)+\
+#        len(not_memb_w))))/N_T
+
+    return memb_index
+
+
 '''
 Calculates all member_index defined, for a given decontamination algorithm.
 Plots the output as a CI vs MI diagram.
@@ -70,93 +113,27 @@ The results are plotted.
 '''
 
 
-################### CHANGE THIS DIR ACCORDINGLY ###############################
-
+################### CHANGE THESE NAMES ACCORDINGLY ############################
 # Location of the *_memb.dat output files. This is also the location of the
 # 'data_output' file from where to get the cont_ind value.
+dir_memb_files = '/media/rest/github/ocaat/output/massclean/'
+#algor_sr = 'KDE-Scott'
 
-dir_memb_files = '/home/gabriel/clusters/massclean_KDE-Scott/'
-algor_sr = 'KDE-Scott'
-#dir_memb_files = '/home/gabriel/clusters/massclean_KDE-1/'
-#algor_sr = 'KDE-1'
-#dir_memb_files = '/home/gabriel/clusters/massclean_KDE-2/'
-#algor_sr = 'KDE-2'
-
-#dir_memb_files = '/home/gabriel/clusters/massclean_VB-1/'
-#algor_sr = 'VB-1'
-#dir_memb_files = '/home/gabriel/clusters/massclean_VB-2/'
-#algor_sr = 'VB-2'
-
-#dir_memb_files = '/home/gabriel/clusters/massclean_Dias-1/'
-#algor_sr = 'Dias-1'
-#dir_memb_files = '/home/gabriel/clusters/massclean_Dias-2/'
-#algor_sr = 'Dias-2'
-
-#dir_memb_files = '/home/gabriel/clusters/massclean_random/'
-#algor_sr = 'random'
-
-###############################################################################
-
-
-# Location of the data files generated from the MASSCLEAN cluster + field
-# files.
-dir_dat_files = '/media/rest/Dropbox/GABRIEL/CARRERA/3-POS-DOC/trabajo/\
-codigo/massclean/MASSCLEAN_clusters/'
+# Location of the MASSCLEAN data files.
+dir_dat_files = '/media/rest/github/massclean_cl/synth_clusters'
 
 # File that stores all the output from running the 'cluster analysis' code
 # over the synthetic clusters using a given decontamination algorithm.
-data_out_file = dir_memb_files + 'data_output'
+data_out_file = dir_memb_files + 'ocaat_output.dat'
 
 # Output data file. Stores the names and parameters values of each cluster
 # along with the CI and MI indexes.
-out_data = dir_memb_files + 'algor_analisys_%s.data' % (algor_sr)
+out_data = dir_memb_files + 'MI_analisys.dat'
 
 # MI + CI file. This data file is used by the 'massclean_avrg_MI_algors'
 # code to plot the MI vs CI relation curves.
-out_MI_CI = dir_memb_files + 'algor_analisys_%s.MI-CI.data' % (algor_sr)
-
-
-def members_index(mi_num, N_T, memb_w, not_memb_w):
-    '''
-    This is the index that indicates how well the algorithm behaved for
-    that particular cluster. Values below 0.5 mean the algorithm did a very
-    poor job at identifying true cluster members. A value > 1 means something
-    went wrong and too many stars were identified as true members.
-
-    N_T is the real number of cluster stars in the MASSCLEAN data file
-    fed to the code. memb_list contains the weights of all stars identified
-    as members by the algorithm that are members. not_memb_list is equivalent
-    but for field stars that were incorrectly identified as members.
-    '''
-
-    if mi_num == 1:
-        # Somewhat equivalent to the TPR_90 index in UPMASK. It's the ratio of
-        # true cluster members recovered and the total number of true cluster
-        # members.
-        if (len(memb_w) + len(not_memb_w)) != 0:
-            memb_index = float(len(memb_w)) / float(N_T)
-        else:
-            memb_index = 0
-    elif mi_num == 2:
-        # Ratio of true cluster members recovered and total number of stars
-        # assigned as cluster members.
-        if (len(memb_w) + len(not_memb_w)) != 0:
-            memb_index = float(len(memb_w)) / float(len(memb_w) +
-            len(not_memb_w))
-        else:
-            memb_index = 0
-    elif mi_num == 3:
-       # Punishes field stars assigned as cluster members according to the
-       # weights assigned to them.
-        memb_index = (sum(memb_w) - sum(not_memb_w)) / N_T
-#    elif mi_num == 3:
-#        # Similar to the one above but also punishes if the total number of
-#        # stars assigned as cluster members is different from the actual
-#        # number of star members.
-#        memb_index = (sum(memb_w)-sum(not_memb_w)-abs(N_T-(len(memb_w)+\
-#        len(not_memb_w))))/N_T
-
-    return memb_index
+#out_MI_CI = dir_memb_files + 'algor_analisys_%s.MI-CI.data' % (algor_sr)
+###############################################################################
 
 
 # Store subdir names [0] and file names [1] inside each subdir.
@@ -170,7 +147,6 @@ for root, dirs, files in walk(dir_dat_files):
                     dir_files[0].append(subdir)
                     dir_files[1].append(name)
 
-
 # Calculate and plot this number of indexes.
 for mi_indx in range(3):
 
@@ -180,10 +156,8 @@ for mi_indx in range(3):
     # [0]: cont_index, [1]: memb_index, [2]: init mass, [4]: age
     clus_param_500 = [[], [], [], []]
     clus_param_1000 = [[], [], [], []]
-    clus_param_1500 = [[], [], [], []]
-    clus_param_2000 = [[], [], [], []]
-    clus_param_2500 = [[], [], [], []]
     clus_param_3000 = [[], [], [], []]
+    clus_param_5000 = [[], [], [], []]
 
     # Lists that will hold all the member and contamination index values.
     memb_ind_lst, cont_ind_lst = [], []
@@ -197,47 +171,30 @@ for mi_indx in range(3):
         clust_name = dir_files[1][f_indx][:-4]
 
         ####### First step: get N_T value for the cluster.
-
         # Loads the data in file as a list of N lists where N is the number
         # of columns. Each of the N lists contains all the data for the column.
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
-            data = np.loadtxt(join(dir_dat_files, sub_dir,
-                                   dir_files[1][f_indx]), unpack=True)
+            data = np.genfromtxt(join(dir_dat_files, sub_dir,
+                dir_files[1][f_indx]), dtype=str, unpack=True)
 
         # Initiate true members counter.
         N_T = 0
         for star_id in data[0]:
             # Increase counter for true members.
-            N_T += 1 if star_id == 1 else 0
+            N_T += 1 if star_id[0] == '1' else 0
 
         ####### Second step: get weights for the stars identified as cluster
         # members by the code.
         data2 = np.loadtxt(join(dir_memb_files, sub_dir,
                                 str(clust_name) + '_memb.dat'), unpack=True)
-
-        # Read number of stars in file
-        num_stars = len(open(join(dir_memb_files, sub_dir,
-                                  str(clust_name) + '_memb.dat')).readlines())
-        # Remove first line: header.
-        num_stars = num_stars - 1
-
-        # Initiate empty lists.
+        # Store weights.
         memb_w, not_memb_w = [], []
-        if len(data2) != 0:
-        # If list is not empty
-            if num_stars == 1:
-                # If there's only one star in the file.
-                if data2[0] == 1:
-                    memb_w.append(data2[7])
-                else:
-                    not_memb_w.append(data2[7])
+        for ind, star_id in enumerate(data2[0]):
+            if str(star_id)[0] == '1':
+                memb_w.append(data2[7][ind])
             else:
-                for ind, star_id in enumerate(data2[0]):
-                    if star_id == 1:
-                        memb_w.append(data2[7][ind])
-                    else:
-                        not_memb_w.append(data2[7][ind])
+                not_memb_w.append(data2[7][ind])
 
         ####### Third step: get 'memb_index'.
         memb_ind = members_index(mi_num, N_T, memb_w, not_memb_w)
@@ -250,19 +207,23 @@ for mi_indx in range(3):
         data3 = zip(*data3)
 
         for ind, cluster in enumerate(data3[0]):
-            if cluster[:-14] == sub_dir and cluster[-13:] == clust_name:
-                cont_ind = data3[4][ind]
+            first, second = cluster.split('/')
+            if first == sub_dir and second == clust_name:
+                cont_ind = data3[8][ind]
                 cont_ind_lst.append(cont_ind)
 
         ####### Fifth step: put cluster's values in a list.
         # Define parameters values.
-        init_mass = float(sub_dir[:2])  # In solar masses.
-        dist = float(sub_dir[3:])       # In pc.
-        age = float(clust_name[-4:])    # In log[age(yr)].
+        first_a, first_b, first_c = sub_dir.split('_')
+        mass = float(first_a)                 # In solar masses.
+        dist = float(first_b) / 1000.         # In Kpc
+        extinc = float(first_c) / 3.1
+        metal = float('0.' + clust_name[5:8])
+        age = float(clust_name[9:]) / 100.    # In log[age/yr].
 
         # Store cluster's name, init mass, z, age (Gyr), E(B-V), dist_mod,
         # dist (kpc) and cont index.
-            # Only do this once.
+        # Only do this once.
         if mi_num == 1:
             try:
                 # File already exists -> don't create a new one, append
@@ -276,11 +237,11 @@ for mi_indx in range(3):
 dist(kpc) CI\n')
                 out_data_file.close()
 
-            line = [sub_dir + '/' + clust_name, str(init_mass), '0.019',
-                    str(round(10 ** (float(age) / 100.) / 1.e09, 3)),
-                    str(round(dist / 3100., 2)), str(round((-5 + 5 *
-                    np.log10(dist)), 2)),
-                    str(round(dist / 1000., 2)), str(cont_ind)]
+            # Line to write in file.
+            line = [sub_dir + '/' + clust_name, str(mass), str(metal),
+                    str(round(10 ** (age) / 1.e09, 3)),
+                    str(round(extinc, 2)), str(round((-5 + 5 *
+                    np.log10(dist)), 2)), str(round(dist, 2)), str(cont_ind)]
 
             # "a" opens the file for appending
             with open(out_data, "a") as f_out:
@@ -288,29 +249,22 @@ dist(kpc) CI\n')
 {:>8}'.format(*line))
                 f_out.write('\n')
 
-        # Store in list (divide age and multiply initial mass for plotting
-        # purposes).
-        to_append = [cont_ind, memb_ind, init_mass * 10., age / 100.]
+        # Store in list for plotting purposes.
+        to_append = [cont_ind, memb_ind, mass, age]
 
-        # Append all values related to cluster to final list according to the
+        # Append values related to cluster to final list according to the
         # distances, also for plotting purposes.
-        if dist == 500.:
+        if dist == 0.5:
             for x, y in izip(clus_param_500, to_append):
                 x.append(y)
-        elif dist == 1000.:
+        elif dist == 1.:
             for x, y in izip(clus_param_1000, to_append):
                 x.append(y)
-        elif dist == 1500.:
-            for x, y in izip(clus_param_1500, to_append):
-                x.append(y)
-        elif dist == 2000.:
-            for x, y in izip(clus_param_2000, to_append):
-                x.append(y)
-        elif dist == 2500.:
-            for x, y in izip(clus_param_2500, to_append):
-                x.append(y)
-        elif dist == 3000.:
+        elif dist == 3.:
             for x, y in izip(clus_param_3000, to_append):
+                x.append(y)
+        elif dist == 5.:
+            for x, y in izip(clus_param_5000, to_append):
                 x.append(y)
 
         print len(dir_files[0]) - i, sub_dir[:2], dist, age, cont_ind, memb_ind
@@ -320,8 +274,8 @@ dist(kpc) CI\n')
     # MI.
 
     # Store all lists in one single list.
-    list_all_params = [clus_param_500, clus_param_1000, clus_param_1500,
-                       clus_param_2000, clus_param_2500, clus_param_3000]
+    list_all_params = [clus_param_500, clus_param_1000, clus_param_3000,
+        clus_param_5000]
 
     # Create list with average memb_ind value for a given interval of
     # cont_index.
@@ -353,16 +307,16 @@ dist(kpc) CI\n')
     # Add MI ID, cont_index and member_index to file for plotting later on.
     # Check if file already exists. If it does append new values instead of
     # deleting/creating the file again.
-    try:
-        # File already exists -> don't create a new one and append new lines.
-        with open(out_MI_CI):
-            pass
-        print('\nOutput MI_CI file already exists.')
-    # File doesn't exist -> create new one.
-    except IOError:
-        out_data_file = open(out_MI_CI, 'w')
-        out_data_file.write('#MI_i CI MI mean\n')
-        out_data_file.close()
+    #try:
+        ## File already exists -> don't create a new one and append new lines.
+        #with open(out_MI_CI):
+            #pass
+        #print('\nOutput MI_CI file already exists.')
+    ## File doesn't exist -> create new one.
+    #except IOError:
+        #out_data_file = open(out_MI_CI, 'w')
+        #out_data_file.write('#MI_i CI MI mean\n')
+        #out_data_file.close()
 
     # List of member index IDs.
     mi_id = [mi_num] * len(cont_ind_avrg)
@@ -371,10 +325,10 @@ dist(kpc) CI\n')
                  memb_ind_mean_list])
 
     # "a" opens the file for appending
-    with open(out_MI_CI, "a") as f_out:
-        for item in line:
-            f_out.write('{:<3} {:>5} {:>5} {:>5}'.format(*item))
-            f_out.write('\n')
+    #with open(out_MI_CI, "a") as f_out:
+        #for item in line:
+            #f_out.write('{:<3} {:>5} {:>5} {:>5}'.format(*item))
+            #f_out.write('\n')
 
     #
     # Make plot.
@@ -383,7 +337,7 @@ dist(kpc) CI\n')
 
     plt.xlabel('CI')
     plt.ylabel(r'MI$_{%d}$' % mi_num)
-    plt.title('Algorithm: %s' % algor_sr)
+    #plt.title('Algorithm: %s' % algor_sr)
     plt.xlim(0., 1.0)
 
     miny = []
@@ -403,28 +357,20 @@ dist(kpc) CI\n')
     # Color is associated with the age; size with the initial mass and
     # the marker with the distance.
     plt.scatter(clus_param_500[0], clus_param_500[1], marker='o',
-                c=clus_param_500[3], s=clus_param_500[2], cmap=cm, lw=0.2,
+                c=clus_param_500[3], s=clus_param_500[2] / 2., cmap=cm, lw=0.2,
                 vmin=6.5, vmax=9.5, zorder=2, label='0.5 kpc')
 
     plt.scatter(clus_param_1000[0], clus_param_1000[1], marker='s',
                 c=clus_param_1000[3], s=clus_param_1000[2], cmap=cm, lw=0.2,
                 vmin=6.5, vmax=9.5, zorder=2, label='1.0 kpc')
 
-    plt.scatter(clus_param_1500[0], clus_param_1500[1], marker='^',
-                c=clus_param_1500[3], s=clus_param_1500[2], cmap=cm, lw=0.2,
-                vmin=6.5, vmax=9.5, zorder=2, label='1.5 kpc')
-
-    plt.scatter(clus_param_2000[0], clus_param_2000[1], marker='p',
-                c=clus_param_2000[3], s=clus_param_2000[2], cmap=cm, lw=0.2,
-                vmin=6.5, vmax=9.5, zorder=2, label='2.0 kpc')
-
-    plt.scatter(clus_param_2500[0], clus_param_2500[1], marker='*',
-                c=clus_param_2500[3], s=clus_param_2500[2], cmap=cm, lw=0.2,
-                vmin=6.5, vmax=9.5, zorder=2, label='2.5 kpc')
-
     plt.scatter(clus_param_3000[0], clus_param_3000[1], marker='D',
-               c=clus_param_3000[3], s=clus_param_3000[2], cmap=cm, lw=0.2,
+               c=clus_param_3000[3], s=clus_param_3000[2] / 2., cmap=cm, lw=0.2,
                 vmin=6.5, vmax=9.5, zorder=2, label='3.0 kpc')
+
+    plt.scatter(clus_param_5000[0], clus_param_5000[1], marker='*',
+               c=clus_param_5000[3], s=clus_param_5000[2] / 2., cmap=cm, lw=0.2,
+                vmin=6.5, vmax=9.5, zorder=2, label='5.0 kpc')
 
     # Plot regression line.
     ci_range = np.linspace(cont_ind_avrg.min(), cont_ind_avrg.max(),
@@ -471,14 +417,14 @@ dist(kpc) CI\n')
 #    elif mi_num == 3:
 #        plt.axhline(y=0., linestyle='--', color='r', zorder=3)
 
+    # Colorbar associated with the age.
     cbar = plt.colorbar(ticks=[6.5, 7., 7.5, 8., 8.5, 9., 9.5])
     cbar.ax.set_yticklabels(['6.5', '7.0', '7.5', '8.0', '8.5', '9.0', '9.5'])
     cbar.set_label(r'Age ($10^n$ yr)')
 
     # Generate output plot.
     # Output png file.
-    out_png = dir_memb_files + 'algor_analisys_%s_MI_%d.png' % (algor_sr,
-        mi_num)
+    out_png = dir_memb_files + 'MI_analisys_MI_%d.png' % mi_num
     plt.savefig(out_png, dpi=150)
 
 
