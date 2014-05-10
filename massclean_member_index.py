@@ -35,11 +35,12 @@ def members_index(mi_num, N_T, memb_w, not_memb_w):
     elif mi_num == 1:
         # Ratio of true cluster members recovered and total number of stars
         # assigned as cluster members.
-        if (len(memb_w) + len(not_memb_w)) != 0:
-            memb_index = float(len(memb_w)) / float(len(memb_w) +
-            len(not_memb_w))
-        else:
-            memb_index = 0
+        #if (len(memb_w) + len(not_memb_w)) != 0:
+            #memb_index = float(len(memb_w)) / float(len(memb_w) +
+            #len(not_memb_w))
+        #else:
+            #memb_index = 0
+        memb_index = sum(memb_w) / N_T
     elif mi_num == 2:
        # Punishes field stars assigned as cluster members according to the
        # weights assigned to them.
@@ -121,21 +122,19 @@ def make_plots(mi_num, clust_CI, clust_MI, clust_params):
 
     # Add text box with MI equation.
     if mi_num == 0:
-        text = r'$MI_{%d}$ = $n_m/N_T$' % mi_num
-        x_align, y_align = 0.41, 0.92
-        plt.axhline(y=0.5, linestyle='--', color='r', zorder=3)
+        text = r'$MI_{%d}$ = $n_m/N_{cl}$' % mi_num
     elif mi_num == 1:
-        text = r'$MI_{%d}$ = $\frac{n_m}{n_m+n_f}$' % mi_num
-        x_align, y_align = 0.38, 0.9
+        #text = r'$MI_{%d}$ = $\frac{n_m}{n_m+n_f}$' % mi_num
+        text = (r'$MI_{%d}$ = $\frac{\sum^{n_m}{p_m}}{N_{cl}}$') % mi_num
     elif mi_num == 2:
-        text = (r'$MI_{%d}$ = $\frac{\left(\sum^{n_m}{w_m} - ' +
-               r' \sum^{n_f}{w_f}\right)}{N_T}$') % mi_num
-        x_align, y_align = 0.62, 0.9
+        text = (r'$MI_{%d}$ = $\frac{\left(\sum^{n_m}{p_m} - ' +
+               r' \sum^{n_f}{p_f}\right)}{N_{cl}}$') % mi_num
         plt.axhline(y=0., linestyle='--', color='r', zorder=3)
     #elif mi_num == 2:
         #text = (r'$MI_{%d}$ = $\frac{\left(\sum^{n_m}{w_m} - ' +
         #r' \sum^{n_f}{w_f}\right) - |N_T - (n_m+n_f)|}{N_T}$') % (mi_num)
         #x_align, y_align = 0.2, 0.91
+    x_align, y_align = 0.65, 0.9
     plt.text(x_align, y_align, text, transform=ax.transAxes,
              bbox=dict(facecolor='white', alpha=0.6), fontsize=12)
 
