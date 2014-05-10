@@ -27,13 +27,11 @@ def members_index(mi_num, N_T, memb_w, not_memb_w):
     '''
 
     if mi_num == 0:
-        # Somewhat equivalent to the TPR_90 index in UPMASK. It's the ratio of
+        # Equivalent to the TPR_90 index in UPMASK. It's the ratio of
         # true cluster members recovered and the total number of true cluster
         # members.
-        if (len(memb_w) + len(not_memb_w)) != 0:
-            memb_index = float(len(memb_w)) / float(N_T)
-        else:
-            memb_index = 0
+        n_w = sum(i > 0.9 for i in memb_w)
+        memb_index = float(n_w) / float(N_T)
     elif mi_num == 1:
         # Ratio of true cluster members recovered and total number of stars
         # assigned as cluster members.
@@ -123,24 +121,24 @@ def make_plots(mi_num, clust_CI, clust_MI, clust_params):
 
     # Add text box with MI equation.
     if mi_num == 0:
-        text = r'$MI_{%d}$ = $n_m/N_T$' % (mi_num)
+        text = r'$MI_{%d}$ = $n_m/N_T$' % mi_num
         x_align, y_align = 0.41, 0.92
+        plt.axhline(y=0.5, linestyle='--', color='r', zorder=3)
     elif mi_num == 1:
-        text = r'$MI_{%d}$ = $\frac{n_m}{n_m+n_f}$' % (mi_num)
+        text = r'$MI_{%d}$ = $\frac{n_m}{n_m+n_f}$' % mi_num
         x_align, y_align = 0.38, 0.9
-#    elif mi_num == 2:
-#        text = r'$MI_{%d}$ = $\frac{\left(\sum^{n_m}{w_m} - \
-#               \sum^{n_f}{w_f}\right)}{N_T}$' % (mi_num)
-#        x_align, y_align = 0.38, 0.9
     elif mi_num == 2:
         text = (r'$MI_{%d}$ = $\frac{\left(\sum^{n_m}{w_m} - ' +
-        r' \sum^{n_f}{w_f}\right) - |N_T - (n_m+n_f)|}{N_T}$') % (mi_num)
-        x_align, y_align = 0.2, 0.91
+               r' \sum^{n_f}{w_f}\right)}{N_T}$') % mi_num
+        x_align, y_align = 0.62, 0.9
+        plt.axhline(y=0., linestyle='--', color='r', zorder=3)
+    #elif mi_num == 2:
+        #text = (r'$MI_{%d}$ = $\frac{\left(\sum^{n_m}{w_m} - ' +
+        #r' \sum^{n_f}{w_f}\right) - |N_T - (n_m+n_f)|}{N_T}$') % (mi_num)
+        #x_align, y_align = 0.2, 0.91
     plt.text(x_align, y_align, text, transform=ax.transAxes,
              bbox=dict(facecolor='white', alpha=0.6), fontsize=12)
 
-    # Plot horizontal line.
-    plt.axhline(y=0.5, linestyle='--', color='r', zorder=3)
     # Plot legend.
     plt.legend(loc="lower left", markerscale=0.7, scatterpoints=1, fontsize=10)
 
