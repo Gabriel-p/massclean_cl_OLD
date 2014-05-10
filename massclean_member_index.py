@@ -75,15 +75,46 @@ def make_plots(mi_num, clust_CI, clust_MI, clust_params):
     # Define color map.
     cm = plt.cm.get_cmap('RdYlBu_r')
 
+    # Order.
+    mass, age, dist = clust_params
+    order = np.argsort(-np.array(mass))
+    z1 = np.take((np.array(mass) / 4.), order)
+    z2 = np.take(age, order)
+    z3 = np.take(dist, order)
+    # Order before plotting.
+    x = np.take(clust_CI, order)
+    y = np.take(clust_MI[mi_num], order)
+
     # Color is associated with the age; size with the initial mass and
     # the marker with the distance.
-    mrk = {0.5: 'o', 1.: 's', 3.: 'D', 5.: '*'}
+    #mrk = {0.5: ('o', '0.5 kpc'), 1.: ('s', '1 kpc'),
+        #3.: ('D', '3 kpc'), 5.: ('*', '5 kpc')}
+    mrk = {7.: ('o', '7.'), 8.: ('s', '8.'), 9.: ('D', '9')}
     for key, value in mrk.items():
-        s1 = (np.array(clust_params[2]) == key)
 
-        plt.scatter(np.array(clust_CI)[s1], np.array(clust_MI[mi_num])[s1],
-            marker=value, c=np.array(clust_params[1])[s1],
-            s=np.array(clust_params[0])[s1], cmap=cm, lw=0.2)
+        #s1 = (np.array(age) == key)
+        #plt.scatter(np.array(clust_CI)[s1], np.array(clust_MI[mi_num])[s1],
+            #marker=value[0], label=value[1],
+            #s=(np.array(mass) / 4.)[s1],
+            #c=np.array(dist)[s1], cmap=cm, lw=0.5)
+
+        #s1 = (np.array(dist) == key)
+        #plt.scatter(np.array(clust_CI)[s1], np.array(clust_MI[mi_num])[s1],
+            #marker=value[0], label=value[1],
+            #s=(np.array(mass) / 4.)[s1],
+            #c=np.array(age)[s1], cmap=cm, lw=0.5)
+
+        s1 = (z2 == key)
+        plt.scatter(x[s1], y[s1],
+            marker=value[0], label=value[1],
+            s=z1[s1],
+            c=z3[s1], cmap=cm, lw=0.2)
+
+    # Colorbar
+    cbar = plt.colorbar()
+    cbar.set_ticks([0.5, 1., 3., 5.])
+    cbar.set_ticklabels([0.5, 1., 3., 5.])
+    cbar.set_label('$dist\,(kpc)$')
 
     # Plot regression line.
     m, b = np.polyfit(clust_CI, clust_MI[mi_num], 1)
@@ -102,21 +133,16 @@ def make_plots(mi_num, clust_CI, clust_MI, clust_params):
 #               \sum^{n_f}{w_f}\right)}{N_T}$' % (mi_num)
 #        x_align, y_align = 0.38, 0.9
     elif mi_num == 2:
-        text = r'$MI_{%d}$ = $\frac{\left(\sum^{n_m}{w_m} - \
-\sum^{n_f}{w_f}\right) - |N_T - (n_m+n_f)|}{N_T}$' % (mi_num)
+        text = (r'$MI_{%d}$ = $\frac{\left(\sum^{n_m}{w_m} - ' +
+        r' \sum^{n_f}{w_f}\right) - |N_T - (n_m+n_f)|}{N_T}$') % (mi_num)
         x_align, y_align = 0.2, 0.91
     plt.text(x_align, y_align, text, transform=ax.transAxes,
              bbox=dict(facecolor='white', alpha=0.6), fontsize=12)
 
     # Plot horizontal line.
     plt.axhline(y=0.5, linestyle='--', color='r', zorder=3)
-
-    # Colorbar associated with the age.
-    #cbar = plt.colorbar(ticks=[6.5, 7., 7.5, 8., 8.5, 9., 9.5])
-    #cbar.ax.set_yticklabels(['6.5', '7.0', '7.5', '8.0', '8.5', '9.0', '9.5'])
-    #cbar.set_label(r'Age ($10^n$ yr)')
-
-    plt.legend(loc="upper right", markerscale=0.7, scatterpoints=1, fontsize=10)
+    # Plot legend.
+    plt.legend(loc="lower left", markerscale=0.7, scatterpoints=1, fontsize=10)
 
     # Generate output png file.
     out_png = dir_memb_files + 'MI_%d_analisys.png' % mi_num
@@ -248,12 +274,10 @@ for f_indx, sub_dir in enumerate(dir_files[0]):
             clust_CI.append(cont_ind)
 
     # Put cluster's parameters in a list.
-    # Define parameters values.
     first_a, first_b, first_c = sub_dir.split('_')
     mass = float(first_a)                 # In solar masses.
     dist = float(first_b) / 1000.         # In Kpc
-    extinc = float(first_c) / 3.1
-    #metal = float('0.' + clust_name[5:8])
+    #extinc = float(first_c) / 3.1
     age = float(clust_name[9:]) / 100.    # In log[age/yr].
 
     # Store in list for plotting purposes.
@@ -267,7 +291,7 @@ for f_indx, sub_dir in enumerate(dir_files[0]):
         # Append value to list.
         clust_MI[mi_num].append(memb_ind)
 
-    print len(dir_files[0]) - i, sub_dir[:2], dist, age, cont_ind, memb_ind
+    print len(dir_files[0]) - i, sub_dir, clust_name, cont_ind, memb_ind
     i += 1
 
 for mi_num in range(3):
