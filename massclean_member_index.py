@@ -30,7 +30,7 @@ def members_index(mi_num, N_T, memb_w, not_memb_w):
         # Equivalent to the TPR_90 index in UPMASK. It's the ratio of
         # true cluster members recovered and the total number of true cluster
         # members.
-        n_w = sum(i > 0.9 for i in memb_w)
+        n_w = sum(i > 0.75 for i in memb_w)
         memb_index = float(n_w) / float(N_T)
     elif mi_num == 1:
         # Ratio of true cluster members recovered and total number of stars
@@ -88,8 +88,9 @@ def make_plots(mi_num, clust_CI, clust_MI, clust_params):
     # the marker with the distance.
     #mrk = {0.5: ('o', '0.5 kpc'), 1.: ('s', '1 kpc'),
         #3.: ('D', '3 kpc'), 5.: ('*', '5 kpc')}
-    mrk = {7.: ('o', '7.'), 8.: ('s', '8.'), 9.: ('D', '9')}
-    for key, value in mrk.items():
+    mrk = {7.: ('o', '$\log(age/yr)=7.$'), 8.: ('s', '$\log(age/yr)=8.$'),
+        9.: ('D', '$\log(age/yr)=9.$')}
+    for key, value in sorted(mrk.items()):
 
         #s1 = (np.array(age) == key)
         #plt.scatter(np.array(clust_CI)[s1], np.array(clust_MI[mi_num])[s1],
@@ -205,10 +206,6 @@ dir_dat_files = '/media/rest/github/massclean_cl/synth_clusters'
 # File that stores all the output from running the 'cluster analysis' code
 # over the synthetic clusters using a given decontamination algorithm.
 data_out_file = dir_memb_files + 'ocaat_output.dat'
-
-# Output data file. Stores the names and parameters values of each cluster
-# along with the CI and MI indexes.
-out_data = dir_memb_files + 'MI_analisys.dat'
 ###############################################################################
 
 
