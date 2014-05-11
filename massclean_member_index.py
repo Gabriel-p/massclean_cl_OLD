@@ -106,7 +106,7 @@ def make_plots(mi_num, clust_CI, clust_MI, clust_params):
         plt.axhline(y=0., linestyle='--', color='r', zorder=3)
     x_align, y_align = 0.65, 0.9
     plt.text(x_align, y_align, text, transform=ax.transAxes,
-             bbox=dict(facecolor='white', alpha=0.6), fontsize=12)
+             bbox=dict(facecolor='white', alpha=0.6), fontsize=14)
 
     # Plot legend.
     plt.legend(loc="lower left", markerscale=0.7, scatterpoints=1, fontsize=10)
