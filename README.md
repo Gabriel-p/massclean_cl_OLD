@@ -1,10 +1,10 @@
 MASSCLEAN cluster generator
 ============
 
-The set of bash/python scripts in this repository are intended to generate synthetic
-clusters making use of the [MASSCLEAN](http://www.physics.uc.edu/~bogdan/massclean/)
+This set of bash/python scripts is intended to generate synthetic
+clusters by making use of the [MASSCLEAN](http://www.physics.uc.edu/~bogdan/massclean/)
 package and to compare their real parameters (center, radius, metallicity, age,
-distance, extinction) with those obtained by the [OCAAT](https://github.com/Gabriel-p/ocaat) code for each one.
+distance, extinction) with those obtained by the [OCAAT](https://github.com/Gabriel-p/ocaat) code applied to each one of them.
 
 1st step
 ---------
@@ -16,18 +16,20 @@ Each sub-folder respects the following naming convention: `(initial mass)/100` f
 
 2nd step
 ---------
-After the synthetic clusters and field plots are generated the script calls the `massclean_cluster_field_merge.py` code to merge cluster and field while adding errors and removing random stars in the frame, mimicking completeness effects.
+After the synthetic clusters and field plots are generated the script above automatically calls the `massclean_cluster_field_merge.py` code to merge cluster and field while adding errors and removing random stars in the frame, mimicking completeness effects.
 The final merged `.DAT` files are stored in `/synth_clusters/` where images for each synthetic cluster are also generated.
+
+This script can also be run separately, provided the *MASSCLEAN* cluster and field files exist.
 
 
 3rd step
 ---------
-The `ci_plots.py` script compares the real *MASSCLEAN* cluster parameters with those obtained by the *OCAAT* code versus the contamination index (CI) obtained for each synthetic cluster.
+The `massclean_member_index.py` script is used to establish the accuracy of the decontamination algorithm applied on the synthetic clusters by *OCAAT*. It calculates the members indexes (MI) defined (which estimates how good real cluster members were recovered by the algorithm) and plots the output as a contamination index (CI) vs MI diagram for all synthetic clusters.
 
 
 4th step
 ---------
-This `massclean_member_index.py` script is used to establish the accuracy of the decontamination algorithm applied on the synthetic clusters vy *OCAAT*. It calculates the members indexes (MI) defined (which estimates how good real cluster members were recovered by the algorithm) and plots the output as a CI vs MI diagram for all synthetic clusters.
+The `ci_plots.py` script compares the real *MASSCLEAN* cluster parameters (center, radius, metallicity, age, distance, extinction) with those obtained by the *OCAAT* code as a parameter versus CI plot for each parameter.
 
 
 Semi-deprecated
