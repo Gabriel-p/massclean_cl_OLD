@@ -30,27 +30,14 @@ def members_index(mi_num, N_T, memb_w, not_memb_w):
         # Equivalent to the TPR_90 index in UPMASK. It's the ratio of
         # true cluster members recovered and the total number of true cluster
         # members.
-        n_w = sum(i > 0.75 for i in memb_w)
+        n_w = sum(i > 0.9 for i in memb_w)
         memb_index = float(n_w) / float(N_T)
     elif mi_num == 1:
-        # Ratio of true cluster members recovered and total number of stars
-        # assigned as cluster members.
-        #if (len(memb_w) + len(not_memb_w)) != 0:
-            #memb_index = float(len(memb_w)) / float(len(memb_w) +
-            #len(not_memb_w))
-        #else:
-            #memb_index = 0
         memb_index = sum(memb_w) / N_T
     elif mi_num == 2:
        # Punishes field stars assigned as cluster members according to the
        # weights assigned to them.
         memb_index = (sum(memb_w) - sum(not_memb_w)) / N_T
-#    elif mi_num == 3:
-#        # Similar to the one above but also punishes if the total number of
-#        # stars assigned as cluster members is different from the actual
-#        # number of star members.
-#        memb_index = (sum(memb_w)-sum(not_memb_w)-abs(N_T-(len(memb_w)+\
-#        len(not_memb_w))))/N_T
 
     return memb_index
 
@@ -77,32 +64,18 @@ def make_plots(mi_num, clust_CI, clust_MI, clust_params):
     # Order.
     mass, age, dist = clust_params
     order = np.argsort(-np.array(mass))
-    z1 = np.take((np.array(mass) / 4.), order)
+    z1 = np.take((np.array(mass) / 5.), order)
     z2 = np.take(age, order)
     z3 = np.take(dist, order)
     # Order before plotting.
     x = np.take(clust_CI, order)
     y = np.take(clust_MI[mi_num], order)
 
-    # Color is associated with the age; size with the initial mass and
-    # the marker with the distance.
-    #mrk = {0.5: ('o', '0.5 kpc'), 1.: ('s', '1 kpc'),
-        #3.: ('D', '3 kpc'), 5.: ('*', '5 kpc')}
-    mrk = {7.: ('o', '$\log(age/yr)=7.$'), 8.: ('s', '$\log(age/yr)=8.$'),
-        9.: ('D', '$\log(age/yr)=9.$')}
+    # Color is associated with the dist; size with the initial mass and
+    # the marker with the age.
+    mrk = {7.: ('s', '$\log(age/yr)=7.$'), 8.: ('D', '$\log(age/yr)=8.$'),
+        9.: ('o', '$\log(age/yr)=9.$')}
     for key, value in sorted(mrk.items()):
-
-        #s1 = (np.array(age) == key)
-        #plt.scatter(np.array(clust_CI)[s1], np.array(clust_MI[mi_num])[s1],
-            #marker=value[0], label=value[1],
-            #s=(np.array(mass) / 4.)[s1],
-            #c=np.array(dist)[s1], cmap=cm, lw=0.5)
-
-        #s1 = (np.array(dist) == key)
-        #plt.scatter(np.array(clust_CI)[s1], np.array(clust_MI[mi_num])[s1],
-            #marker=value[0], label=value[1],
-            #s=(np.array(mass) / 4.)[s1],
-            #c=np.array(age)[s1], cmap=cm, lw=0.5)
 
         s1 = (z2 == key)
         plt.scatter(x[s1], y[s1],
@@ -131,10 +104,6 @@ def make_plots(mi_num, clust_CI, clust_MI, clust_params):
         text = (r'$MI_{%d}$ = $\frac{\left(\sum^{n_m}{p_m} - ' +
                r' \sum^{n_f}{p_f}\right)}{N_{cl}}$') % mi_num
         plt.axhline(y=0., linestyle='--', color='r', zorder=3)
-    #elif mi_num == 2:
-        #text = (r'$MI_{%d}$ = $\frac{\left(\sum^{n_m}{w_m} - ' +
-        #r' \sum^{n_f}{w_f}\right) - |N_T - (n_m+n_f)|}{N_T}$') % (mi_num)
-        #x_align, y_align = 0.2, 0.91
     x_align, y_align = 0.65, 0.9
     plt.text(x_align, y_align, text, transform=ax.transAxes,
              bbox=dict(facecolor='white', alpha=0.6), fontsize=12)
