@@ -54,7 +54,7 @@ def make_plots(mi_num, clust_CI, clust_MI, clust_params):
     plt.ylabel(r'MI$_{%d}$' % mi_num)
     plt.xlim(0., 1.0)
 
-    plt.ylim(min(clust_MI[mi_num]) - 0.1, 1.0)
+    plt.ylim(max(min(clust_MI[mi_num]) - 0.1, -2.5), 1.0)
     ax.yaxis.set_major_locator(MultipleLocator(0.2))
     # Plot grid
     plt.grid(b=True, which='major', color='gray', linestyle='--', zorder=1)
