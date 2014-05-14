@@ -31,7 +31,7 @@ def skip_comments(f):
 
 # Read ocaat_output.dat file to obtain the MASSCLEAN clusters actual
 # data and parameters the ones estimated by OCAAT.
-out_file = 'ocaat_output.dat'
+out_file = '/media/rest/github/ocaat/output/massclean/ocaat_output.dat'
 f = open(out_file)
 names, params = [], []
 for line in skip_comments(f):
@@ -51,39 +51,42 @@ for clust_str in names:
     age.append(float(second[9:]) / 100.)
 
 # Read clusters parameters obtained by OCAAT.
-cenx, ceny, rad, e_rad, ci, prob, metal_ocaat, e_met, age_ocaat, e_age, \
+cenx, ceny, e_cen, rad, e_rad, ci, prob, metal_ocaat, e_met, age_ocaat, e_age,\
 dist_ocaat, e_dist, ext_ocaat, e_ext = [], [], [], [], [], [], [], [], \
-[], [], [], [], [], []
+[], [], [], [], [], [], []
 for par_str in params:
     cenx.append(float(par_str[0]))
     ceny.append(float(par_str[1]))
-    rad.append(float(par_str[2]))
-    e_rad.append(float(par_str[3]))
-    ci.append(float(par_str[7]))
-    prob.append(float(par_str[10]))
-    metal_ocaat.append(float(par_str[13]))
-    e_met.append(float(par_str[14]))
-    age_ocaat.append(float(par_str[15]))
-    e_age.append(float(par_str[16]))
-    ext_ocaat.append(float(par_str[17]))
-    e_ext.append(float(par_str[18]))
-    dist_ocaat.append(float(par_str[19]))
-    e_dist.append(float(par_str[20]))
+    e_cen.append(float(par_str[2]))
+    rad.append(float(par_str[3]))
+    e_rad.append(float(par_str[4]))
+    ci.append(float(par_str[9]))
+    prob.append(float(par_str[12]))
+    metal_ocaat.append(float(par_str[15]))
+    e_met.append(float(par_str[16]))
+    age_ocaat.append(float(par_str[17]))
+    e_age.append(float(par_str[18]))
+    ext_ocaat.append(float(par_str[19]))
+    e_ext.append(float(par_str[20]))
+    dist_ocaat.append(float(par_str[21]))
+    e_dist.append(float(par_str[22]))
 
 
 # Separate between those clusters for which the center was assigned less
 # than 250px from the actual center.
 rad_i, e_rad_i, metal_i, metal_ocaat_i, age_i, age_ocaat_i, e_age_i, dist_i, \
 dist_ocaat_i, e_dist_i, extinc_i, ext_ocaat_i, e_ext_i, ci_i, cent_i, mass_i, \
-prob_i, e_met_i = [], [], [], [], [], [], [], [], [], [], [], [], [], [], \
-[], [], [], []
+prob_i, e_met_i, e_cent_i = [], [], [], [], [], [], [], [], [], [], [], [], \
+[], [], [], [], [], [], []
 
 mass_o, dist_o, ci_o, prob_o = [], [], [], []
 
 cent_diff = np.sqrt((np.array(cenx) - 1024.) ** 2 +
     (np.array(ceny) - 1024.) ** 2)
+
 for i, cl in enumerate(names):
-    if cent_diff[i] > 250.:
+    if (cent_diff[i] - 250.) > rad[i]:
+    #if cent_diff[i] > 250.:
         #print 'out', cl, cent_diff[i], ci[i], prob[i]
         #cent_o.append(cent_diff[i])
         #rad_o.append(rad[i])
@@ -102,6 +105,7 @@ for i, cl in enumerate(names):
     else:
         #print 'in', cl, cent_diff[i]
         cent_i.append(cent_diff[i])
+        e_cent_i.append(e_cen[i])
         rad_i.append(rad[i])
         e_rad_i.append(e_rad[i])
         mass_i.append(mass[i])
@@ -120,9 +124,15 @@ for i, cl in enumerate(names):
         ci_i.append(ci[i])
         prob_i.append(prob[i])
 
+print 'Number of assigned centers out of synth clusters region: %d' % len(ci_o)
 
 # Value that holds 50% of clusters.
 val_c = sorted(cent_i)[int(0.5 * len(cent_i))]
+print '\n Center percentages'
+print '<10', float(sum(abs(i) < 10. for i in cent_i)) / len(cent_i)
+print '<20', float(sum(abs(i) < 20. for i in cent_i)) / len(cent_i)
+print '<50', float(sum(abs(i) < 50. for i in cent_i)) / len(cent_i)
+print '<80', float(sum(abs(i) < 80. for i in cent_i)) / len(cent_i)
 
 # Radius in/out.
 rad_diff_i = np.array(rad_i) - 250.
@@ -175,6 +185,7 @@ print '<0.025', float(sum(abs(i) < 0.025 for i in delta_ext_i)) / \
 print '<0.05', float(sum(abs(i) < 0.05 for i in delta_ext_i)) / len(delta_ext_i)
 print '<0.1', float(sum(abs(i) < 0.1 for i in delta_ext_i)) / len(delta_ext_i)
 print '<0.2', float(sum(abs(i) < 0.2 for i in delta_ext_i)) / len(delta_ext_i)
+print '<0.4', float(sum(abs(i) < 0.4 for i in delta_ext_i)) / len(delta_ext_i)
 
 
 # Make plot.
@@ -198,21 +209,17 @@ order_o = np.argsort(-(np.array(mass_o) / 4.))
 z1_o = np.take(((np.array(mass_o) / 4.)), order_o)
 z2_o = np.take(dist_o, order_o)
 
-##ax0 = plt.subplot(gs[0:3, 0:3])
-#ax0 = plt.subplot(gs[0])
-#plt.ylabel('$\log(CI)$', fontsize=14)
-#plt.xlabel('$CI$', fontsize=12)
-#plt.xlim(-0.05, 1.05)
-#ax0.minorticks_on()
-#ax0.grid(b=True, which='major', color='gray', linestyle='--', lw=0.5)
-## Order before plotting.
-#x = np.take(ci_i, order_i)
-#y = np.take(ci_param_i, order_i)
-#plt.scatter(x, y, c=z2_i, cmap=cm, s=z1_i)
-#cbar = plt.colorbar()
-#cbar.set_ticks([0.5, 1., 3., 5.])
-#cbar.set_ticklabels([0.5, 1., 3., 5.])
-#cbar.set_label('dist (kpc)')
+ax0 = plt.subplot(gs[0])
+plt.ylim(ymin, ymax)
+plt.ylabel('$\log(CI)$', fontsize=14)
+plt.xlabel('$CI$', fontsize=12)
+plt.xlim(-0.05, 1.05)
+ax0.minorticks_on()
+ax0.grid(b=True, which='major', color='gray', linestyle='--', lw=0.5)
+# Order before plotting.
+x = np.take(ci_i, order_i)
+y = np.take(ci_param_i, order_i)
+plt.scatter(x, y, c=z2_i, cmap=cm, s=z1_i)
 
 #ax5 = plt.subplot(gs[15:18, 0:3])
 axp = plt.subplot(gs[1])
@@ -242,6 +249,8 @@ plt.xlabel('$\Delta center\,(px)$', fontsize=14)
 ax00.minorticks_on()
 ax00.grid(b=True, which='major', color='gray', linestyle='--', lw=0.5)
 plt.axvspan(0., val_c, facecolor='grey', alpha=0.5, zorder=1)
+plt.errorbar(cent_i, ci_param_i, xerr=e_cent_i, ls='none', color='grey',
+    zorder=1)
 # Order before plotting.
 x = np.take(cent_i, order_i)
 y = np.take(ci_param_i, order_i)
@@ -326,7 +335,7 @@ plt.axvspan(-val_d, val_d, facecolor='grey', alpha=0.5, zorder=1)
 
 #ax4 = plt.subplot(gs[11:14, 3:6])
 ax4 = plt.subplot(gs[10])
-plt.xlim(-0.2, 0.2)
+plt.xlim(-0.4, 0.4)
 plt.ylim(ymin, ymax)
 plt.xlabel('$\Delta E_{(B-V)}$', fontsize=14)
 # make these tick labels invisible
