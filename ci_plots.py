@@ -167,6 +167,7 @@ print '<1.3', float(sum(abs(i) < 1.3 for i in delta_age_i)) / len(delta_age_i)
 
 # Distance in/out.
 d_ocaat_i = (10 ** ((np.array(dist_ocaat_i) + 5) / 5)) / 1000.
+e_dist_i_dm = 0.2 * np.log(10.) * d_ocaat_i * np.array(e_dist_i)
 delta_dist_i = np.array(dist_i) - np.array(d_ocaat_i)
 val_d = sorted(abs(delta_dist_i))[int(0.5 * len(delta_dist_i))]
 print '\n Dist percentages'
@@ -328,8 +329,8 @@ ax3.minorticks_on()
 # Order before plotting.
 x = np.take(delta_dist_i, order_i)
 y = np.take(ci_param_i, order_i)
-plt.errorbar(delta_dist_i, ci_param_i, xerr=e_dist_i, ls='none', color='grey',
-    zorder=1)
+plt.errorbar(delta_dist_i, ci_param_i, xerr=e_dist_i_dm, ls='none',
+    color='grey', zorder=1)
 plt.scatter(x, y, c=z2_i, cmap=cm, s=z1_i, zorder=3, lw=0.5)
 plt.axvspan(-val_d, val_d, facecolor='grey', alpha=0.5, zorder=1)
 
