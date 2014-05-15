@@ -85,25 +85,14 @@ cent_diff = np.sqrt((np.array(cenx) - 1024.) ** 2 +
     (np.array(ceny) - 1024.) ** 2)
 
 for i, cl in enumerate(names):
-    if (cent_diff[i] - 250.) > rad[i]:
-    #if cent_diff[i] > 250.:
+    #if (cent_diff[i] - 80.) > rad[i]:
+    if cent_diff[i] > 90.:
         #print 'out', cl, cent_diff[i], ci[i], prob[i]
-        #cent_o.append(cent_diff[i])
-        #rad_o.append(rad[i])
         mass_o.append(mass[i])
-        #metal_o.append(metal[i])
-        #e_met_o.append(e_met[i])
-        #metal_ocaat_o.append(metal_ocaat[i])
-        #age_o.append(age[i])
-        #age_ocaat_o.append(age_ocaat[i])
         dist_o.append(dist[i])
-        #dist_ocaat_o.append(dist_ocaat[i])
-        #extinc_o.append(extinc[i])
-        #ext_ocaat_o.append(ext_ocaat[i])
         ci_o.append(ci[i])
         prob_o.append(prob[i])
     else:
-        #print 'in', cl, cent_diff[i]
         cent_i.append(cent_diff[i])
         e_cent_i.append(e_cen[i])
         rad_i.append(rad[i])
@@ -126,9 +115,15 @@ for i, cl in enumerate(names):
 
 print 'Number of assigned centers out of synth clusters region: %d' % len(ci_o)
 
+print 'Clusters with prob<0.4 value'
+for i, cl in enumerate(names):
+    if prob[i] < 0.4:
+        print cl, int(cent_diff[i]), prob[i]
+
 # Value that holds 50% of clusters.
 val_c = sorted(cent_i)[int(0.5 * len(cent_i))]
 print '\n Center percentages'
+print '50% limit:', val_c
 print '<10', float(sum(abs(i) < 10. for i in cent_i)) / len(cent_i)
 print '<20', float(sum(abs(i) < 20. for i in cent_i)) / len(cent_i)
 print '<50', float(sum(abs(i) < 50. for i in cent_i)) / len(cent_i)
@@ -138,6 +133,7 @@ print '<80', float(sum(abs(i) < 80. for i in cent_i)) / len(cent_i)
 rad_diff_i = np.array(rad_i) - 250.
 val_r = sorted(abs(rad_diff_i))[int(0.5 * len(rad_diff_i))]
 print '\n Radius percentages'
+print '50% limit:', val_r
 print '<10', float(sum(abs(i) < 10. for i in rad_diff_i)) / len(rad_diff_i)
 print '<20', float(sum(abs(i) < 20. for i in rad_diff_i)) / len(rad_diff_i)
 print '<50', float(sum(abs(i) < 50. for i in rad_diff_i)) / len(rad_diff_i)
@@ -147,6 +143,7 @@ delta_met_i = np.log10(np.array(metal_i) / 0.019) - \
 np.log10(np.array(metal_ocaat_i) / 0.019)
 val_m = sorted(abs(delta_met_i))[int(0.5 * len(delta_met_i))]
 print '\n Metallicity percentages'
+print '50% limit:', val_m
 print '<0.1', float(sum(abs(i) < 0.1 for i in delta_met_i)) / len(delta_met_i)
 print '<0.2', float(sum(abs(i) < 0.2 for i in delta_met_i)) / len(delta_met_i)
 print '<0.5', float(sum(abs(i) < 0.5 for i in delta_met_i)) / len(delta_met_i)
@@ -160,6 +157,7 @@ e_feh_i = (1. / np.log(10.)) * (np.array(e_met_i) / np.array(metal_i))
 delta_age_i = np.array(age_i) - np.array(age_ocaat_i)
 val_a = sorted(abs(delta_age_i))[int(0.5 * len(delta_age_i))]
 print '\n Age percentages'
+print '50% limit:', val_a
 print '<0.1.', float(sum(abs(i) < 0.1 for i in delta_age_i)) / len(delta_age_i)
 print '<0.2', float(sum(abs(i) < 0.2 for i in delta_age_i)) / len(delta_age_i)
 print '<0.5', float(sum(abs(i) < 0.5 for i in delta_age_i)) / len(delta_age_i)
@@ -171,6 +169,7 @@ e_dist_i_dm = 0.2 * np.log(10.) * d_ocaat_i * np.array(e_dist_i)
 delta_dist_i = np.array(dist_i) - np.array(d_ocaat_i)
 val_d = sorted(abs(delta_dist_i))[int(0.5 * len(delta_dist_i))]
 print '\n Dist percentages'
+print '50% limit:', val_d
 print '<0.1.', float(sum(abs(i) < 0.1 for i in delta_dist_i)) / \
     len(delta_dist_i)
 print '<0.5', float(sum(abs(i) < 0.5 for i in delta_dist_i)) / len(delta_dist_i)
@@ -181,6 +180,7 @@ print '<1.5', float(sum(abs(i) < 1.5 for i in delta_dist_i)) / len(delta_dist_i)
 delta_ext_i = np.array(extinc_i) - np.array(ext_ocaat_i)
 val_e = sorted(abs(delta_ext_i))[int(0.5 * len(delta_ext_i))]
 print '\n Extinc percentages'
+print '50% limit:', val_e
 print '<0.025', float(sum(abs(i) < 0.025 for i in delta_ext_i)) / \
     len(delta_ext_i)
 print '<0.05', float(sum(abs(i) < 0.05 for i in delta_ext_i)) / len(delta_ext_i)
@@ -225,15 +225,15 @@ plt.scatter(x, y, c=z2_i, cmap=cm, s=z1_i)
 #ax5 = plt.subplot(gs[15:18, 0:3])
 axp = plt.subplot(gs[1])
 plt.ylim(0., 1.05)
-plt.xlim(0., 1.0)
+plt.xlim(0., 1.05)
 plt.ylabel('prob', fontsize=12)
 plt.xlabel('$CI$', fontsize=14)
 axp.grid(b=True, which='both', color='gray', linestyle='--', lw=0.5)
+plt.scatter(ci_o, prob_o, c=z2_o, cmap=cm, s=z1_o, marker='D', lw=0.5)
+    #facecolor='none', lw=1.5)
 # Order before plotting.
 x = np.take(ci_i, order_i)
 y = np.take(prob_i, order_i)
-plt.scatter(ci_o, prob_o, c=z2_o, cmap=cm, s=z1_o, marker='s',
-    facecolor='none', lw=1.5)
 SC = plt.scatter(x, y, c=z2_i, cmap=cm, s=z1_i)
 axp2 = plt.subplot(gs[2])
 cbar = plt.colorbar(SC, cax=axp2)
