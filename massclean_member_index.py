@@ -10,6 +10,7 @@ from os.path import join
 import numpy as np
 import warnings
 import matplotlib.pyplot as plt
+import matplotlib.gridspec as gridspec
 from matplotlib.ticker import MultipleLocator
 
 
@@ -42,25 +43,25 @@ def members_index(mi_num, N_T, memb_w, not_memb_w):
     return memb_index
 
 
-def make_plots(mi_num, clust_CI, clust_MI, clust_params):
+def make_plots(mi_num, clust_CI, clust_MI, clust_MI_r, clust_params):
     '''
     Plot the CI vs MI diagram for each MI.
     '''
 
-    fig = plt.figure()
-    ax = fig.add_subplot(111)
+    # Make plot.
+    plt.figure(figsize=(14, 6))  # create the top-level container
+    gs = gridspec.GridSpec(1, 3, width_ratios=[1, 1, 0.05])
 
+    ax0 = plt.subplot(gs[0])
     plt.xlabel('CI')
     plt.ylabel(r'MI$_{%d}$' % mi_num)
     plt.xlim(0., 1.0)
-
     plt.ylim(max(min(clust_MI[mi_num]) - 0.1, -2.5), 1.0)
-    ax.yaxis.set_major_locator(MultipleLocator(0.2))
+    ax0.yaxis.set_major_locator(MultipleLocator(0.2))
     # Plot grid
     plt.grid(b=True, which='major', color='gray', linestyle='--', zorder=1)
     # Define color map.
     cm = plt.cm.get_cmap('RdYlBu_r')
-
     # Order.
     mass, age, dist = clust_params
     order = np.argsort(-np.array(mass))
@@ -70,7 +71,6 @@ def make_plots(mi_num, clust_CI, clust_MI, clust_params):
     # Order before plotting.
     x = np.take(clust_CI, order)
     y = np.take(clust_MI[mi_num], order)
-
     # Color is associated with the dist; size with the initial mass and
     # the marker with the age.
     mrk = {7.: ('s', '$\log(age/yr)=7.$'), 8.: ('D', '$\log(age/yr)=8.$'),
@@ -82,18 +82,51 @@ def make_plots(mi_num, clust_CI, clust_MI, clust_params):
             marker=value[0], label=value[1],
             s=z1[s1],
             c=z3[s1], cmap=cm, lw=0.2)
-
-    # Colorbar
-    cbar = plt.colorbar()
-    cbar.set_ticks([0.5, 1., 3., 5.])
-    cbar.set_ticklabels([0.5, 1., 3., 5.])
-    cbar.set_label('$dist\,(kpc)$')
-
     # Plot regression line.
     m, b = np.polyfit(clust_CI, clust_MI[mi_num], 1)
     range_CI = np.linspace(0., 1., 10)
     plt.plot(range_CI, m * range_CI + b, c='k', ls='--')
+    if mi_num == 2:
+        plt.axhline(y=0., linestyle='--', color='r', zorder=3)
+    # Plot legend.
+    plt.legend(loc="top right", markerscale=0.7, scatterpoints=1, fontsize=10)
 
+    # Random MI.
+    ax1 = plt.subplot(gs[1])
+    plt.xlabel('CI')
+    plt.ylabel(r'MI$_{%d}$' % mi_num)
+    plt.xlim(0., 1.0)
+    plt.ylim(max(min(clust_MI[mi_num]) - 0.1, -2.5), 1.0)
+    ax1.yaxis.set_major_locator(MultipleLocator(0.2))
+    # Plot grid
+    plt.grid(b=True, which='major', color='gray', linestyle='--', zorder=1)
+    # Define color map.
+    cm = plt.cm.get_cmap('RdYlBu_r')
+    # Order.
+    mass, age, dist = clust_params
+    order = np.argsort(-np.array(mass))
+    z1 = np.take((np.array(mass) / 5.), order)
+    z2 = np.take(age, order)
+    z3 = np.take(dist, order)
+    # Order before plotting.
+    x = np.take(clust_CI, order)
+    y = np.take(clust_MI_r[mi_num], order)
+    # Color is associated with the dist; size with the initial mass and
+    # the marker with the age.
+    mrk = {7.: ('s', '$\log(age/yr)=7.$'), 8.: ('D', '$\log(age/yr)=8.$'),
+        9.: ('o', '$\log(age/yr)=9.$')}
+    for key, value in sorted(mrk.items()):
+        s1 = (z2 == key)
+        SC = plt.scatter(x[s1], y[s1],
+            marker=value[0], label=value[1],
+            s=z1[s1],
+            c=z3[s1], cmap=cm, lw=0.2)
+    # Plot regression line.
+    m, b = np.polyfit(clust_CI, clust_MI_r[mi_num], 1)
+    range_CI = np.linspace(0., 1., 10)
+    plt.plot(range_CI, m * range_CI + b, c='k', ls='--')
+    if mi_num == 2:
+        plt.axhline(y=0., linestyle='--', color='r', zorder=3)
     # Add text box with MI equation.
     if mi_num == 0:
         text = r'$MI_{%d}$ = $n_m/N_{cl}$' % mi_num
@@ -103,14 +136,20 @@ def make_plots(mi_num, clust_CI, clust_MI, clust_params):
     elif mi_num == 2:
         text = (r'$MI_{%d}$ = $\frac{\left(\sum^{n_m}{p_m} - ' +
                r' \sum^{n_f}{p_f}\right)}{N_{cl}}$') % mi_num
-        plt.axhline(y=0., linestyle='--', color='r', zorder=3)
-    x_align, y_align = 0.65, 0.9
-    plt.text(x_align, y_align, text, transform=ax.transAxes,
-             bbox=dict(facecolor='white', alpha=0.6), fontsize=14)
+    x_align, y_align = 0.61, 0.9
+    plt.text(x_align, y_align, text, transform=ax1.transAxes,
+             bbox=dict(facecolor='white', alpha=0.6), fontsize=16)
 
-    # Plot legend.
-    plt.legend(loc="lower left", markerscale=0.7, scatterpoints=1, fontsize=10)
+    # Colorbar
+    #cbar = plt.colorbar()
+    axp2 = plt.subplot(gs[2])
+    cbar = plt.colorbar(SC, cax=axp2)
+    cbar.set_ticks([0.5, 1., 3., 5.])
+    cbar.set_ticklabels([0.5, 1., 3., 5.])
+    cbar.set_label('$dist\,(kpc)$')
 
+    # Save to file.
+    plt.tight_layout()
     # Generate output png file.
     out_png = dir_memb_files + 'MI_%d_analisys.png' % mi_num
     plt.savefig(out_png, dpi=150)
@@ -191,7 +230,8 @@ for root, dirs, files in walk(dir_dat_files):
 
 
 # Lists that will hold all the member and contamination index values.
-clust_MI, clust_CI, clust_params = [[], [], []], [], [[], [], []]
+clust_MI, clust_MI_r, clust_CI, clust_params = [[], [], []], [[], [], []], \
+[], [[], [], []]
 
 # Initialize files remaining counter.
 i = 0
@@ -201,30 +241,6 @@ for f_indx, sub_dir in enumerate(dir_files[0]):
     # dir_files[1][f_indx] is the name of the file being processed.
     clust_name = dir_files[1][f_indx][:-4]
 
-    # Get N_T value for the cluster.
-    # Loads the data in file as a list of N lists where N is the number
-    # of columns. Each of the N lists contains all the data for the column.
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
-        data = np.genfromtxt(join(dir_dat_files, sub_dir,
-            dir_files[1][f_indx]), dtype=str, unpack=True)
-    # Initiate true members counter.
-    N_T = 0
-    for star_id in data[0]:
-        # Increase counter for true members.
-        N_T += 1 if star_id[0] == '1' else 0
-
-    # Get weights for the stars identified as cluster members by the code.
-    data2 = np.loadtxt(join(dir_memb_files, sub_dir,
-                            str(clust_name) + '_memb.dat'), unpack=True)
-    # Store weights.
-    memb_w, not_memb_w = [], []
-    for ind, star_id in enumerate(data2[0]):
-        if str(star_id)[0] == '1':
-            memb_w.append(data2[7][ind])
-        else:
-            not_memb_w.append(data2[7][ind])
-
     # Get 'cont_ind' index for this cluster.
     data3 = np.genfromtxt(data_out_file, dtype=None)
     # Transpose list since unpack=True apparently doesn't work above.
@@ -233,32 +249,71 @@ for f_indx, sub_dir in enumerate(dir_files[0]):
     for ind, cluster in enumerate(data3[0]):
         first, second = cluster.split('/')
         if first == sub_dir and second == clust_name:
-            cont_ind = data3[8][ind]
-            clust_CI.append(cont_ind)
+            cont_ind = data3[10][ind]
+            cenx, ceny = data3[1][ind], data3[2][ind]
 
-    # Put cluster's parameters in a list.
-    first_a, first_b, first_c = sub_dir.split('_')
-    mass = float(first_a)                 # In solar masses.
-    dist = float(first_b) / 1000.         # In Kpc
-    #extinc = float(first_c) / 3.1
-    age = float(clust_name[9:]) / 100.    # In log[age/yr].
+    cent_diff = np.sqrt((cenx - 1024.) ** 2 + (ceny - 1024.) ** 2)
+    if cent_diff < 80.:
 
-    # Store in list for plotting purposes.
-    clust_params[0].append(mass)
-    clust_params[1].append(age)
-    clust_params[2].append(dist)
+        # Store CI of cluster.
+        clust_CI.append(cont_ind)
 
-    # Calculate 'memb_index' for this cluster.
-    for mi_num in range(3):
-        memb_ind = members_index(mi_num, N_T, memb_w, not_memb_w)
-        # Append value to list.
-        clust_MI[mi_num].append(memb_ind)
+        # Get N_T value for the cluster.
+        # Loads the data in file as a list of N lists where N is the number
+        # of columns. Each of the N lists contains all the data for the column.
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            data = np.genfromtxt(join(dir_dat_files, sub_dir,
+                dir_files[1][f_indx]), dtype=str, unpack=True)
+        # Initiate true members counter.
+        N_T = 0
+        for star_id in data[0]:
+            # Increase counter for true members.
+            N_T += 1 if star_id[0] == '1' else 0
 
-    print len(dir_files[0]) - i, sub_dir, clust_name, cont_ind, memb_ind
-    i += 1
+        # Get weights for the stars within the cluster region and assigned
+        # membership probabilities by the code.
+        data2 = np.loadtxt(join(dir_memb_files, sub_dir,
+                                str(clust_name) + '_memb.dat'), unpack=True)
+        # Store weights.
+        memb_w, not_memb_w = [], []
+        for ind, star_id in enumerate(data2[0]):
+            if str(star_id)[0] == '1':
+                memb_w.append(data2[7][ind])
+            else:
+                not_memb_w.append(data2[7][ind])
+
+        # Calculate 'memb_index' for this cluster.
+        for mi_num in range(3):
+            memb_ind = members_index(mi_num, N_T, memb_w, not_memb_w)
+            # Append value to list.
+            clust_MI[mi_num].append(memb_ind)
+
+            # Random membership assignation.
+            memb_w_r = np.random.uniform(low=0., high=1., size=(len(memb_w),))
+            not_memb_w_r = np.random.uniform(low=0., high=1.,
+                size=(len(not_memb_w),))
+            memb_ind_r = members_index(mi_num, N_T, memb_w_r, not_memb_w_r)
+            # Append value to list.
+            clust_MI_r[mi_num].append(memb_ind_r)
+
+        # Put cluster's parameters in a list.
+        first_a, first_b, first_c = sub_dir.split('_')
+        mass = float(first_a)                 # In solar masses.
+        dist = float(first_b) / 1000.         # In Kpc
+        #extinc = float(first_c) / 3.1
+        age = float(clust_name[9:]) / 100.    # In log[age/yr].
+
+        # Store in list for plotting purposes.
+        clust_params[0].append(mass)
+        clust_params[1].append(age)
+        clust_params[2].append(dist)
+
+        print len(dir_files[0]) - i, sub_dir, clust_name, cont_ind
+        i += 1
 
 for mi_num in range(3):
     # Generate plots.
-    make_plots(mi_num, clust_CI, clust_MI, clust_params)
+    make_plots(mi_num, clust_CI, clust_MI, clust_MI_r, clust_params)
 
 print 'End.'
