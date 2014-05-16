@@ -203,8 +203,12 @@ ymin, ymax = -4.1, 0.
 
 # Order.
 order_i = np.argsort(-(np.array(mass_i) / 4.))
-z1_i = np.take(((np.array(mass_i) / 4.)), order_i)
+z1_i = np.take(((np.array(mass_i) / 5.) + 5.), order_i)
 z2_i = np.take(dist_i, order_i)
+# Define age markers and labels.
+mrk = {7.: ('s', '$\log(age/yr)=7.$'), 8.: ('D', '$\log(age/yr)=8.$'),
+    9.: ('o', '$\log(age/yr)=9.$')}
+z3_i = np.take(age_i, order_i)
 
 order_o = np.argsort(-(np.array(mass_o) / 4.))
 z1_o = np.take(((np.array(mass_o) / 4.)), order_o)
@@ -241,7 +245,6 @@ cbar.set_ticks([0.5, 1., 3., 5.])
 cbar.set_ticklabels([0.5, 1., 3., 5.])
 cbar.set_label('dist (kpc)')
 
-#ax00 = plt.subplot(gs[5:8, 0:3])
 ax00 = plt.subplot(gs[3])
 plt.xlim(-2., 90.)
 plt.ylim(ymin, ymax)
@@ -255,9 +258,19 @@ plt.errorbar(cent_i, ci_param_i, xerr=e_cent_i, ls='none', color='grey',
 # Order before plotting.
 x = np.take(cent_i, order_i)
 y = np.take(ci_param_i, order_i)
-plt.scatter(x, y, c=z2_i, cmap=cm, s=z1_i, zorder=3)
+for key, value in sorted(mrk.items()):
+    s1 = (z3_i == key)
+    plt.scatter(x[s1], y[s1],
+        marker=value[0], label=value[1],
+        s=z1_i[s1],
+        c=z2_i[s1], cmap=cm, lw=0.4, zorder=3)
+# Plot legend.
+legend = plt.legend(loc="lower right", markerscale=0.7, scatterpoints=1,
+    fontsize=11)
+for i in range(len(mrk)):
+    legend.legendHandles[i].set_color('k')
+#legend.legendHandles[1].set_color('yellow')
 
-#ax01 = plt.subplot(gs[5:8, 3:6])
 ax01 = plt.subplot(gs[4])
 plt.xlim(-150., 150.)
 plt.ylim(ymin, ymax)
@@ -273,14 +286,19 @@ plt.errorbar(rad_diff_i, ci_param_i, xerr=e_rad_i, ls='none', color='grey',
 x = np.take(rad_diff_i, order_i)
 y = np.take(ci_param_i, order_i)
 # Clusters inside rad/cent boundary.
-SC = plt.scatter(x, y, c=z2_i, cmap=cm, s=z1_i, zorder=3)
+for key, value in sorted(mrk.items()):
+    s1 = (z3_i == key)
+    SC = plt.scatter(x[s1], y[s1],
+        marker=value[0], label=value[1],
+        s=z1_i[s1],
+        c=z2_i[s1], cmap=cm, lw=0.4, zorder=3)
+# Colorbar.
 ax01 = plt.subplot(gs[5])
 cbar = plt.colorbar(SC, cax=ax01)
 cbar.set_ticks([0.5, 1., 3., 5.])
 cbar.set_ticklabels([0.5, 1., 3., 5.])
 cbar.set_label('dist (kpc)')
 
-#ax1 = plt.subplot(gs[8:11, 0:3])
 ax1 = plt.subplot(gs[6])
 plt.xlim(-1.4, 1.4)
 plt.ylim(ymin, ymax)
@@ -293,7 +311,14 @@ x = np.take(delta_met_i, order_i)
 y = np.take(ci_param_i, order_i)
 plt.errorbar(delta_met_i, ci_param_i, xerr=e_feh_i, ls='none', color='grey',
     zorder=1)
-plt.scatter(x, y, c=z2_i, cmap=cm, s=z1_i, zorder=3, lw=0.5)
+#plt.scatter(x, y, c=z2_i, cmap=cm, s=z1_i, zorder=3, lw=0.5)
+for key, value in sorted(mrk.items()):
+    s1 = (z3_i == key)
+    plt.scatter(x[s1], y[s1],
+        marker=value[0], label=value[1],
+        s=z1_i[s1],
+        c=z2_i[s1], cmap=cm, lw=0.4, zorder=3)
+# Vertical shaded area.
 plt.axvspan(-val_m, val_m, facecolor='grey', alpha=0.5, zorder=1)
 
 #ax2 = plt.subplot(gs[8:11, 3:6])
@@ -310,8 +335,16 @@ x = np.take(delta_age_i, order_i)
 y = np.take(ci_param_i, order_i)
 plt.errorbar(delta_age_i, ci_param_i, xerr=e_age_i, ls='none', color='grey',
     zorder=1)
-SC = plt.scatter(x, y, c=z2_i, cmap=cm, s=z1_i, zorder=3, lw=0.5)
+#SC = plt.scatter(x, y, c=z2_i, cmap=cm, s=z1_i, zorder=3, lw=0.5)
+for key, value in sorted(mrk.items()):
+    s1 = (z3_i == key)
+    SC = plt.scatter(x[s1], y[s1],
+        marker=value[0], label=value[1],
+        s=z1_i[s1],
+        c=z2_i[s1], cmap=cm, lw=0.4, zorder=3)
+# Vertical shaded area.
 plt.axvspan(-val_a, val_a, facecolor='grey', alpha=0.5, zorder=1)
+# Colorbar.
 ax22 = plt.subplot(gs[8])
 cbar = plt.colorbar(SC, cax=ax22)
 cbar.set_ticks([0.5, 1., 3., 5.])
@@ -331,7 +364,14 @@ x = np.take(delta_dist_i, order_i)
 y = np.take(ci_param_i, order_i)
 plt.errorbar(delta_dist_i, ci_param_i, xerr=e_dist_i_dm, ls='none',
     color='grey', zorder=1)
-plt.scatter(x, y, c=z2_i, cmap=cm, s=z1_i, zorder=3, lw=0.5)
+#plt.scatter(x, y, c=z2_i, cmap=cm, s=z1_i, zorder=3, lw=0.5)
+for key, value in sorted(mrk.items()):
+    s1 = (z3_i == key)
+    plt.scatter(x[s1], y[s1],
+        marker=value[0], label=value[1],
+        s=z1_i[s1],
+        c=z2_i[s1], cmap=cm, lw=0.4, zorder=3)
+# Vertical shaded area.
 plt.axvspan(-val_d, val_d, facecolor='grey', alpha=0.5, zorder=1)
 
 #ax4 = plt.subplot(gs[11:14, 3:6])
@@ -348,8 +388,16 @@ x = np.take(delta_ext_i, order_i)
 y = np.take(ci_param_i, order_i)
 plt.errorbar(delta_ext_i, ci_param_i, xerr=e_ext_i, ls='none', color='grey',
     zorder=1)
-SC = plt.scatter(x, y, c=z2_i, cmap=cm, s=z1_i, zorder=3, lw=0.5)
+#SC = plt.scatter(x, y, c=z2_i, cmap=cm, s=z1_i, zorder=3, lw=0.5)
+for key, value in sorted(mrk.items()):
+    s1 = (z3_i == key)
+    SC = plt.scatter(x[s1], y[s1],
+        marker=value[0], label=value[1],
+        s=z1_i[s1],
+        c=z2_i[s1], cmap=cm, lw=0.4, zorder=3)
+# Vertical shaded area.
 plt.axvspan(-val_e, val_e, facecolor='grey', alpha=0.5, zorder=1)
+# Colorbar
 ax42 = plt.subplot(gs[11])
 cbar = plt.colorbar(SC, cax=ax42)
 cbar.set_ticks([0.5, 1., 3., 5.])
