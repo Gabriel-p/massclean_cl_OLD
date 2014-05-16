@@ -269,7 +269,6 @@ legend = plt.legend(loc="lower right", markerscale=0.7, scatterpoints=1,
     fontsize=11)
 for i in range(len(mrk)):
     legend.legendHandles[i].set_color('k')
-#legend.legendHandles[1].set_color('yellow')
 
 ax01 = plt.subplot(gs[4])
 plt.xlim(-150., 150.)
