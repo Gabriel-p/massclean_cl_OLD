@@ -53,6 +53,7 @@ def make_plots(mi_num, clust_CI, clust_MI, clust_MI_r, clust_params):
     gs = gridspec.GridSpec(1, 3, width_ratios=[1, 1, 0.05])
 
     ax0 = plt.subplot(gs[0])
+    ax0.set_title('Decontamination algorithm')
     plt.xlabel('CI')
     plt.ylabel(r'MI$_{%d}$' % mi_num)
     plt.xlim(0., 1.0)
@@ -89,10 +90,14 @@ def make_plots(mi_num, clust_CI, clust_MI, clust_MI_r, clust_params):
     if mi_num == 2:
         plt.axhline(y=0., linestyle='--', color='r', zorder=3)
     # Plot legend.
-    plt.legend(loc="top right", markerscale=0.7, scatterpoints=1, fontsize=10)
+    legend = plt.legend(loc="upper right", markerscale=0.7, scatterpoints=1,
+        fontsize=11)
+    for i in range(len(mrk)):
+        legend.legendHandles[i].set_color('k')
 
     # Random MI.
     ax1 = plt.subplot(gs[1])
+    ax1.set_title('Random probability')
     plt.xlabel('CI')
     plt.ylabel(r'MI$_{%d}$' % mi_num)
     plt.xlim(0., 1.0)
@@ -252,6 +257,7 @@ for f_indx, sub_dir in enumerate(dir_files[0]):
             cont_ind = data3[10][ind]
             cenx, ceny = data3[1][ind], data3[2][ind]
 
+    # Only plot clusters closer than this limit to the true center.
     cent_diff = np.sqrt((cenx - 1024.) ** 2 + (ceny - 1024.) ** 2)
     if cent_diff < 80.:
 
