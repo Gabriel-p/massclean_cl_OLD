@@ -55,7 +55,7 @@ def make_plots(mi_num, clust_CI, clust_MI, clust_MI_r, clust_params):
     ax0 = plt.subplot(gs[0])
     ax0.set_title('Decontamination algorithm')
     plt.xlabel('CI')
-    plt.ylabel(r'MI$_{%d}$' % mi_num)
+    plt.ylabel('MI')
     plt.xlim(0., 1.0)
     plt.ylim(max(min(clust_MI[mi_num]) - 0.1, -2.5), 1.0)
     ax0.yaxis.set_major_locator(MultipleLocator(0.2))
@@ -99,7 +99,7 @@ def make_plots(mi_num, clust_CI, clust_MI, clust_MI_r, clust_params):
     ax1 = plt.subplot(gs[1])
     ax1.set_title('Random probability')
     plt.xlabel('CI')
-    plt.ylabel(r'MI$_{%d}$' % mi_num)
+    plt.ylabel('MI')
     plt.xlim(0., 1.0)
     plt.ylim(max(min(clust_MI[mi_num]) - 0.1, -2.5), 1.0)
     ax1.yaxis.set_major_locator(MultipleLocator(0.2))
@@ -134,14 +134,14 @@ def make_plots(mi_num, clust_CI, clust_MI, clust_MI_r, clust_params):
         plt.axhline(y=0., linestyle='--', color='r', zorder=3)
     # Add text box with MI equation.
     if mi_num == 0:
-        text = r'$MI_{%d}$ = $n_m/N_{cl}$' % mi_num
+        text = '$MI = n_m/N_{cl}$'
     elif mi_num == 1:
         #text = r'$MI_{%d}$ = $\frac{n_m}{n_m+n_f}$' % mi_num
-        text = (r'$MI_{%d}$ = $\frac{\sum^{n_m}{p_m}}{N_{cl}}$') % mi_num
+        text = ('$MI = \frac{\sum^{n_m}{p_m}}{N_{cl}}$')
     elif mi_num == 2:
-        text = (r'$MI_{%d}$ = $\frac{\left(\sum^{n_m}{p_m} - ' +
-               r' \sum^{n_f}{p_f}\right)}{N_{cl}}$') % mi_num
-    x_align, y_align = 0.61, 0.9
+        text = (r'$MI = \frac{\left(\sum^{n_m}{p_m} - ' +
+               r' \sum^{n_f}{p_f}\right)}{N_{cl}}$')
+    x_align, y_align = 0.61, 0.88
     plt.text(x_align, y_align, text, transform=ax1.transAxes,
              bbox=dict(facecolor='white', alpha=0.6), fontsize=16)
 
