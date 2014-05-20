@@ -6,6 +6,9 @@ Created on Fri Apr 58 15:19:04 2014
 @author: gabriel
 """
 
+from os import listdir, walk
+from os.path import join
+import warnings
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
@@ -20,6 +23,53 @@ Generate plots of metallicity, age, distance and extinction deltas.
 '''
 
 
+def get_true_memb_n():
+    '''
+    Obtaines the true members count from each synthetic cluster.
+    '''
+
+    # Location of the MASSCLEAN data files.
+    dir_dat_files = '/media/rest/github/massclean_cl/synth_clusters'
+
+    # Store subdir names [0] and file names [1] inside each subdir.
+    dir_files = [[], []]
+    for root, dirs, files in walk(dir_dat_files):
+        if dirs:
+            for subdir in dirs:
+                for name in listdir(join(dir_dat_files, subdir)):
+                    # Check to see if it's a valid data file.
+                    if name.endswith(('.DAT')):
+                        dir_files[0].append(subdir)
+                        dir_files[1].append(name)
+
+    clust_memb_num = [[], []]
+    # Loop through each file.
+    for f_indx, sub_dir in enumerate(dir_files[0]):
+
+        # dir_files[1][f_indx] is the name of the file being processed.
+        clust_name = dir_files[1][f_indx][:-4]
+
+        # Get N_T value for the cluster.
+        # Loads the data in file as a list of N lists where N is the number
+        # of columns. Each of the N lists contains all the data for the column.
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            data = np.genfromtxt(join(dir_dat_files, sub_dir,
+                dir_files[1][f_indx]), dtype=str, unpack=True)
+        # Initiate true members counter.
+        N_T = 0
+        for star_id in data[0]:
+            # Increase counter for true members.
+            N_T += 1 if star_id[0] == '1' else 0
+
+        # Store name and number for this cluster.
+        full_name = str(sub_dir + '/' + clust_name)
+        clust_memb_num[0].append(full_name)
+        clust_memb_num[1].append(N_T)
+
+    return clust_memb_num
+
+
 def skip_comments(f):
     '''
     Read lines that DO NOT start with a # symbol.
@@ -29,8 +79,12 @@ def skip_comments(f):
             yield line
 
 
+# Obtain the true number of cluster members in each synthetic cluster.
+clust_memb_num = get_true_memb_n()
+
+
 # Read ocaat_output.dat file to obtain the MASSCLEAN clusters actual
-# data and parameters the ones estimated by OCAAT.
+# data and parameters.
 out_file = '/media/rest/github/ocaat/output/massclean/ocaat_output.dat'
 f = open(out_file)
 names, params = [], []
@@ -40,8 +94,11 @@ for line in skip_comments(f):
 
 # Separate into masses, distances, metallicities and ages of MASSCLEAN
 # clusters.
-mass, dist, extinc, metal, age = [], [], [], [], []
+mass, dist, extinc, metal, age, memb_num = [], [], [], [], [], []
 for clust_str in names:
+    # Get index for this cluster in members list.
+    cl_indx = clust_memb_num[0].index(clust_str)
+    memb_num.append(clust_memb_num[1][cl_indx])
     first, second = clust_str.split('/')
     first_a, first_b, first_c = first.split('_')
     mass.append(float(first_a))
@@ -51,9 +108,9 @@ for clust_str in names:
     age.append(float(second[9:]) / 100.)
 
 # Read clusters parameters obtained by OCAAT.
-cenx, ceny, e_cen, rad, e_rad, ci, prob, metal_ocaat, e_met, age_ocaat, e_age,\
-dist_ocaat, e_dist, ext_ocaat, e_ext = [], [], [], [], [], [], [], [], \
-[], [], [], [], [], [], []
+cenx, ceny, e_cen, rad, e_rad, ci, memb_n, prob, metal_ocaat, e_met, \
+age_ocaat, e_age, dist_ocaat, e_dist, ext_ocaat, e_ext = \
+[], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []
 for par_str in params:
     cenx.append(float(par_str[0]))
     ceny.append(float(par_str[1]))
@@ -61,6 +118,7 @@ for par_str in params:
     rad.append(float(par_str[3]))
     e_rad.append(float(par_str[4]))
     ci.append(float(par_str[9]))
+    memb_n.append(float(par_str[10]))
     prob.append(float(par_str[12]))
     metal_ocaat.append(float(par_str[15]))
     e_met.append(float(par_str[16]))
@@ -75,9 +133,10 @@ for par_str in params:
 # Separate between those clusters for which the center was assigned less
 # than 250px from the actual center.
 rad_i, e_rad_i, metal_i, metal_ocaat_i, age_i, age_ocaat_i, e_age_i, dist_i, \
-dist_ocaat_i, e_dist_i, extinc_i, ext_ocaat_i, e_ext_i, ci_i, cent_i, mass_i, \
-prob_i, e_met_i, e_cent_i = [], [], [], [], [], [], [], [], [], [], [], [], \
-[], [], [], [], [], [], []
+dist_ocaat_i, e_dist_i, extinc_i, ext_ocaat_i, e_ext_i, ci_i, memb_true_i, \
+memb_ocaat_i, cent_i, mass_i, prob_i, e_met_i, e_cent_i = \
+[], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [],\
+[]
 
 mass_o, dist_o, ci_o, prob_o = [], [], [], []
 
@@ -111,6 +170,8 @@ for i, cl in enumerate(names):
         ext_ocaat_i.append(ext_ocaat[i])
         e_ext_i.append(e_ext[i])
         ci_i.append(ci[i])
+        memb_true_i.append(memb_num[i])
+        memb_ocaat_i.append(memb_n[i])
         prob_i.append(prob[i])
 
 print 'Number of assigned centers out of synth clusters region: %d' % len(ci_o)
@@ -137,6 +198,16 @@ print '50% limit:', val_r
 print '<10', float(sum(abs(i) < 10. for i in rad_diff_i)) / len(rad_diff_i)
 print '<20', float(sum(abs(i) < 20. for i in rad_diff_i)) / len(rad_diff_i)
 print '<50', float(sum(abs(i) < 50. for i in rad_diff_i)) / len(rad_diff_i)
+
+# Number of members.
+memb_diff_i = (np.array(memb_ocaat_i) - np.array(memb_true_i)) / \
+    np.array(memb_true_i)
+val_memb = sorted(abs(memb_diff_i))[int(0.5 * len(memb_diff_i))]
+print '\n Member number percentages'
+print '50% limit:', val_memb
+print '<0.1', float(sum(abs(i) < 0.1 for i in memb_diff_i)) / len(memb_diff_i)
+print '<0.2', float(sum(abs(i) < 0.2 for i in memb_diff_i)) / len(memb_diff_i)
+print '<0.5', float(sum(abs(i) < 0.5 for i in memb_diff_i)) / len(memb_diff_i)
 
 # Metallicity in/out.
 delta_met_i = np.log10(np.array(metal_i) / 0.019) - \
@@ -206,8 +277,8 @@ order_i = np.argsort(-(np.array(mass_i) / 4.))
 z1_i = np.take(((np.array(mass_i) / 5.) + 5.), order_i)
 z2_i = np.take(dist_i, order_i)
 # Define age markers and labels.
-mrk = {7.: ('s', '$\log(age/yr)=7.$'), 8.: ('D', '$\log(age/yr)=8.$'),
-    9.: ('o', '$\log(age/yr)=9.$')}
+mrk = {7.: ('o', '$\log(age/yr)=7.$'), 8.: ('s', '$\log(age/yr)=8.$'),
+    9.: ('D', '$\log(age/yr)=9.$')}
 z3_i = np.take(age_i, order_i)
 
 order_o = np.argsort(-(np.array(mass_o) / 4.))
@@ -215,18 +286,41 @@ z1_o = np.take(((np.array(mass_o) / 4.)), order_o)
 z2_o = np.take(dist_o, order_o)
 
 ax0 = plt.subplot(gs[0])
+#plt.ylim(ymin, ymax)
+#plt.ylabel('$\log(CI)$', fontsize=14)
+#plt.xlabel('$CI$', fontsize=12)
+#plt.xlim(-0.05, 1.05)
+#ax0.minorticks_on()
+#ax0.grid(b=True, which='major', color='gray', linestyle='--', lw=0.5)
+## Order before plotting.
+#x = np.take(ci_i, order_i)
+#y = np.take(ci_param_i, order_i)
+#plt.scatter(x, y, c=z2_i, cmap=cm, s=z1_i)
+plt.xlabel('$\Delta_{rel} MN$', fontsize=14)
+plt.ylabel('$\log(CI)$', fontsize=12)
 plt.ylim(ymin, ymax)
-plt.ylabel('$\log(CI)$', fontsize=14)
-plt.xlabel('$CI$', fontsize=12)
-plt.xlim(-0.05, 1.05)
+plt.xlim(-0.5, 0.5)
 ax0.minorticks_on()
 ax0.grid(b=True, which='major', color='gray', linestyle='--', lw=0.5)
+plt.axvspan(0., val_memb, facecolor='grey', alpha=0.5, zorder=1)
 # Order before plotting.
-x = np.take(ci_i, order_i)
+x = np.take(memb_diff_i, order_i)
 y = np.take(ci_param_i, order_i)
-plt.scatter(x, y, c=z2_i, cmap=cm, s=z1_i)
+#plt.scatter(x, y, c=z2_i, cmap=cm, s=z1_i, zorder=3)
+for key, value in sorted(mrk.items()):
+    s1 = (z3_i == key)
+    plt.scatter(x[s1], y[s1],
+        marker=value[0], label=value[1],
+        s=z1_i[s1],
+        c=z2_i[s1], cmap=cm, lw=0.4, zorder=3)
+# Plot legend.
+leg = plt.legend(loc="lower right", markerscale=0.7, scatterpoints=1,
+    fontsize=13)
+for i in range(len(mrk)):
+    leg.legendHandles[i].set_color('k')
+    leg.get_frame().set_alpha(0.7)
 
-#ax5 = plt.subplot(gs[15:18, 0:3])
+# Prob vs CI.
 axp = plt.subplot(gs[1])
 plt.ylim(0., 1.05)
 plt.xlim(0., 1.05)
@@ -234,7 +328,6 @@ plt.ylabel('prob', fontsize=12)
 plt.xlabel('$CI$', fontsize=14)
 axp.grid(b=True, which='both', color='gray', linestyle='--', lw=0.5)
 plt.scatter(ci_o, prob_o, c=z2_o, cmap=cm, s=z1_o, marker='D', lw=0.5)
-    #facecolor='none', lw=1.5)
 # Order before plotting.
 x = np.take(ci_i, order_i)
 y = np.take(prob_i, order_i)
@@ -265,10 +358,11 @@ for key, value in sorted(mrk.items()):
         s=z1_i[s1],
         c=z2_i[s1], cmap=cm, lw=0.4, zorder=3)
 # Plot legend.
-legend = plt.legend(loc="lower right", markerscale=0.7, scatterpoints=1,
-    fontsize=11)
+leg = plt.legend(loc="lower right", markerscale=0.7, scatterpoints=1,
+    fontsize=13)
 for i in range(len(mrk)):
-    legend.legendHandles[i].set_color('k')
+    leg.legendHandles[i].set_color('k')
+    leg.get_frame().set_alpha(0.7)
 
 ax01 = plt.subplot(gs[4])
 plt.xlim(-150., 150.)
@@ -319,6 +413,12 @@ for key, value in sorted(mrk.items()):
         c=z2_i[s1], cmap=cm, lw=0.4, zorder=3)
 # Vertical shaded area.
 plt.axvspan(-val_m, val_m, facecolor='grey', alpha=0.5, zorder=1)
+# Plot legend.
+leg = plt.legend(loc="lower left", markerscale=0.7, scatterpoints=1,
+    fontsize=12)
+for i in range(len(mrk)):
+    leg.legendHandles[i].set_color('k')
+    leg.get_frame().set_alpha(0.7)
 
 #ax2 = plt.subplot(gs[8:11, 3:6])
 ax2 = plt.subplot(gs[7])
