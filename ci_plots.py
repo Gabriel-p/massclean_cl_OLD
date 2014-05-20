@@ -285,31 +285,36 @@ order_o = np.argsort(-(np.array(mass_o) / 4.))
 z1_o = np.take(((np.array(mass_o) / 4.)), order_o)
 z2_o = np.take(dist_o, order_o)
 
+
+# Prob vs CI.
 ax0 = plt.subplot(gs[0])
-#plt.ylim(ymin, ymax)
-#plt.ylabel('$\log(CI)$', fontsize=14)
-#plt.xlabel('$CI$', fontsize=12)
-#plt.xlim(-0.05, 1.05)
-#ax0.minorticks_on()
-#ax0.grid(b=True, which='major', color='gray', linestyle='--', lw=0.5)
-## Order before plotting.
-#x = np.take(ci_i, order_i)
-#y = np.take(ci_param_i, order_i)
-#plt.scatter(x, y, c=z2_i, cmap=cm, s=z1_i)
-plt.xlabel('$\Delta_{rel} MN$', fontsize=14)
+plt.ylim(0.005, 1.05)
+plt.xlim(0., 1.05)
+plt.ylabel('prob', fontsize=12)
+plt.xlabel('$CI$', fontsize=14)
+ax0.grid(b=True, which='both', color='gray', linestyle='--', lw=0.5)
+plt.scatter(ci_o, prob_o, c=z2_o, cmap=cm, s=z1_o, marker='D', lw=0.5)
+# Order before plotting.
+x = np.take(ci_i, order_i)
+y = np.take(prob_i, order_i)
+plt.scatter(x, y, c=z2_i, cmap=cm, s=z1_i + 25., lw=0.4)
+
+# Memb num vs CI.
+axp = plt.subplot(gs[1])
+plt.xlabel('$e_{rel} MN$', fontsize=14)
 plt.ylabel('$\log(CI)$', fontsize=12)
 plt.ylim(ymin, ymax)
 plt.xlim(-0.5, 0.5)
-ax0.minorticks_on()
-ax0.grid(b=True, which='major', color='gray', linestyle='--', lw=0.5)
-plt.axvspan(0., val_memb, facecolor='grey', alpha=0.5, zorder=1)
+axp.minorticks_on()
+axp.grid(b=True, which='major', color='gray', linestyle='--', lw=0.5)
+plt.axvspan(-val_memb, val_memb, facecolor='grey', alpha=0.5, zorder=1)
 # Order before plotting.
 x = np.take(memb_diff_i, order_i)
 y = np.take(ci_param_i, order_i)
 #plt.scatter(x, y, c=z2_i, cmap=cm, s=z1_i, zorder=3)
 for key, value in sorted(mrk.items()):
     s1 = (z3_i == key)
-    plt.scatter(x[s1], y[s1],
+    SC = plt.scatter(x[s1], y[s1],
         marker=value[0], label=value[1],
         s=z1_i[s1],
         c=z2_i[s1], cmap=cm, lw=0.4, zorder=3)
@@ -319,19 +324,7 @@ leg = plt.legend(loc="lower right", markerscale=0.7, scatterpoints=1,
 for i in range(len(mrk)):
     leg.legendHandles[i].set_color('k')
     leg.get_frame().set_alpha(0.7)
-
-# Prob vs CI.
-axp = plt.subplot(gs[1])
-plt.ylim(0., 1.05)
-plt.xlim(0., 1.05)
-plt.ylabel('prob', fontsize=12)
-plt.xlabel('$CI$', fontsize=14)
-axp.grid(b=True, which='both', color='gray', linestyle='--', lw=0.5)
-plt.scatter(ci_o, prob_o, c=z2_o, cmap=cm, s=z1_o, marker='D', lw=0.5)
-# Order before plotting.
-x = np.take(ci_i, order_i)
-y = np.take(prob_i, order_i)
-SC = plt.scatter(x, y, c=z2_i, cmap=cm, s=z1_i)
+# Colorbar
 axp2 = plt.subplot(gs[2])
 cbar = plt.colorbar(SC, cax=axp2)
 cbar.set_ticks([0.5, 1., 3., 5.])
@@ -452,7 +445,7 @@ cbar.set_label('dist (kpc)')
 
 #ax3 = plt.subplot(gs[11:14, 0:3])
 ax3 = plt.subplot(gs[9])
-plt.xlim(-1.6, 1.6)
+plt.xlim(-1.45, 1.45)
 plt.ylim(ymin, ymax)
 plt.xlabel('$\Delta dist (kpc)$', fontsize=14)
 plt.ylabel('$\log(CI)$', fontsize=14)

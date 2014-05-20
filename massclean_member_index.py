@@ -49,13 +49,13 @@ def make_plots(mi_num, clust_CI, clust_MI, clust_MI_r, clust_params):
     '''
 
     # Make plot.
-    plt.figure(figsize=(14, 6))  # create the top-level container
-    gs = gridspec.GridSpec(1, 3, width_ratios=[1, 1, 0.05])
+    plt.figure(figsize=(14, 25))  # create the top-level container
+    gs = gridspec.GridSpec(4, 3, width_ratios=[1, 1, 0.05])
 
     ax0 = plt.subplot(gs[0])
     ax0.set_title('Decontamination algorithm')
-    plt.xlabel('CI')
-    plt.ylabel('MI')
+    plt.xlabel('$CI$', fontsize=14)
+    plt.ylabel('$MI$', fontsize=14)
     plt.xlim(0., 1.0)
     plt.ylim(max(min(clust_MI[mi_num]) - 0.1, -2.5), 1.0)
     ax0.yaxis.set_major_locator(MultipleLocator(0.2))
@@ -74,8 +74,8 @@ def make_plots(mi_num, clust_CI, clust_MI, clust_MI_r, clust_params):
     y = np.take(clust_MI[mi_num], order)
     # Color is associated with the dist; size with the initial mass and
     # the marker with the age.
-    mrk = {7.: ('s', '$\log(age/yr)=7.$'), 8.: ('D', '$\log(age/yr)=8.$'),
-        9.: ('o', '$\log(age/yr)=9.$')}
+    mrk = {7.: ('o', '$\log(age/yr)=7.$'), 8.: ('s', '$\log(age/yr)=8.$'),
+        9.: ('D', '$\log(age/yr)=9.$')}
     for key, value in sorted(mrk.items()):
 
         s1 = (z2 == key)
@@ -90,18 +90,19 @@ def make_plots(mi_num, clust_CI, clust_MI, clust_MI_r, clust_params):
     if mi_num == 2:
         plt.axhline(y=0., linestyle='--', color='r', zorder=3)
     # Plot legend.
-    legend = plt.legend(loc="upper right", markerscale=0.7, scatterpoints=1,
-        fontsize=11)
+    legend = plt.legend(loc="lower left", markerscale=0.7, scatterpoints=1,
+        fontsize=13)
     for i in range(len(mrk)):
         legend.legendHandles[i].set_color('k')
 
     # Random MI.
     ax1 = plt.subplot(gs[1])
     ax1.set_title('Random probability')
-    plt.xlabel('CI')
-    plt.ylabel('MI')
+    plt.xlabel('$CI$', fontsize=14)
     plt.xlim(0., 1.0)
     plt.ylim(max(min(clust_MI[mi_num]) - 0.1, -2.5), 1.0)
+    # make these tick labels invisible
+    plt.setp(ax1.get_yticklabels(), visible=False)
     ax1.yaxis.set_major_locator(MultipleLocator(0.2))
     # Plot grid
     plt.grid(b=True, which='major', color='gray', linestyle='--', zorder=1)
@@ -141,14 +142,33 @@ def make_plots(mi_num, clust_CI, clust_MI, clust_MI_r, clust_params):
     elif mi_num == 2:
         text = (r'$MI = \frac{\left(\sum^{n_m}{p_m} - ' +
                r' \sum^{n_f}{p_f}\right)}{N_{cl}}$')
-    x_align, y_align = 0.61, 0.88
+    x_align, y_align = 0.57, 0.88
     plt.text(x_align, y_align, text, transform=ax1.transAxes,
-             bbox=dict(facecolor='white', alpha=0.6), fontsize=16)
-
+             bbox=dict(facecolor='white', alpha=0.6), fontsize=20)
     # Colorbar
-    #cbar = plt.colorbar()
     axp2 = plt.subplot(gs[2])
     cbar = plt.colorbar(SC, cax=axp2)
+    cbar.set_ticks([0.5, 1., 3., 5.])
+    cbar.set_ticklabels([0.5, 1., 3., 5.])
+    cbar.set_label('$dist\,(kpc)$')
+
+    # Fillers.
+    plt.subplot(gs[3])
+    plt.xlabel('$CI$', fontsize=14)
+    plt.ylabel('$MI$', fontsize=14)
+    x = clust_CI
+    y = clust_MI_r[mi_num]
+    plt.scatter(x, y)
+
+    plt.subplot(gs[4])
+    plt.xlabel('$CI$', fontsize=14)
+    plt.ylabel('$MI$', fontsize=14)
+    x = clust_CI
+    y = clust_MI_r[mi_num]
+    SC2 = plt.scatter(x, y, c=dist)
+    # Colorbar
+    ax4 = plt.subplot(gs[5])
+    cbar = plt.colorbar(SC2, cax=ax4)
     cbar.set_ticks([0.5, 1., 3., 5.])
     cbar.set_ticklabels([0.5, 1., 3., 5.])
     cbar.set_label('$dist\,(kpc)$')
