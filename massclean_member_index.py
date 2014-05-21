@@ -33,9 +33,9 @@ def members_index(mi_num, N_T, memb_w, not_memb_w):
         # members.
         n_w = sum(i > 0.9 for i in memb_w)
         memb_index = float(n_w) / float(N_T)
+    #elif mi_num == 1:
+        #memb_index = sum(memb_w) / N_T
     elif mi_num == 1:
-        memb_index = sum(memb_w) / N_T
-    elif mi_num == 2:
        # Punishes field stars assigned as cluster members according to the
        # weights assigned to them.
         memb_index = (sum(memb_w) - sum(not_memb_w)) / N_T
@@ -43,10 +43,15 @@ def members_index(mi_num, N_T, memb_w, not_memb_w):
     return memb_index
 
 
-def make_plots(mi_num, clust_CI, clust_MI, clust_MI_r, clust_params):
+def make_plots(clust_CI, clust_MI, clust_MI_r, clust_params):
     '''
     Plot the CI vs MI diagram for each MI.
     '''
+
+    # Color is associated with the dist; size with the initial mass and
+    # the marker with the age.
+    mrk = {7.: ('o', '$\log(age/yr)=7.$'), 8.: ('s', '$\log(age/yr)=8.$'),
+        9.: ('D', '$\log(age/yr)=9.$')}
 
     # Make plot.
     plt.figure(figsize=(14, 25))  # create the top-level container
@@ -54,13 +59,19 @@ def make_plots(mi_num, clust_CI, clust_MI, clust_MI_r, clust_params):
 
     ax0 = plt.subplot(gs[0])
     ax0.set_title('Decontamination algorithm')
-    plt.xlabel('$CI$', fontsize=14)
-    plt.ylabel('$MI$', fontsize=14)
+    plt.ylabel('$MI_1$', fontsize=16)
     plt.xlim(0., 1.0)
-    plt.ylim(max(min(clust_MI[mi_num]) - 0.1, -2.5), 1.0)
+    plt.ylim(-0.01, 1.0)
+    # make these tick labels invisible
+    plt.setp(ax0.get_xticklabels(), visible=False)
     ax0.yaxis.set_major_locator(MultipleLocator(0.2))
     # Plot grid
     plt.grid(b=True, which='major', color='gray', linestyle='--', zorder=1)
+    # Add text box with MI equation.
+    text = r'$MI_1 = n_m/N_{cl}$' '\n' r'  $(p_m >\,0.9)$'
+    x_align, y_align = 0.57, 0.88
+    plt.text(x_align, y_align, text, transform=ax0.transAxes,
+             bbox=dict(facecolor='white', alpha=0.6), fontsize=20)
     # Define color map.
     cm = plt.cm.get_cmap('RdYlBu_r')
     # Order.
@@ -71,38 +82,27 @@ def make_plots(mi_num, clust_CI, clust_MI, clust_MI_r, clust_params):
     z3 = np.take(dist, order)
     # Order before plotting.
     x = np.take(clust_CI, order)
-    y = np.take(clust_MI[mi_num], order)
-    # Color is associated with the dist; size with the initial mass and
-    # the marker with the age.
-    mrk = {7.: ('o', '$\log(age/yr)=7.$'), 8.: ('s', '$\log(age/yr)=8.$'),
-        9.: ('D', '$\log(age/yr)=9.$')}
+    y = np.take(clust_MI[0], order)
     for key, value in sorted(mrk.items()):
-
         s1 = (z2 == key)
         plt.scatter(x[s1], y[s1],
             marker=value[0], label=value[1],
             s=z1[s1],
             c=z3[s1], cmap=cm, lw=0.2)
     # Plot regression line.
-    m, b = np.polyfit(clust_CI, clust_MI[mi_num], 1)
+    m, b = np.polyfit(clust_CI, clust_MI[0], 1)
     range_CI = np.linspace(0., 1., 10)
     plt.plot(range_CI, m * range_CI + b, c='k', ls='--')
-    if mi_num == 2:
-        plt.axhline(y=0., linestyle='--', color='r', zorder=3)
-    # Plot legend.
-    legend = plt.legend(loc="lower left", markerscale=0.7, scatterpoints=1,
-        fontsize=13)
-    for i in range(len(mrk)):
-        legend.legendHandles[i].set_color('k')
 
+    #
     # Random MI.
     ax1 = plt.subplot(gs[1])
     ax1.set_title('Random probability')
-    plt.xlabel('$CI$', fontsize=14)
     plt.xlim(0., 1.0)
-    plt.ylim(max(min(clust_MI[mi_num]) - 0.1, -2.5), 1.0)
+    plt.ylim(-0.01, 1.0)
     # make these tick labels invisible
     plt.setp(ax1.get_yticklabels(), visible=False)
+    plt.setp(ax1.get_xticklabels(), visible=False)
     ax1.yaxis.set_major_locator(MultipleLocator(0.2))
     # Plot grid
     plt.grid(b=True, which='major', color='gray', linestyle='--', zorder=1)
@@ -116,11 +116,7 @@ def make_plots(mi_num, clust_CI, clust_MI, clust_MI_r, clust_params):
     z3 = np.take(dist, order)
     # Order before plotting.
     x = np.take(clust_CI, order)
-    y = np.take(clust_MI_r[mi_num], order)
-    # Color is associated with the dist; size with the initial mass and
-    # the marker with the age.
-    mrk = {7.: ('s', '$\log(age/yr)=7.$'), 8.: ('D', '$\log(age/yr)=8.$'),
-        9.: ('o', '$\log(age/yr)=9.$')}
+    y = np.take(clust_MI_r[0], order)
     for key, value in sorted(mrk.items()):
         s1 = (z2 == key)
         SC = plt.scatter(x[s1], y[s1],
@@ -128,63 +124,111 @@ def make_plots(mi_num, clust_CI, clust_MI, clust_MI_r, clust_params):
             s=z1[s1],
             c=z3[s1], cmap=cm, lw=0.2)
     # Plot regression line.
-    m, b = np.polyfit(clust_CI, clust_MI_r[mi_num], 1)
+    m, b = np.polyfit(clust_CI, clust_MI_r[0], 1)
     range_CI = np.linspace(0., 1., 10)
     plt.plot(range_CI, m * range_CI + b, c='k', ls='--')
-    if mi_num == 2:
-        plt.axhline(y=0., linestyle='--', color='r', zorder=3)
-    # Add text box with MI equation.
-    if mi_num == 0:
-        text = '$MI = n_m/N_{cl}$'
-    elif mi_num == 1:
-        #text = r'$MI_{%d}$ = $\frac{n_m}{n_m+n_f}$' % mi_num
-        text = ('$MI = \frac{\sum^{n_m}{p_m}}{N_{cl}}$')
-    elif mi_num == 2:
-        text = (r'$MI = \frac{\left(\sum^{n_m}{p_m} - ' +
-               r' \sum^{n_f}{p_f}\right)}{N_{cl}}$')
-    x_align, y_align = 0.57, 0.88
-    plt.text(x_align, y_align, text, transform=ax1.transAxes,
-             bbox=dict(facecolor='white', alpha=0.6), fontsize=20)
+    # Plot legend.
+    legend = plt.legend(loc="upper right", markerscale=0.7, scatterpoints=1,
+        fontsize=17)
+    for i in range(len(mrk)):
+        legend.legendHandles[i].set_color('k')
     # Colorbar
     axp2 = plt.subplot(gs[2])
     cbar = plt.colorbar(SC, cax=axp2)
     cbar.set_ticks([0.5, 1., 3., 5.])
     cbar.set_ticklabels([0.5, 1., 3., 5.])
-    cbar.set_label('$dist\,(kpc)$')
+    cbar.set_label('$dist\,(kpc)$', fontsize=16)
 
-    # Fillers.
-    plt.subplot(gs[3])
-    plt.xlabel('$CI$', fontsize=14)
-    plt.ylabel('$MI$', fontsize=14)
-    x = clust_CI
-    y = clust_MI_r[mi_num]
-    plt.scatter(x, y)
+    #
+    # Second MI.
+    ax3 = plt.subplot(gs[3])
+    plt.xlabel('$CI$', fontsize=16)
+    plt.ylabel('$MI_2$', fontsize=16)
+    plt.xlim(0., 1.0)
+    plt.ylim(max(min(clust_MI[1]) - 0.1, -2.5), 1.0)
+    ax3.yaxis.set_major_locator(MultipleLocator(0.2))
+    # Plot grid
+    plt.grid(b=True, which='major', color='gray', linestyle='--', zorder=1)
+    # Add text box with MI equation.
+    text = (r'$MI_2 = \frac{\left(\sum^{n_m}{p_m} - ' +
+           r' \sum^{n_f}{p_f}\right)}{N_{cl}}$')
+    x_align, y_align = 0.57, 0.86
+    plt.text(x_align, y_align, text, transform=ax3.transAxes,
+             bbox=dict(facecolor='white', alpha=0.6), fontsize=20)
+    plt.axhline(y=0., linestyle='--', color='r', zorder=3)
+    # Define color map.
+    cm = plt.cm.get_cmap('RdYlBu_r')
+    # Order.
+    mass, age, dist = clust_params
+    order = np.argsort(-np.array(mass))
+    z1 = np.take((np.array(mass) / 5.), order)
+    z2 = np.take(age, order)
+    z3 = np.take(dist, order)
+    # Order before plotting.
+    x = np.take(clust_CI, order)
+    y = np.take(clust_MI[1], order)
+    for key, value in sorted(mrk.items()):
+        s1 = (z2 == key)
+        plt.scatter(x[s1], y[s1],
+            marker=value[0], label=value[1],
+            s=z1[s1],
+            c=z3[s1], cmap=cm, lw=0.2)
+    # Plot regression line.
+    m, b = np.polyfit(clust_CI, clust_MI[1], 1)
+    range_CI = np.linspace(0., 1., 10)
+    plt.plot(range_CI, m * range_CI + b, c='k', ls='--')
+    plt.axhline(y=0., linestyle='--', color='r', zorder=3)
 
-    plt.subplot(gs[4])
-    plt.xlabel('$CI$', fontsize=14)
-    plt.ylabel('$MI$', fontsize=14)
-    x = clust_CI
-    y = clust_MI_r[mi_num]
-    SC2 = plt.scatter(x, y, c=dist)
+    #
+    # Second random MI.
+    ax4 = plt.subplot(gs[4])
+    plt.xlabel('$CI$', fontsize=16)
+    plt.xlim(0., 1.0)
+    plt.ylim(max(min(clust_MI[1]) - 0.1, -2.5), 1.0)
+    # make these tick labels invisible
+    plt.setp(ax4.get_yticklabels(), visible=False)
+    ax4.yaxis.set_major_locator(MultipleLocator(0.2))
+    # Plot grid
+    plt.grid(b=True, which='major', color='gray', linestyle='--', zorder=1)
+    plt.axhline(y=0., linestyle='--', color='r', zorder=3)
+    # Define color map.
+    cm = plt.cm.get_cmap('RdYlBu_r')
+    # Order.
+    mass, age, dist = clust_params
+    order = np.argsort(-np.array(mass))
+    z1 = np.take((np.array(mass) / 5.), order)
+    z2 = np.take(age, order)
+    z3 = np.take(dist, order)
+    # Order before plotting.
+    x = np.take(clust_CI, order)
+    y = np.take(clust_MI_r[1], order)
+    for key, value in sorted(mrk.items()):
+        s1 = (z2 == key)
+        SC2 = plt.scatter(x[s1], y[s1],
+            marker=value[0], label=value[1],
+            s=z1[s1],
+            c=z3[s1], cmap=cm, lw=0.2)
+    # Plot regression line.
+    m, b = np.polyfit(clust_CI, clust_MI_r[1], 1)
+    range_CI = np.linspace(0., 1., 10)
+    plt.plot(range_CI, m * range_CI + b, c='k', ls='--')
     # Colorbar
-    ax4 = plt.subplot(gs[5])
-    cbar = plt.colorbar(SC2, cax=ax4)
+    axp4 = plt.subplot(gs[5])
+    cbar = plt.colorbar(SC2, cax=axp4)
     cbar.set_ticks([0.5, 1., 3., 5.])
     cbar.set_ticklabels([0.5, 1., 3., 5.])
-    cbar.set_label('$dist\,(kpc)$')
+    cbar.set_label('$dist\,(kpc)$', fontsize=16)
 
-    # Save to file.
+    # Save to output png file.
     plt.tight_layout()
-    # Generate output png file.
-    out_png = dir_memb_files + 'MI_%d_analisys.png' % mi_num
+    out_png = dir_memb_files + 'MI_analisys.png'
     plt.savefig(out_png, dpi=150)
-    print 'Plot %d done.' % mi_num
+    print 'Plot done.'
 
 
 '''
 Calculates all member_index defined, for a given decontamination algorithm.
 Plots the output as a CI vs MI diagram.
-
 
 First step is to read the *.DAT data file for the synthetic cluster and recover
 the true number of members: N_T.
@@ -255,7 +299,7 @@ for root, dirs, files in walk(dir_dat_files):
 
 
 # Lists that will hold all the member and contamination index values.
-clust_MI, clust_MI_r, clust_CI, clust_params = [[], [], []], [[], [], []], \
+clust_MI, clust_MI_r, clust_CI, clust_params = [[], []], [[], []], \
 [], [[], [], []]
 
 # Initialize files remaining counter.
@@ -279,7 +323,7 @@ for f_indx, sub_dir in enumerate(dir_files[0]):
 
     # Only plot clusters closer than this limit to the true center.
     cent_diff = np.sqrt((cenx - 1024.) ** 2 + (ceny - 1024.) ** 2)
-    if cent_diff < 80.:
+    if cent_diff < 90.:
 
         # Store CI of cluster.
         clust_CI.append(cont_ind)
@@ -310,10 +354,12 @@ for f_indx, sub_dir in enumerate(dir_files[0]):
                 not_memb_w.append(data2[7][ind])
 
         # Calculate 'memb_index' for this cluster.
-        for mi_num in range(3):
+        for mi_num in range(2):
             memb_ind = members_index(mi_num, N_T, memb_w, not_memb_w)
             # Append value to list.
             clust_MI[mi_num].append(memb_ind)
+            if mi_num == 0:
+                print cont_ind, memb_ind
 
             # Random membership assignation.
             memb_w_r = np.random.uniform(low=0., high=1., size=(len(memb_w),))
@@ -335,11 +381,10 @@ for f_indx, sub_dir in enumerate(dir_files[0]):
         clust_params[1].append(age)
         clust_params[2].append(dist)
 
-        print len(dir_files[0]) - i, sub_dir, clust_name, cont_ind
+        #print len(dir_files[0]) - i, sub_dir, clust_name, cont_ind
         i += 1
 
-for mi_num in range(3):
-    # Generate plots.
-    make_plots(mi_num, clust_CI, clust_MI, clust_MI_r, clust_params)
+# Generate plots.
+#make_plots(clust_CI, clust_MI, clust_MI_r, clust_params)
 
 print 'End.'

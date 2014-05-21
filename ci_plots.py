@@ -179,12 +179,12 @@ print 'Number of assigned centers out of synth clusters region: %d' % len(ci_o)
 print 'Clusters with prob<0.4 value'
 for i, cl in enumerate(names):
     if prob[i] < 0.4:
-        print cl, int(cent_diff[i]), prob[i]
+        print cl, int(cent_diff[i]), prob[i], memb_n[i] / memb_num[i]
 
 # Value that holds 50% of clusters.
 val_c = sorted(cent_i)[int(0.5 * len(cent_i))]
-print '50% limit:', val_c
-print '\n Center percentages'
+print '\n 50% limit:', val_c
+print 'Center percentages'
 print '<10', float(sum(abs(i) < 10. for i in cent_diff)) / len(cent_diff)
 print '<20', float(sum(abs(i) < 20. for i in cent_diff)) / len(cent_diff)
 print '<50', float(sum(abs(i) < 50. for i in cent_diff)) / len(cent_diff)
@@ -194,9 +194,9 @@ print '<90', float(sum(abs(i) < 90. for i in cent_diff)) / len(cent_diff)
 # Radius in/out.
 rad_diff_i = np.array(rad_i) - 250.
 val_r = sorted(abs(rad_diff_i))[int(0.5 * len(rad_diff_i))]
-print '50% limit:', val_r
+print '\n 50% limit:', val_r
 rad_diff_io = np.array(rad) - 250.
-print '\n Radius percentages'
+print 'Radius percentages'
 print '<10', float(sum(abs(i) < 10. for i in rad_diff_io)) / len(rad_diff_io)
 print '<20', float(sum(abs(i) < 20. for i in rad_diff_io)) / len(rad_diff_io)
 print '<50', float(sum(abs(i) < 50. for i in rad_diff_io)) / len(rad_diff_io)
@@ -207,10 +207,10 @@ print '<90', float(sum(abs(i) < 90. for i in rad_diff_io)) / len(rad_diff_io)
 memb_diff_i = (np.array(memb_ocaat_i) - np.array(memb_true_i)) / \
     np.array(memb_true_i)
 val_memb = sorted(abs(memb_diff_i))[int(0.5 * len(memb_diff_i))]
-print '50% limit:', val_memb
+print '\n 50% limit:', val_memb
 memb_diff_io = (np.array(memb_n) - np.array(memb_num)) / \
     np.array(memb_num)
-print '\n Member number percentages'
+print 'Member number percentages'
 print '<0.1', float(sum(abs(i) < 0.1 for i in memb_diff_io)) / len(memb_diff_io)
 print '<0.2', float(sum(abs(i) < 0.2 for i in memb_diff_io)) / len(memb_diff_io)
 print '<0.5', float(sum(abs(i) < 0.5 for i in memb_diff_io)) / len(memb_diff_io)
@@ -221,10 +221,10 @@ print '<0.9', float(sum(abs(i) < 0.9 for i in memb_diff_io)) / len(memb_diff_io)
 delta_met_i = np.log10(np.array(metal_i) / 0.019) - \
 np.log10(np.array(metal_ocaat_i) / 0.019)
 val_m = sorted(abs(delta_met_i))[int(0.5 * len(delta_met_i))]
-print '50% limit:', val_m
+print '\n 50% limit:', val_m
 delta_met_io = np.log10(np.array(metal) / 0.019) - \
 np.log10(np.array(metal_ocaat) / 0.019)
-print '\n Metallicity percentages'
+print 'Metallicity percentages'
 print '<0.1', float(sum(abs(i) < 0.1 for i in delta_met_io)) / len(delta_met_io)
 print '<0.2', float(sum(abs(i) < 0.2 for i in delta_met_io)) / len(delta_met_io)
 print '<0.5', float(sum(abs(i) < 0.5 for i in delta_met_io)) / len(delta_met_io)
@@ -237,9 +237,9 @@ e_feh_i = (1. / np.log(10.)) * (np.array(e_met_i) / np.array(metal_i))
 #(10 ** (np.array(age_ocaat_i))) / 1.e09
 delta_age_i = np.array(age_i) - np.array(age_ocaat_i)
 val_a = sorted(abs(delta_age_i))[int(0.5 * len(delta_age_i))]
-print '50% limit:', val_a
+print '\n 50% limit:', val_a
 delta_age_io = np.array(age) - np.array(age_ocaat)
-print '\n Age percentages'
+print 'Age percentages'
 print '<0.1', float(sum(abs(i) < 0.1 for i in delta_age_io)) / len(delta_age_io)
 print '<0.2', float(sum(abs(i) < 0.2 for i in delta_age_io)) / len(delta_age_io)
 print '<0.5', float(sum(abs(i) < 0.5 for i in delta_age_io)) / len(delta_age_io)
@@ -250,10 +250,10 @@ d_ocaat_i = (10 ** ((np.array(dist_ocaat_i) + 5) / 5)) / 1000.
 e_dist_i_dm = 0.2 * np.log(10.) * d_ocaat_i * np.array(e_dist_i)
 delta_dist_i = np.array(dist_i) - np.array(d_ocaat_i)
 val_d = sorted(abs(delta_dist_i))[int(0.5 * len(delta_dist_i))]
-print '50% limit:', val_d
+print '\n 50% limit:', val_d
 d_ocaat_io = (10 ** ((np.array(dist_ocaat) + 5) / 5)) / 1000.
 delta_dist_io = np.array(dist) - np.array(d_ocaat_io)
-print '\n Dist percentages'
+print 'Dist percentages'
 print '<0.1.', float(sum(abs(i) < 0.1 for i in delta_dist_io)) / \
     len(delta_dist_io)
 print '<0.5', float(sum(abs(i) < 0.5 for i in delta_dist_io)) / \
@@ -265,9 +265,9 @@ len(delta_dist_io)
 # Extinction in/out.
 delta_ext_i = np.array(extinc_i) - np.array(ext_ocaat_i)
 val_e = sorted(abs(delta_ext_i))[int(0.5 * len(delta_ext_i))]
-print '50% limit:', val_e
+print '\n 50% limit:', val_e
 delta_ext_io = np.array(extinc) - np.array(ext_ocaat)
-print '\n Extinc percentages'
+print 'Extinc percentages'
 print '<0.025', float(sum(abs(i) < 0.025 for i in delta_ext_io)) / \
     len(delta_ext_io)
 print '<0.05', float(sum(abs(i) < 0.05 for i in delta_ext_io)) / \
