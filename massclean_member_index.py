@@ -31,7 +31,7 @@ def members_index(mi_num, N_T, memb_w, not_memb_w):
         # Equivalent to the TPR_90 index in UPMASK. It's the ratio of
         # true cluster members recovered and the total number of true cluster
         # members.
-        n_w = sum(i > 0.9 for i in memb_w)
+        n_w = sum(i > 0.5 for i in memb_w)
         memb_index = float(n_w) / float(N_T)
     #elif mi_num == 1:
         #memb_index = sum(memb_w) / N_T
@@ -68,7 +68,7 @@ def make_plots(clust_CI, clust_MI, clust_MI_r, clust_params):
     # Plot grid
     plt.grid(b=True, which='major', color='gray', linestyle='--', zorder=1)
     # Add text box with MI equation.
-    text = r'$MI_1 = n_m/N_{cl}$' '\n' r'  $(p_m >\,0.9)$'
+    text = r'$MI_1 = n_m/N_{cl}$' '\n' r'  $(p_m >\,0.5)$'
     x_align, y_align = 0.57, 0.88
     plt.text(x_align, y_align, text, transform=ax0.transAxes,
              bbox=dict(facecolor='white', alpha=0.6), fontsize=20)
@@ -358,8 +358,8 @@ for f_indx, sub_dir in enumerate(dir_files[0]):
             memb_ind = members_index(mi_num, N_T, memb_w, not_memb_w)
             # Append value to list.
             clust_MI[mi_num].append(memb_ind)
-            if mi_num == 0:
-                print cont_ind, memb_ind
+            #if mi_num == 0:
+                #print cont_ind, memb_ind
 
             # Random membership assignation.
             memb_w_r = np.random.uniform(low=0., high=1., size=(len(memb_w),))
@@ -381,10 +381,10 @@ for f_indx, sub_dir in enumerate(dir_files[0]):
         clust_params[1].append(age)
         clust_params[2].append(dist)
 
-        #print len(dir_files[0]) - i, sub_dir, clust_name, cont_ind
+        print len(dir_files[0]) - i, sub_dir, clust_name, cont_ind
         i += 1
 
 # Generate plots.
-#make_plots(clust_CI, clust_MI, clust_MI_r, clust_params)
+make_plots(clust_CI, clust_MI, clust_MI_r, clust_params)
 
 print 'End.'

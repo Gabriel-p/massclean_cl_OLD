@@ -195,19 +195,23 @@ print '<90', float(sum(abs(i) < 90. for i in cent_diff)) / len(cent_diff)
 rad_diff_i = np.array(rad_i) - 250.
 val_r = sorted(abs(rad_diff_i))[int(0.5 * len(rad_diff_i))]
 print '\n 50% limit:', val_r
-rad_diff_io = np.array(rad) - 250.
-print 'Radius percentages'
-print '<10', float(sum(abs(i) < 10. for i in rad_diff_io)) / len(rad_diff_io)
-print '<20', float(sum(abs(i) < 20. for i in rad_diff_io)) / len(rad_diff_io)
-print '<50', float(sum(abs(i) < 50. for i in rad_diff_io)) / len(rad_diff_io)
-print '<80', float(sum(abs(i) < 80. for i in rad_diff_io)) / len(rad_diff_io)
-print '<90', float(sum(abs(i) < 90. for i in rad_diff_io)) / len(rad_diff_io)
+val_r_90 = sorted(abs(rad_diff_i))[int(0.9 * len(rad_diff_i))]
+print '90% limit:', val_r_90
+#rad_diff_io = np.array(rad) - 250.
+print 'Radius percentages (%d)' % len(rad_diff_i)
+print '<10', float(sum(abs(i) < 10. for i in rad_diff_i)) / len(rad_diff_i)
+print '<20', float(sum(abs(i) < 20. for i in rad_diff_i)) / len(rad_diff_i)
+print '<50', float(sum(abs(i) < 50. for i in rad_diff_i)) / len(rad_diff_i)
+print '<80', float(sum(abs(i) < 80. for i in rad_diff_i)) / len(rad_diff_i)
+print '<90', float(sum(abs(i) < 90. for i in rad_diff_i)) / len(rad_diff_i)
 
 # Number of members.
 memb_diff_i = (np.array(memb_ocaat_i) - np.array(memb_true_i)) / \
     np.array(memb_true_i)
 val_memb = sorted(abs(memb_diff_i))[int(0.5 * len(memb_diff_i))]
 print '\n 50% limit:', val_memb
+val_memb_90 = sorted(abs(memb_diff_i))[int(0.9 * len(memb_diff_i))]
+print '90% limit:', val_memb_90
 memb_diff_io = (np.array(memb_n) - np.array(memb_num)) / \
     np.array(memb_num)
 print 'Member number percentages'
@@ -220,15 +224,19 @@ print '<0.9', float(sum(abs(i) < 0.9 for i in memb_diff_io)) / len(memb_diff_io)
 # Metallicity in/out.
 delta_met_i = np.log10(np.array(metal_i) / 0.019) - \
 np.log10(np.array(metal_ocaat_i) / 0.019)
+#delta_met_i = np.array(metal_i) - np.array(metal_ocaat_i)
 val_m = sorted(abs(delta_met_i))[int(0.5 * len(delta_met_i))]
 print '\n 50% limit:', val_m
-delta_met_io = np.log10(np.array(metal) / 0.019) - \
-np.log10(np.array(metal_ocaat) / 0.019)
+#delta_met_io = np.log10(np.array(metal) / 0.019) - \
+#np.log10(np.array(metal_ocaat) / 0.019)
 print 'Metallicity percentages'
-print '<0.1', float(sum(abs(i) < 0.1 for i in delta_met_io)) / len(delta_met_io)
-print '<0.2', float(sum(abs(i) < 0.2 for i in delta_met_io)) / len(delta_met_io)
-print '<0.5', float(sum(abs(i) < 0.5 for i in delta_met_io)) / len(delta_met_io)
-print '<1.3', float(sum(abs(i) < 1.3 for i in delta_met_io)) / len(delta_met_io)
+print '<0.1', float(sum(abs(i) < 0.1 for i in delta_met_i)) / len(delta_met_i)
+print '<0.2', float(sum(abs(i) < 0.2 for i in delta_met_i)) / len(delta_met_i)
+print '<0.5', float(sum(abs(i) < 0.5 for i in delta_met_i)) / len(delta_met_i)
+print '<1.', float(sum(abs(i) < 1. for i in delta_met_i)) / len(delta_met_i)
+print '<1.5', float(sum(abs(i) < 1.5 for i in delta_met_i)) / len(delta_met_i)
+print '<1.8', float(sum(abs(i) < 1.8 for i in delta_met_i)) / len(delta_met_i)
+print '<2.5', float(sum(abs(i) < 2.5 for i in delta_met_i)) / len(delta_met_i)
 # Transform to [Fe/H] errors.
 e_feh_i = (1. / np.log(10.)) * (np.array(e_met_i) / np.array(metal_i))
 
@@ -238,12 +246,31 @@ e_feh_i = (1. / np.log(10.)) * (np.array(e_met_i) / np.array(metal_i))
 delta_age_i = np.array(age_i) - np.array(age_ocaat_i)
 val_a = sorted(abs(delta_age_i))[int(0.5 * len(delta_age_i))]
 print '\n 50% limit:', val_a
-delta_age_io = np.array(age) - np.array(age_ocaat)
+#delta_age_io = np.array(age) - np.array(age_ocaat)
 print 'Age percentages'
-print '<0.1', float(sum(abs(i) < 0.1 for i in delta_age_io)) / len(delta_age_io)
-print '<0.2', float(sum(abs(i) < 0.2 for i in delta_age_io)) / len(delta_age_io)
-print '<0.5', float(sum(abs(i) < 0.5 for i in delta_age_io)) / len(delta_age_io)
-print '<1.3', float(sum(abs(i) < 1.3 for i in delta_age_io)) / len(delta_age_io)
+print '<0.1', float(sum(abs(i) < 0.1 for i in delta_age_i)) / len(delta_age_i)
+print '<0.2', float(sum(abs(i) < 0.2 for i in delta_age_i)) / len(delta_age_i)
+print '<0.5', float(sum(abs(i) < 0.5 for i in delta_age_i)) / len(delta_age_i)
+print '<1.3', float(sum(abs(i) < 1.3 for i in delta_age_i)) / len(delta_age_i)
+print '<2', float(sum(abs(i) < 2 for i in delta_age_i)) / len(delta_age_i)
+print '<3', float(sum(abs(i) < 3 for i in delta_age_i)) / len(delta_age_i)
+print '<4', float(sum(abs(i) < 4 for i in delta_age_i)) / len(delta_age_i)
+
+#
+# Check for age-metallicity degeneracy.
+#print '\n'
+#for val1, val2 in zip(delta_met_i, delta_age_i):
+    #print val1, val2
+
+#for i, cl in enumerate(names):
+    #if cent_diff[i] < 90.:
+        ##met_diff = np.log10(metal[i] / 0.019) - np.log10(metal_ocaat[i]
+        ##/ 0.019)
+        #age_diff = age[i] - age_ocaat[i]
+        ##if met_diff > 0 and age_diff < 0:
+        #print cl, age_diff, age[i], age_ocaat[i], dist[i]
+#print 'Halt.'
+
 
 # Distance in/out.
 d_ocaat_i = (10 ** ((np.array(dist_ocaat_i) + 5) / 5)) / 1000.
@@ -251,30 +278,34 @@ e_dist_i_dm = 0.2 * np.log(10.) * d_ocaat_i * np.array(e_dist_i)
 delta_dist_i = np.array(dist_i) - np.array(d_ocaat_i)
 val_d = sorted(abs(delta_dist_i))[int(0.5 * len(delta_dist_i))]
 print '\n 50% limit:', val_d
-d_ocaat_io = (10 ** ((np.array(dist_ocaat) + 5) / 5)) / 1000.
-delta_dist_io = np.array(dist) - np.array(d_ocaat_io)
+#d_ocaat_io = (10 ** ((np.array(dist_ocaat) + 5) / 5)) / 1000.
+#delta_dist_io = np.array(dist) - np.array(d_ocaat_io)
 print 'Dist percentages'
-print '<0.1.', float(sum(abs(i) < 0.1 for i in delta_dist_io)) / \
-    len(delta_dist_io)
-print '<0.5', float(sum(abs(i) < 0.5 for i in delta_dist_io)) / \
-len(delta_dist_io)
-print '<1.', float(sum(abs(i) < 1. for i in delta_dist_io)) / len(delta_dist_io)
-print '<1.5', float(sum(abs(i) < 1.5 for i in delta_dist_io)) / \
-len(delta_dist_io)
+print '<0.1.', float(sum(abs(i) < 0.1 for i in delta_dist_i)) / \
+    len(delta_dist_i)
+print '<0.5', float(sum(abs(i) < 0.5 for i in delta_dist_i)) / \
+len(delta_dist_i)
+print '<1.', float(sum(abs(i) < 1. for i in delta_dist_i)) / len(delta_dist_i)
+print '<1.5', float(sum(abs(i) < 1.5 for i in delta_dist_i)) / \
+len(delta_dist_i)
+print '<2.', float(sum(abs(i) < 2. for i in delta_dist_i)) / len(delta_dist_i)
+print '<3.', float(sum(abs(i) < 3. for i in delta_dist_i)) / len(delta_dist_i)
+print '<4.', float(sum(abs(i) < 4. for i in delta_dist_i)) / len(delta_dist_i)
+print '<5.', float(sum(abs(i) < 5. for i in delta_dist_i)) / len(delta_dist_i)
 
 # Extinction in/out.
 delta_ext_i = np.array(extinc_i) - np.array(ext_ocaat_i)
 val_e = sorted(abs(delta_ext_i))[int(0.5 * len(delta_ext_i))]
 print '\n 50% limit:', val_e
-delta_ext_io = np.array(extinc) - np.array(ext_ocaat)
+#delta_ext_io = np.array(extinc) - np.array(ext_ocaat)
 print 'Extinc percentages'
-print '<0.025', float(sum(abs(i) < 0.025 for i in delta_ext_io)) / \
-    len(delta_ext_io)
-print '<0.05', float(sum(abs(i) < 0.05 for i in delta_ext_io)) / \
-len(delta_ext_io)
-print '<0.1', float(sum(abs(i) < 0.1 for i in delta_ext_io)) / len(delta_ext_io)
-print '<0.2', float(sum(abs(i) < 0.2 for i in delta_ext_io)) / len(delta_ext_io)
-print '<0.4', float(sum(abs(i) < 0.4 for i in delta_ext_io)) / len(delta_ext_io)
+print '<0.025', float(sum(abs(i) < 0.025 for i in delta_ext_i)) / \
+    len(delta_ext_i)
+print '<0.05', float(sum(abs(i) < 0.05 for i in delta_ext_i)) / \
+len(delta_ext_i)
+print '<0.1', float(sum(abs(i) < 0.1 for i in delta_ext_i)) / len(delta_ext_i)
+print '<0.2', float(sum(abs(i) < 0.2 for i in delta_ext_i)) / len(delta_ext_i)
+print '<0.4', float(sum(abs(i) < 0.4 for i in delta_ext_i)) / len(delta_ext_i)
 
 
 # Make plot.
@@ -336,10 +367,10 @@ for key, value in sorted(mrk.items()):
         c=z2_i[s1], cmap=cm, lw=0.4, zorder=3)
 # Plot legend.
 leg = plt.legend(loc="lower right", markerscale=0.7, scatterpoints=1,
-    fontsize=13)
+    fontsize=15)
 for i in range(len(mrk)):
     leg.legendHandles[i].set_color('k')
-    leg.get_frame().set_alpha(0.7)
+    leg.get_frame().set_alpha(0.5)
 # Colorbar
 axp2 = plt.subplot(gs[2])
 cbar = plt.colorbar(SC, cax=axp2)
@@ -348,7 +379,7 @@ cbar.set_ticklabels([0.5, 1., 3., 5.])
 cbar.set_label('dist (kpc)')
 
 ax00 = plt.subplot(gs[3])
-plt.xlim(-2., 90.)
+plt.xlim(-2., 100.)
 plt.ylim(ymin, ymax)
 plt.ylabel('$\log(CI)$', fontsize=14)
 plt.xlabel('$\Delta center\,(px)$', fontsize=14)
@@ -368,10 +399,10 @@ for key, value in sorted(mrk.items()):
         c=z2_i[s1], cmap=cm, lw=0.4, zorder=3)
 # Plot legend.
 leg = plt.legend(loc="lower right", markerscale=0.7, scatterpoints=1,
-    fontsize=13)
+    fontsize=15)
 for i in range(len(mrk)):
     leg.legendHandles[i].set_color('k')
-    leg.get_frame().set_alpha(0.7)
+    leg.get_frame().set_alpha(0.5)
 
 ax01 = plt.subplot(gs[4])
 plt.xlim(-150., 150.)
@@ -402,7 +433,8 @@ cbar.set_ticklabels([0.5, 1., 3., 5.])
 cbar.set_label('dist (kpc)')
 
 ax1 = plt.subplot(gs[6])
-plt.xlim(-1.4, 1.4)
+#plt.xlim(-1.4, 1.4)
+plt.xlim(-2, 2)
 plt.ylim(ymin, ymax)
 plt.xlabel('$\Delta [Fe/H]$', fontsize=14)
 plt.ylabel('$\log(CI))$', fontsize=14)
@@ -422,16 +454,11 @@ for key, value in sorted(mrk.items()):
         c=z2_i[s1], cmap=cm, lw=0.4, zorder=3)
 # Vertical shaded area.
 plt.axvspan(-val_m, val_m, facecolor='grey', alpha=0.5, zorder=1)
-# Plot legend.
-leg = plt.legend(loc="lower left", markerscale=0.7, scatterpoints=1,
-    fontsize=12)
-for i in range(len(mrk)):
-    leg.legendHandles[i].set_color('k')
-    leg.get_frame().set_alpha(0.7)
 
 #ax2 = plt.subplot(gs[8:11, 3:6])
 ax2 = plt.subplot(gs[7])
-plt.xlim(-1.25, 1.25)
+#plt.xlim(-1.25, 1.25)
+plt.xlim(-2., 2.)
 plt.ylim(ymin, ymax)
 plt.xlabel('$\Delta \log(age/yr)$', fontsize=14)
 # make these tick labels invisible
@@ -452,6 +479,12 @@ for key, value in sorted(mrk.items()):
         c=z2_i[s1], cmap=cm, lw=0.4, zorder=3)
 # Vertical shaded area.
 plt.axvspan(-val_a, val_a, facecolor='grey', alpha=0.5, zorder=1)
+# Plot legend.
+leg = plt.legend(loc="lower right", markerscale=0.7, scatterpoints=1,
+    fontsize=15)
+for i in range(len(mrk)):
+    leg.legendHandles[i].set_color('k')
+    leg.get_frame().set_alpha(0.5)
 # Colorbar.
 ax22 = plt.subplot(gs[8])
 cbar = plt.colorbar(SC, cax=ax22)
@@ -461,7 +494,8 @@ cbar.set_label('dist (kpc)')
 
 #ax3 = plt.subplot(gs[11:14, 0:3])
 ax3 = plt.subplot(gs[9])
-plt.xlim(-1.45, 1.45)
+#plt.xlim(-1.45, 1.45)
+plt.xlim(-3.5, 3.5)
 plt.ylim(ymin, ymax)
 plt.xlabel('$\Delta dist (kpc)$', fontsize=14)
 plt.ylabel('$\log(CI)$', fontsize=14)
