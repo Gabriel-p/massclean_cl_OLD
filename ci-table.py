@@ -156,13 +156,13 @@ for ci_rang in ci_lst:
     for m_vals in ci_rang[3]:
         if m_vals:
             m_m, m_st = np.mean(m_vals), np.std(m_vals)
-            m_mean.append(round(m_m, 3))
-            m_std.append(round(m_st, 3))
+            m_mean.append(round(m_m, 3) * 100.)
+            m_std.append(round(m_st, 3) * 100.)
         else:
             m_mean.append('-')
             m_std.append('')
     # Format mean and std dev values in a single list.
     f_lst = [item for sublist in zip(m_mean, m_std) for item in sublist]
-    print 'm: ${}\pm{}$ & ${}\pm{}$ & ${}\pm{}$ & ${}\pm{}$'.format(*f_lst)
+    print 'mx1e02: ${}\pm{}$ & ${}\pm{}$ & ${}\pm{}$ & ${}\pm{}$'.format(*f_lst)
 
     print '\n'
