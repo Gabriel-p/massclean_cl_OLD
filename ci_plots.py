@@ -12,6 +12,7 @@ import warnings
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
+from matplotlib.ticker import MultipleLocator
 
 '''
 Generate plots of contamination index (CI) for each MASSCLEAN cluster versus
@@ -312,6 +313,7 @@ print '<0.4', float(sum(abs(i) < 0.4 for i in delta_ext_i)) / len(delta_ext_i)
 fig = plt.figure(figsize=(14, 25))  # create the top-level container
 gs = gridspec.GridSpec(4, 3, width_ratios=[1, 1, 0.05])
 cm = plt.cm.get_cmap('RdYlBu_r')
+xy_font_s = 21
 
 # Y axis parameter.
 ci_param_i = np.log(np.array(ci_i))
@@ -337,8 +339,8 @@ z2_o = np.take(dist_o, order_o)
 ax0 = plt.subplot(gs[0])
 plt.ylim(0.005, 1.05)
 plt.xlim(0., 1.05)
-plt.ylabel('prob', fontsize=12)
-plt.xlabel('$CI$', fontsize=14)
+plt.ylabel('$prob$', fontsize=xy_font_s)
+plt.xlabel('$CI$', fontsize=xy_font_s)
 ax0.grid(b=True, which='both', color='gray', linestyle='--', lw=0.5)
 plt.scatter(ci_o, prob_o, c=z2_o, cmap=cm, s=z1_o, marker='D', lw=0.5)
 # Order before plotting.
@@ -348,11 +350,12 @@ plt.scatter(x, y, c=z2_i, cmap=cm, s=z1_i + 25., lw=0.4)
 
 # Memb num vs CI.
 axp = plt.subplot(gs[1])
-plt.xlabel('$e_{rel} MN$', fontsize=14)
-plt.ylabel('$\log(CI)$', fontsize=12)
+plt.xlabel('$e_{rel} MN$', fontsize=xy_font_s)
+plt.ylabel('$\log(CI)$', fontsize=xy_font_s)
 plt.ylim(ymin, ymax)
 plt.xlim(-0.5, 0.5)
 axp.minorticks_on()
+axp.yaxis.set_major_locator(MultipleLocator(1.0))
 axp.grid(b=True, which='major', color='gray', linestyle='--', lw=0.5)
 plt.axvspan(-val_memb, val_memb, facecolor='grey', alpha=0.5, zorder=1)
 # Order before plotting.
@@ -365,25 +368,21 @@ for key, value in sorted(mrk.items()):
         marker=value[0], label=value[1],
         s=z1_i[s1],
         c=z2_i[s1], cmap=cm, lw=0.4, zorder=3)
-# Plot legend.
-leg = plt.legend(loc="lower right", markerscale=0.7, scatterpoints=1,
-    fontsize=15)
-for i in range(len(mrk)):
-    leg.legendHandles[i].set_color('k')
-    leg.get_frame().set_alpha(0.5)
 # Colorbar
 axp2 = plt.subplot(gs[2])
 cbar = plt.colorbar(SC, cax=axp2)
 cbar.set_ticks([0.5, 1., 3., 5.])
 cbar.set_ticklabels([0.5, 1., 3., 5.])
-cbar.set_label('dist (kpc)')
+cbar.set_label('$dist\,(kpc)$', fontsize=xy_font_s, labelpad=-15, y=0.35)
 
+# Delta center vs log(CI)
 ax00 = plt.subplot(gs[3])
-plt.xlim(-2., 100.)
+plt.xlim(-2., 98.)
 plt.ylim(ymin, ymax)
-plt.ylabel('$\log(CI)$', fontsize=14)
-plt.xlabel('$\Delta center\,(px)$', fontsize=14)
+plt.ylabel('$\log(CI)$', fontsize=xy_font_s)
+plt.xlabel('$\Delta center\,(px)$', fontsize=xy_font_s)
 ax00.minorticks_on()
+ax00.yaxis.set_major_locator(MultipleLocator(1.0))
 ax00.grid(b=True, which='major', color='gray', linestyle='--', lw=0.5)
 plt.axvspan(0., val_c, facecolor='grey', alpha=0.5, zorder=1)
 plt.errorbar(cent_i, ci_param_i, xerr=e_cent_i, ls='none', color='grey',
@@ -399,18 +398,20 @@ for key, value in sorted(mrk.items()):
         c=z2_i[s1], cmap=cm, lw=0.4, zorder=3)
 # Plot legend.
 leg = plt.legend(loc="lower right", markerscale=0.7, scatterpoints=1,
-    fontsize=15)
+    fontsize=17)
 for i in range(len(mrk)):
     leg.legendHandles[i].set_color('k')
     leg.get_frame().set_alpha(0.5)
 
+# Delta r_cl vs log(CI)
 ax01 = plt.subplot(gs[4])
-plt.xlim(-150., 150.)
+plt.xlim(-148., 148.)
 plt.ylim(ymin, ymax)
-plt.xlabel('$\Delta r_{cl}\,(px)$', fontsize=14)
+plt.xlabel('$\Delta r_{cl}\,(px)$', fontsize=xy_font_s)
 # make these tick labels invisible
 plt.setp(ax01.get_yticklabels(), visible=False)
 ax01.minorticks_on()
+ax01.yaxis.set_major_locator(MultipleLocator(1.0))
 ax01.grid(b=True, which='major', color='gray', linestyle='--', lw=0.5)
 plt.axvspan(-val_r, val_r, facecolor='grey', alpha=0.5, zorder=1)
 plt.errorbar(rad_diff_i, ci_param_i, xerr=e_rad_i, ls='none', color='grey',
@@ -430,22 +431,22 @@ ax01 = plt.subplot(gs[5])
 cbar = plt.colorbar(SC, cax=ax01)
 cbar.set_ticks([0.5, 1., 3., 5.])
 cbar.set_ticklabels([0.5, 1., 3., 5.])
-cbar.set_label('dist (kpc)')
+cbar.set_label('$dist\,(kpc)$', fontsize=xy_font_s, labelpad=-15, y=0.35)
 
+# Delta metallicity vs loc(CI)
 ax1 = plt.subplot(gs[6])
-#plt.xlim(-1.4, 1.4)
-plt.xlim(-2, 2)
+plt.xlim(-1.8, 1.8)
 plt.ylim(ymin, ymax)
-plt.xlabel('$\Delta [Fe/H]$', fontsize=14)
-plt.ylabel('$\log(CI))$', fontsize=14)
-ax1.grid(b=True, which='major', color='gray', linestyle='--', lw=0.5)
+plt.xlabel('$\Delta [Fe/H]$', fontsize=xy_font_s)
+plt.ylabel('$\log(CI)$', fontsize=xy_font_s)
 ax1.minorticks_on()
+ax1.yaxis.set_major_locator(MultipleLocator(1.0))
+ax1.grid(b=True, which='major', color='gray', linestyle='--', lw=0.5)
 # Order before plotting.
 x = np.take(delta_met_i, order_i)
 y = np.take(ci_param_i, order_i)
 plt.errorbar(delta_met_i, ci_param_i, xerr=e_feh_i, ls='none', color='grey',
     zorder=1)
-#plt.scatter(x, y, c=z2_i, cmap=cm, s=z1_i, zorder=3, lw=0.5)
 for key, value in sorted(mrk.items()):
     s1 = (z3_i == key)
     plt.scatter(x[s1], y[s1],
@@ -455,16 +456,16 @@ for key, value in sorted(mrk.items()):
 # Vertical shaded area.
 plt.axvspan(-val_m, val_m, facecolor='grey', alpha=0.5, zorder=1)
 
-#ax2 = plt.subplot(gs[8:11, 3:6])
+# Delta log(age) vs log(CI)
 ax2 = plt.subplot(gs[7])
-#plt.xlim(-1.25, 1.25)
-plt.xlim(-2., 2.)
+plt.xlim(-1.9, 1.9)
 plt.ylim(ymin, ymax)
-plt.xlabel('$\Delta \log(age/yr)$', fontsize=14)
+plt.xlabel('$\Delta \log(age/yr)$', fontsize=xy_font_s)
 # make these tick labels invisible
 plt.setp(ax2.get_yticklabels(), visible=False)
-ax2.grid(b=True, which='major', color='gray', linestyle='--', lw=0.5)
 ax2.minorticks_on()
+ax2.grid(b=True, which='major', color='gray', linestyle='--', lw=0.5)
+ax2.yaxis.set_major_locator(MultipleLocator(1.0))
 # Order before plotting.
 x = np.take(delta_age_i, order_i)
 y = np.take(ci_param_i, order_i)
@@ -479,28 +480,22 @@ for key, value in sorted(mrk.items()):
         c=z2_i[s1], cmap=cm, lw=0.4, zorder=3)
 # Vertical shaded area.
 plt.axvspan(-val_a, val_a, facecolor='grey', alpha=0.5, zorder=1)
-# Plot legend.
-leg = plt.legend(loc="lower right", markerscale=0.7, scatterpoints=1,
-    fontsize=15)
-for i in range(len(mrk)):
-    leg.legendHandles[i].set_color('k')
-    leg.get_frame().set_alpha(0.5)
 # Colorbar.
 ax22 = plt.subplot(gs[8])
 cbar = plt.colorbar(SC, cax=ax22)
 cbar.set_ticks([0.5, 1., 3., 5.])
 cbar.set_ticklabels([0.5, 1., 3., 5.])
-cbar.set_label('dist (kpc)')
+cbar.set_label('$dist\,(kpc)$', fontsize=xy_font_s, labelpad=-15, y=0.35)
 
-#ax3 = plt.subplot(gs[11:14, 0:3])
+# Delta dist vs log(CI)
 ax3 = plt.subplot(gs[9])
-#plt.xlim(-1.45, 1.45)
 plt.xlim(-3.5, 3.5)
 plt.ylim(ymin, ymax)
-plt.xlabel('$\Delta dist (kpc)$', fontsize=14)
-plt.ylabel('$\log(CI)$', fontsize=14)
+plt.xlabel('$\Delta dist (kpc)$', fontsize=xy_font_s)
+plt.ylabel('$\log(CI)$', fontsize=xy_font_s)
 ax3.grid(b=True, which='major', color='gray', linestyle='--', lw=0.5)
 ax3.minorticks_on()
+ax3.yaxis.set_major_locator(MultipleLocator(1.0))
 # Order before plotting.
 x = np.take(delta_dist_i, order_i)
 y = np.take(ci_param_i, order_i)
@@ -516,15 +511,16 @@ for key, value in sorted(mrk.items()):
 # Vertical shaded area.
 plt.axvspan(-val_d, val_d, facecolor='grey', alpha=0.5, zorder=1)
 
-#ax4 = plt.subplot(gs[11:14, 3:6])
+# Delta extinction vs log(CI)
 ax4 = plt.subplot(gs[10])
-plt.xlim(-0.4, 0.4)
+plt.xlim(-0.39, 0.39)
 plt.ylim(ymin, ymax)
-plt.xlabel('$\Delta E_{(B-V)}$', fontsize=14)
+plt.xlabel('$\Delta E_{(B-V)}$', fontsize=xy_font_s)
 # make these tick labels invisible
 plt.setp(ax4.get_yticklabels(), visible=False)
 ax4.grid(b=True, which='major', color='gray', linestyle='--', lw=0.5)
 ax4.minorticks_on()
+ax4.yaxis.set_major_locator(MultipleLocator(1.0))
 # Order before plotting.
 x = np.take(delta_ext_i, order_i)
 y = np.take(ci_param_i, order_i)
@@ -544,7 +540,7 @@ ax42 = plt.subplot(gs[11])
 cbar = plt.colorbar(SC, cax=ax42)
 cbar.set_ticks([0.5, 1., 3., 5.])
 cbar.set_ticklabels([0.5, 1., 3., 5.])
-cbar.set_label('dist (kpc)')
+cbar.set_label('$dist\,(kpc)$', fontsize=xy_font_s, labelpad=-15, y=0.35)
 
 
 plt.tight_layout()
@@ -570,7 +566,7 @@ print 'End.'
 #cbar = plt.colorbar()
 #cbar.set_ticks([0.5, 1., 3., 5.])
 #cbar.set_ticklabels([0.5, 1., 3., 5.])
-#cbar.set_label('dist (kpc)')
+#cbar.set_label('dist (kpc)', fontsize=17, labelpad=-15, y=0.35)
 
 ##ax12 = plt.subplot(gs[5:8, 8:11])
 ##plt.xlim(-5., 1.5)
@@ -586,7 +582,7 @@ print 'End.'
 ##cbar = plt.colorbar()
 ##cbar.set_ticks([0.5, 1., 3., 5.])
 ##cbar.set_ticklabels([0.5, 1., 3., 5.])
-##cbar.set_label('dist (kpc)')
+##cbar.set_label('dist (kpc)', fontsize=17, labelpad=-15, y=0.35)
 
 
 #ax21 = plt.subplot(gs[9:12, 4:7], aspect=1)
@@ -606,7 +602,7 @@ print 'End.'
 #cbar = plt.colorbar()
 #cbar.set_ticks([0.5, 1., 3., 5.])
 #cbar.set_ticklabels([0.5, 1., 3., 5.])
-#cbar.set_label('dist (kpc)')
+#cbar.set_label('dist (kpc)', fontsize=17, labelpad=-15, y=0.35)
 
 #ax22 = plt.subplot(gs[9:12, 8:11])
 #plt.xlim(-2., 2.)
@@ -622,7 +618,7 @@ print 'End.'
 #cbar = plt.colorbar()
 #cbar.set_ticks([0.5, 1., 3., 5.])
 #cbar.set_ticklabels([0.5, 1., 3., 5.])
-#cbar.set_label('dist (kpc)')
+#cbar.set_label('dist (kpc)', fontsize=17, labelpad=-15, y=0.35)
 
 
 #ax31 = plt.subplot(gs[13:16, 4:7], aspect=1)
@@ -642,7 +638,7 @@ print 'End.'
 #cbar = plt.colorbar()
 #cbar.set_ticks([0.5, 1., 3., 5.])
 #cbar.set_ticklabels([0.5, 1., 3., 5.])
-#cbar.set_label('dist (kpc)')
+#cbar.set_label('dist (kpc)', fontsize=17, labelpad=-15, y=0.35)
 
 #ax32 = plt.subplot(gs[13:16, 8:11])
 ##plt.xlim(-1.5, 1.5)
@@ -658,7 +654,7 @@ print 'End.'
 #cbar = plt.colorbar()
 #cbar.set_ticks([0.5, 1., 3., 5.])
 #cbar.set_ticklabels([0.5, 1., 3., 5.])
-#cbar.set_label('dist (kpc)')
+#cbar.set_label('dist (kpc)', fontsize=17, labelpad=-15, y=0.35)
 
 
 #ax41 = plt.subplot(gs[17:20, 4:7], aspect=1)
@@ -678,7 +674,7 @@ print 'End.'
 #cbar = plt.colorbar()
 #cbar.set_ticks([0.5, 1., 3., 5.])
 #cbar.set_ticklabels([0.5, 1., 3., 5.])
-#cbar.set_label('dist (kpc)')
+#cbar.set_label('dist (kpc)', fontsize=17, labelpad=-15, y=0.35)
 
 #ax42 = plt.subplot(gs[17:20, 8:11])
 ##plt.xlim(-1.5, 1.5)
@@ -695,4 +691,4 @@ print 'End.'
 #cbar = plt.colorbar()
 #cbar.set_ticks([0.5, 1., 3., 5.])
 #cbar.set_ticklabels([0.5, 1., 3., 5.])
-#cbar.set_label('dist (kpc)')
+#cbar.set_label('dist (kpc)', fontsize=17, labelpad=-15, y=0.35)

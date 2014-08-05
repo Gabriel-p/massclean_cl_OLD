@@ -31,7 +31,7 @@ def members_index(mi_num, N_T, memb_w, not_memb_w):
         # Equivalent to the TPR_90 index in UPMASK. It's the ratio of
         # true cluster members recovered and the total number of true cluster
         # members.
-        n_w = sum(i > 0.5 for i in memb_w)
+        n_w = sum(i > 0.9 for i in memb_w)
         memb_index = float(n_w) / float(N_T)
     #elif mi_num == 1:
         #memb_index = sum(memb_w) / N_T
@@ -56,11 +56,12 @@ def make_plots(clust_CI, clust_MI, clust_MI_r, clust_params):
     # Make plot.
     plt.figure(figsize=(14, 25))  # create the top-level container
     gs = gridspec.GridSpec(4, 3, width_ratios=[1, 1, 0.05])
+    xy_font_s = 21
 
     ax0 = plt.subplot(gs[0])
-    ax0.set_title('Decontamination algorithm')
-    plt.ylabel('$MI_1$', fontsize=16)
-    plt.xlim(0., 1.0)
+    ax0.set_title('Decontamination algorithm', fontsize=18)
+    plt.ylabel('$MI_1$', fontsize=xy_font_s)
+    plt.xlim(0., 0.97)
     plt.ylim(-0.01, 1.0)
     # make these tick labels invisible
     plt.setp(ax0.get_xticklabels(), visible=False)
@@ -68,10 +69,10 @@ def make_plots(clust_CI, clust_MI, clust_MI_r, clust_params):
     # Plot grid
     plt.grid(b=True, which='major', color='gray', linestyle='--', zorder=1)
     # Add text box with MI equation.
-    text = r'$MI_1 = n_m/N_{cl}$' '\n' r'  $(p_m >\,0.5)$'
-    x_align, y_align = 0.57, 0.88
+    text = r'$MI_1 = n_m/N_{cl}$' '\n' r'  $(p_m >\,0.9)$'
+    x_align, y_align = 0.57, 0.85
     plt.text(x_align, y_align, text, transform=ax0.transAxes,
-             bbox=dict(facecolor='white', alpha=0.6), fontsize=20)
+             bbox=dict(facecolor='white', alpha=0.6), fontsize=xy_font_s)
     # Define color map.
     cm = plt.cm.get_cmap('RdYlBu_r')
     # Order.
@@ -97,8 +98,8 @@ def make_plots(clust_CI, clust_MI, clust_MI_r, clust_params):
     #
     # Random MI.
     ax1 = plt.subplot(gs[1])
-    ax1.set_title('Random probability')
-    plt.xlim(0., 1.0)
+    ax1.set_title('Random probability', fontsize=18)
+    plt.xlim(0., 0.97)
     plt.ylim(-0.01, 1.0)
     # make these tick labels invisible
     plt.setp(ax1.get_yticklabels(), visible=False)
@@ -137,14 +138,14 @@ def make_plots(clust_CI, clust_MI, clust_MI_r, clust_params):
     cbar = plt.colorbar(SC, cax=axp2)
     cbar.set_ticks([0.5, 1., 3., 5.])
     cbar.set_ticklabels([0.5, 1., 3., 5.])
-    cbar.set_label('$dist\,(kpc)$', fontsize=16)
+    cbar.set_label('$dist\,(kpc)$', fontsize=xy_font_s, labelpad=-15, y=0.35)
 
     #
     # Second MI.
     ax3 = plt.subplot(gs[3])
-    plt.xlabel('$CI$', fontsize=16)
-    plt.ylabel('$MI_2$', fontsize=16)
-    plt.xlim(0., 1.0)
+    plt.xlabel('$CI$', fontsize=xy_font_s)
+    plt.ylabel('$MI_2$', fontsize=xy_font_s)
+    plt.xlim(0., 0.97)
     plt.ylim(max(min(clust_MI[1]) - 0.1, -2.5), 1.0)
     ax3.yaxis.set_major_locator(MultipleLocator(0.2))
     # Plot grid
@@ -154,7 +155,7 @@ def make_plots(clust_CI, clust_MI, clust_MI_r, clust_params):
            r' \sum^{n_f}{p_f}\right)}{N_{cl}}$')
     x_align, y_align = 0.57, 0.86
     plt.text(x_align, y_align, text, transform=ax3.transAxes,
-             bbox=dict(facecolor='white', alpha=0.6), fontsize=20)
+             bbox=dict(facecolor='white', alpha=0.6), fontsize=xy_font_s)
     plt.axhline(y=0., linestyle='--', color='r', zorder=3)
     # Define color map.
     cm = plt.cm.get_cmap('RdYlBu_r')
@@ -182,8 +183,8 @@ def make_plots(clust_CI, clust_MI, clust_MI_r, clust_params):
     #
     # Second random MI.
     ax4 = plt.subplot(gs[4])
-    plt.xlabel('$CI$', fontsize=16)
-    plt.xlim(0., 1.0)
+    plt.xlabel('$CI$', fontsize=xy_font_s)
+    plt.xlim(0., 0.97)
     plt.ylim(max(min(clust_MI[1]) - 0.1, -2.5), 1.0)
     # make these tick labels invisible
     plt.setp(ax4.get_yticklabels(), visible=False)
@@ -204,7 +205,7 @@ def make_plots(clust_CI, clust_MI, clust_MI_r, clust_params):
     y = np.take(clust_MI_r[1], order)
     for key, value in sorted(mrk.items()):
         s1 = (z2 == key)
-        SC2 = plt.scatter(x[s1], y[s1],
+        plt.scatter(x[s1], y[s1],
             marker=value[0], label=value[1],
             s=z1[s1],
             c=z3[s1], cmap=cm, lw=0.2)
@@ -213,11 +214,11 @@ def make_plots(clust_CI, clust_MI, clust_MI_r, clust_params):
     range_CI = np.linspace(0., 1., 10)
     plt.plot(range_CI, m * range_CI + b, c='k', ls='--')
     # Colorbar
-    axp4 = plt.subplot(gs[5])
-    cbar = plt.colorbar(SC2, cax=axp4)
-    cbar.set_ticks([0.5, 1., 3., 5.])
-    cbar.set_ticklabels([0.5, 1., 3., 5.])
-    cbar.set_label('$dist\,(kpc)$', fontsize=16)
+    #axp4 = plt.subplot(gs[5])
+    #cbar = plt.colorbar(SC2, cax=axp4)
+    #cbar.set_ticks([0.5, 1., 3., 5.])
+    #cbar.set_ticklabels([0.5, 1., 3., 5.])
+    #cbar.set_label('$dist\,(kpc)$', fontsize=xy_font_s, labelpad=-15, y=0.35)
 
     # Save to output png file.
     plt.tight_layout()
