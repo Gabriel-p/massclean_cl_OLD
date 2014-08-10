@@ -59,20 +59,21 @@ def make_plots(clust_CI, clust_MI, clust_MI_r, clust_params):
     xy_font_s = 21
 
     ax0 = plt.subplot(gs[0])
-    ax0.set_title('Decontamination algorithm', fontsize=18)
+    ax0.set_title('Decontamination algorithm', fontsize=xy_font_s)
     plt.ylabel('$MI_1$', fontsize=xy_font_s)
     plt.xlim(0., 0.97)
-    plt.ylim(-0.01, 1.0)
+    plt.ylim(-0.01, 0.99)
     # make these tick labels invisible
     plt.setp(ax0.get_xticklabels(), visible=False)
+    # Set steps in axis.
     ax0.yaxis.set_major_locator(MultipleLocator(0.2))
     # Plot grid
     plt.grid(b=True, which='major', color='gray', linestyle='--', zorder=1)
     # Add text box with MI equation.
-    text = r'$MI_1 = n_m/N_{cl}$' '\n' r'  $(p_m >\,0.9)$'
+    text = r'$MI_1 = n_m/N_{cl}$' '\n' r'  $(MP >\,0.9)$'
     x_align, y_align = 0.57, 0.85
     plt.text(x_align, y_align, text, transform=ax0.transAxes,
-             bbox=dict(facecolor='white', alpha=0.6), fontsize=xy_font_s)
+             bbox=dict(facecolor='white', alpha=0.6), fontsize=(xy_font_s + 2))
     # Define color map.
     cm = plt.cm.get_cmap('RdYlBu_r')
     # Order.
@@ -98,9 +99,9 @@ def make_plots(clust_CI, clust_MI, clust_MI_r, clust_params):
     #
     # Random MI.
     ax1 = plt.subplot(gs[1])
-    ax1.set_title('Random probability', fontsize=18)
+    ax1.set_title('Random probability', fontsize=xy_font_s)
     plt.xlim(0., 0.97)
-    plt.ylim(-0.01, 1.0)
+    plt.ylim(-0.01, 0.99)
     # make these tick labels invisible
     plt.setp(ax1.get_yticklabels(), visible=False)
     plt.setp(ax1.get_xticklabels(), visible=False)
@@ -146,16 +147,16 @@ def make_plots(clust_CI, clust_MI, clust_MI_r, clust_params):
     plt.xlabel('$CI$', fontsize=xy_font_s)
     plt.ylabel('$MI_2$', fontsize=xy_font_s)
     plt.xlim(0., 0.97)
-    plt.ylim(max(min(clust_MI[1]) - 0.1, -2.5), 1.0)
-    ax3.yaxis.set_major_locator(MultipleLocator(0.2))
+    plt.ylim(max(min(clust_MI[1]) - 0.1, -2.5), 0.99)
+    ax3.yaxis.set_major_locator(MultipleLocator(0.4))
     # Plot grid
     plt.grid(b=True, which='major', color='gray', linestyle='--', zorder=1)
     # Add text box with MI equation.
     text = (r'$MI_2 = \frac{\left(\sum^{n_m}{p_m} - ' +
            r' \sum^{n_f}{p_f}\right)}{N_{cl}}$')
-    x_align, y_align = 0.57, 0.86
+    x_align, y_align = 0.52, 0.86
     plt.text(x_align, y_align, text, transform=ax3.transAxes,
-             bbox=dict(facecolor='white', alpha=0.6), fontsize=xy_font_s)
+             bbox=dict(facecolor='white', alpha=0.6), fontsize=(xy_font_s + 2))
     plt.axhline(y=0., linestyle='--', color='r', zorder=3)
     # Define color map.
     cm = plt.cm.get_cmap('RdYlBu_r')
@@ -185,10 +186,10 @@ def make_plots(clust_CI, clust_MI, clust_MI_r, clust_params):
     ax4 = plt.subplot(gs[4])
     plt.xlabel('$CI$', fontsize=xy_font_s)
     plt.xlim(0., 0.97)
-    plt.ylim(max(min(clust_MI[1]) - 0.1, -2.5), 1.0)
+    plt.ylim(max(min(clust_MI[1]) - 0.1, -2.5), 0.99)
     # make these tick labels invisible
     plt.setp(ax4.get_yticklabels(), visible=False)
-    ax4.yaxis.set_major_locator(MultipleLocator(0.2))
+    ax4.yaxis.set_major_locator(MultipleLocator(0.4))
     # Plot grid
     plt.grid(b=True, which='major', color='gray', linestyle='--', zorder=1)
     plt.axhline(y=0., linestyle='--', color='r', zorder=3)
