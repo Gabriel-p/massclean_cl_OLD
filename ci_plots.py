@@ -197,8 +197,8 @@ print '<50', float(sum(abs(i) < 50. for i in cent_diff)) / len(cent_diff)
 print '<80', float(sum(abs(i) < 80. for i in cent_diff)) / len(cent_diff)
 print '<90', float(sum(abs(i) < 90. for i in cent_diff)) / len(cent_diff)
 
-# Radius in/out.
-rad_diff_i = np.array(rad_i) - 250.
+# Radius delta: true - OCAAT.
+rad_diff_i = 250 - np.array(rad_i)
 val_r = sorted(abs(rad_diff_i))[int(0.5 * len(rad_diff_i))]
 print '\n 50% limit:', val_r
 val_r_90 = sorted(abs(rad_diff_i))[int(0.9 * len(rad_diff_i))]
@@ -211,7 +211,7 @@ print '<50', float(sum(abs(i) < 50. for i in rad_diff_i)) / len(rad_diff_i)
 print '<80', float(sum(abs(i) < 80. for i in rad_diff_i)) / len(rad_diff_i)
 print '<90', float(sum(abs(i) < 90. for i in rad_diff_i)) / len(rad_diff_i)
 
-# Number of members.
+# Number of members, relative error.
 memb_diff_i = (np.array(memb_ocaat_i) - np.array(memb_true_i)) / \
     np.array(memb_true_i)
 val_memb = sorted(abs(memb_diff_i))[int(0.5 * len(memb_diff_i))]
@@ -227,7 +227,7 @@ print '<0.5', float(sum(abs(i) < 0.5 for i in memb_diff_io)) / len(memb_diff_io)
 print '<0.8', float(sum(abs(i) < 0.8 for i in memb_diff_io)) / len(memb_diff_io)
 print '<0.9', float(sum(abs(i) < 0.9 for i in memb_diff_io)) / len(memb_diff_io)
 
-# Metallicity in/out.
+# Metallicity delta: true - OCAAT.
 delta_met_i = np.log10(np.array(metal_i) / 0.019) - \
 np.log10(np.array(metal_ocaat_i) / 0.019)
 #delta_met_i = np.array(metal_i) - np.array(metal_ocaat_i)
@@ -246,7 +246,7 @@ print '<2.5', float(sum(abs(i) < 2.5 for i in delta_met_i)) / len(delta_met_i)
 # Transform to [Fe/H] errors.
 e_feh_i = (1. / np.log(10.)) * (np.array(e_met_i) / np.array(metal_i))
 
-# Age in/out.
+# Age delta: true - OCAAT.
 #delta_age_i = (10 ** (np.array(age_i))) / 1.e09 - \
 #(10 ** (np.array(age_ocaat_i))) / 1.e09
 delta_age_i = np.array(age_i) - np.array(age_ocaat_i)
@@ -277,8 +277,7 @@ print '<4', float(sum(abs(i) < 4 for i in delta_age_i)) / len(delta_age_i)
         #print cl, age_diff, age[i], age_ocaat[i], dist[i]
 #print 'Halt.'
 
-
-# Distance in/out.
+# Distance delta: true - OCAAT.
 d_ocaat_i = (10 ** ((np.array(dist_ocaat_i) + 5) / 5)) / 1000.
 e_dist_i_dm = 0.2 * np.log(10.) * d_ocaat_i * np.array(e_dist_i)
 delta_dist_i = np.array(dist_i) - np.array(d_ocaat_i)
@@ -299,7 +298,7 @@ print '<3.', float(sum(abs(i) < 3. for i in delta_dist_i)) / len(delta_dist_i)
 print '<4.', float(sum(abs(i) < 4. for i in delta_dist_i)) / len(delta_dist_i)
 print '<5.', float(sum(abs(i) < 5. for i in delta_dist_i)) / len(delta_dist_i)
 
-# Extinction in/out.
+# Extinction delta: true - OCAAT.
 delta_ext_i = np.array(extinc_i) - np.array(ext_ocaat_i)
 val_e = sorted(abs(delta_ext_i))[int(0.5 * len(delta_ext_i))]
 print '\n 50% limit:', val_e
@@ -313,6 +312,11 @@ print '<0.1', float(sum(abs(i) < 0.1 for i in delta_ext_i)) / len(delta_ext_i)
 print '<0.2', float(sum(abs(i) < 0.2 for i in delta_ext_i)) / len(delta_ext_i)
 print '<0.4', float(sum(abs(i) < 0.4 for i in delta_ext_i)) / len(delta_ext_i)
 
+
+# Check for high distance/low extinction correlation.
+#for i, cl in enumerate(names):
+    #if (dist[i] - dist_ocaat[i]) < 0 and (extinc[i] - ext_ocaat[i]) > 0:
+        #print cl
 
 # Make plot.
 fig = plt.figure(figsize=(14, 25))  # create the top-level container
