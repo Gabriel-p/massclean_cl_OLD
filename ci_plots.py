@@ -177,6 +177,11 @@ for i, cl in enumerate(names):
 
 print 'Number of assigned centers out of synth clusters region: %d' % len(ci_o)
 
+#print 'Not distant clusters with delta-cent > 20'
+#for i, cl in enumerate(names):
+    #if cent_diff[i] > 20. and dist[i] < 0.8:
+        #print cl, int(cent_diff[i])
+
 print 'Clusters with prob<0.4 value'
 for i, cl in enumerate(names):
     if prob[i] < 0.4:
