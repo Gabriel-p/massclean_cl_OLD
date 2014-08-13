@@ -135,9 +135,9 @@ for par_str in params:
 # than 250px from the actual center.
 rad_i, e_rad_i, metal_i, metal_ocaat_i, age_i, age_ocaat_i, e_age_i, dist_i, \
 dist_ocaat_i, e_dist_i, extinc_i, ext_ocaat_i, e_ext_i, ci_i, memb_true_i, \
-memb_ocaat_i, cent_i, mass_i, prob_i, e_met_i, e_cent_i = \
+memb_ocaat_i, cent_i, mass_i, prob_i, e_met_i, e_cent_i, names_i = \
 [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [],\
-[]
+[], []
 
 mass_o, dist_o, ci_o, prob_o = [], [], [], []
 
@@ -153,6 +153,7 @@ for i, cl in enumerate(names):
         ci_o.append(ci[i])
         prob_o.append(prob[i])
     else:
+        names_i.append(cl)
         cent_i.append(cent_diff[i])
         e_cent_i.append(e_cen[i])
         rad_i.append(rad[i])
@@ -160,7 +161,11 @@ for i, cl in enumerate(names):
         mass_i.append(mass[i])
         metal_i.append(metal[i])
         e_met_i.append(e_met[i])
-        metal_ocaat_i.append(metal_ocaat[i])
+        # Avoid infinity values ahead.
+        if metal_ocaat[i] == 0.:
+            metal_ocaat_i.append(0.0005)
+        else:
+            metal_ocaat_i.append(metal_ocaat[i])
         age_i.append(age[i])
         age_ocaat_i.append(age_ocaat[i])
         e_age_i.append(e_age[i])
@@ -313,10 +318,12 @@ print '<0.2', float(sum(abs(i) < 0.2 for i in delta_ext_i)) / len(delta_ext_i)
 print '<0.4', float(sum(abs(i) < 0.4 for i in delta_ext_i)) / len(delta_ext_i)
 
 
-# Check for high distance/low extinction correlation.
-#for i, cl in enumerate(names):
-    #if (dist[i] - dist_ocaat[i]) < 0 and (extinc[i] - ext_ocaat[i]) > 0:
-        #print cl
+# Check for correlations.
+print '\n Correlations:'
+data = np.array([delta_met_i, delta_age_i, delta_dist_i, delta_ext_i])
+# plotting the correlation matrix
+print np.corrcoef(data)
+
 
 # Make plot.
 fig = plt.figure(figsize=(14, 25))  # create the top-level container
