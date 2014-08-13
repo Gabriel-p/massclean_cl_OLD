@@ -50,8 +50,8 @@ def make_plots(clust_CI, clust_MI, clust_MI_r, clust_params):
 
     # Color is associated with the dist; size with the initial mass and
     # the marker with the age.
-    mrk = {7.: ('o', '$\log(age/yr)=7.$'), 8.: ('s', '$\log(age/yr)=8.$'),
-        9.: ('D', '$\log(age/yr)=9.$')}
+    mrk = {7.: ('o', '$\log(age)=7.$'), 8.: ('s', '$\log(age)=8.$'),
+        9.: ('D', '$\log(age)=9.$')}
 
     # Make plot.
     plt.figure(figsize=(14, 25))  # create the top-level container

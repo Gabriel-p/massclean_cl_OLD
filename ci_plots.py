@@ -307,9 +307,10 @@ print '<0.4', float(sum(abs(i) < 0.4 for i in delta_ext_i)) / len(delta_ext_i)
 # Check for correlations.
 # http://mathworld.wolfram.com/StatisticalCorrelation.html
 # https://en.wikipedia.org/wiki/Pearson_product-moment_correlation_coefficient
+# http://surveymethodsaddicts.blogspot.com.ar/2008/09/what-is-difference-
+# between-correlation.html
 print '\n Correlations:'
 data = np.array([delta_met_i, delta_age_i, delta_dist_i, delta_ext_i])
-# plotting the correlation matrix
 print np.corrcoef(data)
 ## Check
 #d_m, e_m = np.mean(delta_dist_i), np.mean(delta_ext_i)
@@ -337,8 +338,8 @@ order_i = np.argsort(-(np.array(mass_i) / 4.))
 z1_i = np.take(((np.array(mass_i) / 5.) + 5.), order_i)
 z2_i = np.take(dist_i, order_i)
 # Define age markers and labels.
-mrk = {7.: ('o', '$\log(age/yr)=7.$'), 8.: ('s', '$\log(age/yr)=8.$'),
-    9.: ('D', '$\log(age/yr)=9.$')}
+mrk = {7.: ('o', '$\log(age)=7.$'), 8.: ('s', '$\log(age)=8.$'),
+    9.: ('D', '$\log(age)=9.$')}
 z3_i = np.take(age_i, order_i)
 
 order_o = np.argsort(-(np.array(mass_o) / 4.))
@@ -471,7 +472,7 @@ plt.axvspan(-val_m, val_m, facecolor='grey', alpha=0.5, zorder=1)
 ax2 = plt.subplot(gs[7])
 plt.xlim(-1.9, 1.9)
 plt.ylim(ymin, ymax)
-plt.xlabel('$\Delta \log(age/yr)$', fontsize=xy_font_s)
+plt.xlabel('$\Delta \log(age)$', fontsize=xy_font_s)
 # make these tick labels invisible
 plt.setp(ax2.get_yticklabels(), visible=False)
 ax2.minorticks_on()
