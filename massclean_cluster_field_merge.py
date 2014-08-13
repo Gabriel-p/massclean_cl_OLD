@@ -301,7 +301,7 @@ for f_indx, sub_dir in enumerate(dir_files[0]):
     ax0.grid(b=True, which='major', color='gray', linestyle='--', lw=1)
     text1 = '$N_{cluster} = %d$' '\n' % len(col_raw)
     text2 = '$V_{min} = %0.1f$' '\n' % max_mag_lim
-    text3 = '$log[age/yr] = %.1f$' '\n' % age
+    text3 = '$log[age] = %.1f$' '\n' % age
     text4 = '$z = %.4f$' '\n' % metal
     text5 = '$dist = %.1f \,kpc$' '\n' % (dist / 1000.)
     text6 = '$A_V = %.1f \, mag$' '\n' % vis_abs
