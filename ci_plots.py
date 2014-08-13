@@ -267,20 +267,6 @@ print '<2', float(sum(abs(i) < 2 for i in delta_age_i)) / len(delta_age_i)
 print '<3', float(sum(abs(i) < 3 for i in delta_age_i)) / len(delta_age_i)
 print '<4', float(sum(abs(i) < 4 for i in delta_age_i)) / len(delta_age_i)
 
-#
-# Check for age-metallicity degeneracy.
-#print '\n'
-#for val1, val2 in zip(delta_met_i, delta_age_i):
-    #print val1, val2
-
-#for i, cl in enumerate(names):
-    #if cent_diff[i] < 90.:
-        ##met_diff = np.log10(metal[i] / 0.019) - np.log10(metal_ocaat[i]
-        ##/ 0.019)
-        #age_diff = age[i] - age_ocaat[i]
-        ##if met_diff > 0 and age_diff < 0:
-        #print cl, age_diff, age[i], age_ocaat[i], dist[i]
-#print 'Halt.'
 
 # Distance delta: true - OCAAT.
 d_ocaat_i = (10 ** ((np.array(dist_ocaat_i) + 5) / 5)) / 1000.
@@ -319,11 +305,20 @@ print '<0.4', float(sum(abs(i) < 0.4 for i in delta_ext_i)) / len(delta_ext_i)
 
 
 # Check for correlations.
+# http://mathworld.wolfram.com/StatisticalCorrelation.html
+# https://en.wikipedia.org/wiki/Pearson_product-moment_correlation_coefficient
 print '\n Correlations:'
 data = np.array([delta_met_i, delta_age_i, delta_dist_i, delta_ext_i])
 # plotting the correlation matrix
 print np.corrcoef(data)
-
+## Check
+#d_m, e_m = np.mean(delta_dist_i), np.mean(delta_ext_i)
+#d_st, e_st = np.std(delta_dist_i), np.std(delta_ext_i)
+#de_cov = 0.
+#for i, dist in enumerate(delta_dist_i):
+    #de_cov += ((dist - d_m) * (delta_ext_i[i] - e_m))
+#print (de_cov / len(delta_dist_i)) / (d_st * e_st)
+#raw_input()
 
 # Make plot.
 fig = plt.figure(figsize=(14, 25))  # create the top-level container
@@ -563,148 +558,4 @@ plt.tight_layout()
 # Output png file.
 plt.savefig('ci_out.png', dpi=150)
 
-print 'End.'
-
-#ax11 = plt.subplot(gs[5:8, 4:7], aspect=1)
-#plt.xlim(-0.01, 0.04)
-#plt.ylim(-0.01, 0.04)
-#plt.xlabel('$z_{ocaat}$', fontsize=14)
-#plt.ylabel('$z_{real}$', fontsize=14)
-#ax11.grid(b=True, which='both', color='gray', linestyle='--', lw=0.5)
-## Order before plotting.
-#x = np.take(metal_ocaat_i, order_i)
-#y = np.take(metal_i, order_i)
-#plt.scatter(x, y, c=z2_i, cmap=cm, s=z1_i, lw=0.3)
-##plt.errorbar(metal_ocaat, metal, xerr=e_met, ls='none', color='grey',
-    ##elinewidth=0.8)
-## 1:1 line
-#plt.plot([0., 0.01, 0.02, 0.03], [0., 0.01, 0.02, 0.03], 'k-', ls='--')
-#cbar = plt.colorbar()
-#cbar.set_ticks([0.5, 1., 3., 5.])
-#cbar.set_ticklabels([0.5, 1., 3., 5.])
-#cbar.set_label('dist (kpc)', fontsize=17, labelpad=-15, y=0.35)
-
-##ax12 = plt.subplot(gs[5:8, 8:11])
-##plt.xlim(-5., 1.5)
-##plt.xlabel('$e_z^{rel}$', fontsize=16)
-##plt.ylabel('$\log(CI)$', fontsize=14)
-##ax12.grid(b=True, which='both', color='gray', linestyle='--', lw=0.5)
-### Order before plotting.
-##delta_met_rel = delta_met / np.array(metal)
-##x = np.take(delta_met_rel, order)
-##y = np.take(ci_param, order)
-##plt.scatter(x, y, c=z2, cmap=cm, s=z1, zorder=2)
-##plt.axvspan(-0.5, 0.5, facecolor='grey', alpha=0.5, zorder=1)
-##cbar = plt.colorbar()
-##cbar.set_ticks([0.5, 1., 3., 5.])
-##cbar.set_ticklabels([0.5, 1., 3., 5.])
-##cbar.set_label('dist (kpc)', fontsize=17, labelpad=-15, y=0.35)
-
-
-#ax21 = plt.subplot(gs[9:12, 4:7], aspect=1)
-#plt.xlim(6.5, 9.5)
-#plt.ylim(6.5, 9.5)
-#plt.xlabel('$log(age/yr)_{ocaat}$', fontsize=14)
-#plt.ylabel('$log(age/yr)_{real}$', fontsize=14)
-#ax21.grid(b=True, which='both', color='gray', linestyle='--', lw=0.5)
-## Order before plotting.
-#x = np.take(age_ocaat_i, order_i)
-#y = np.take(age_i, order_i)
-#plt.scatter(x, y, c=z2_i, cmap=cm, s=z1_i, lw=0.3)
-##plt.errorbar(age_ocaat, age, xerr=e_age, ls='none', color='grey',
-    ##elinewidth=0.8)
-## 1:1 line
-#plt.plot([6., 10.], [6., 10.], 'k-', ls='--')
-#cbar = plt.colorbar()
-#cbar.set_ticks([0.5, 1., 3., 5.])
-#cbar.set_ticklabels([0.5, 1., 3., 5.])
-#cbar.set_label('dist (kpc)', fontsize=17, labelpad=-15, y=0.35)
-
-#ax22 = plt.subplot(gs[9:12, 8:11])
-#plt.xlim(-2., 2.)
-#plt.xlabel('$e_{age/Gyr}^{rel}$', fontsize=16)
-#plt.ylabel('$\log(CI)$', fontsize=14)
-#ax22.grid(b=True, which='both', color='gray', linestyle='--', lw=0.5)
-## Order before plotting.
-#delta_age_rel = delta_age / (10 ** (np.array(age)) / 1.e09)
-#x = np.take(delta_age_rel, order)
-#y = np.take(ci_param, order)
-#plt.scatter(x, y, c=z2, cmap=cm, s=z1, zorder=2)
-#plt.axvspan(-0.5, 0.5, facecolor='grey', alpha=0.5, zorder=1)
-#cbar = plt.colorbar()
-#cbar.set_ticks([0.5, 1., 3., 5.])
-#cbar.set_ticklabels([0.5, 1., 3., 5.])
-#cbar.set_label('dist (kpc)', fontsize=17, labelpad=-15, y=0.35)
-
-
-#ax31 = plt.subplot(gs[13:16, 4:7], aspect=1)
-#plt.xlim(-0.5, 7.5)
-#plt.ylim(-0.5, 7.5)
-#plt.xlabel('$DM_{ocaat}$', fontsize=14)
-#plt.ylabel('$DM_{real}$', fontsize=14)
-#ax31.grid(b=True, which='both', color='gray', linestyle='--', lw=0.5)
-## Order before plotting.
-#x = np.take(d_ocaat_i, order_i)
-#y = np.take(dist_i, order_i)
-#plt.scatter(x, y, c=z2_i, cmap=cm, s=z1_i, lw=0.3)
-##plt.errorbar(d_ocaat_i, dist_i, xerr=e_dist, ls='none', color='grey',
-    ##elinewidth=0.8)
-## 1:1 line
-#plt.plot([-0.5, 8.], [-0.5, 8.], 'k-', ls='--')
-#cbar = plt.colorbar()
-#cbar.set_ticks([0.5, 1., 3., 5.])
-#cbar.set_ticklabels([0.5, 1., 3., 5.])
-#cbar.set_label('dist (kpc)', fontsize=17, labelpad=-15, y=0.35)
-
-#ax32 = plt.subplot(gs[13:16, 8:11])
-##plt.xlim(-1.5, 1.5)
-#plt.xlabel('$e_{d(kpc)}^{rel}$', fontsize=16)
-#plt.ylabel('$\log(CI)$', fontsize=14)
-#ax32.grid(b=True, which='both', color='gray', linestyle='--', lw=0.5)
-## Order before plotting.
-#delta_dist_rel = delta_dist / np.array(dist)
-#x = np.take(delta_dist_rel, order)
-#y = np.take(ci_param, order)
-#plt.scatter(x, y, c=z2, cmap=cm, s=z1, zorder=2)
-#plt.axvspan(-0.5, 0.5, facecolor='grey', alpha=0.5, zorder=1)
-#cbar = plt.colorbar()
-#cbar.set_ticks([0.5, 1., 3., 5.])
-#cbar.set_ticklabels([0.5, 1., 3., 5.])
-#cbar.set_label('dist (kpc)', fontsize=17, labelpad=-15, y=0.35)
-
-
-#ax41 = plt.subplot(gs[17:20, 4:7], aspect=1)
-#plt.xlim(-0.3, 1.2)
-#plt.ylim(-0.3, 1.2)
-#plt.xlabel('$E(B-V)_{ocaat}$', fontsize=14)
-#plt.ylabel('$E(B-V)_{real}$', fontsize=14)
-#ax41.grid(b=True, which='both', color='gray', linestyle='--', lw=0.5)
-## Order before plotting.
-#x = np.take(ext_ocaat_i, order_i)
-#y = np.take(extinc_i, order_i)
-#plt.scatter(x, y, c=z2_i, cmap=cm, s=z1_i, lw=0.3)
-##plt.errorbar(ext_ocaat, extinc, xerr=e_dist, ls='none', color='grey',
-    ##elinewidth=0.8)
-## 1:1 line
-#plt.plot([-0.3, 0.5, 1.5], [-0.3, 0.5, 1.5], 'k-', ls='--')
-#cbar = plt.colorbar()
-#cbar.set_ticks([0.5, 1., 3., 5.])
-#cbar.set_ticklabels([0.5, 1., 3., 5.])
-#cbar.set_label('dist (kpc)', fontsize=17, labelpad=-15, y=0.35)
-
-#ax42 = plt.subplot(gs[17:20, 8:11])
-##plt.xlim(-1.5, 1.5)
-#plt.xlabel('$e_{E(B-V)}^{rel}$', fontsize=16)
-#plt.ylabel('$\log(CI)$', fontsize=14)
-#ax42.grid(b=True, which='both', color='gray', linestyle='--', lw=0.5)
-## Order before plotting.
-#delta_ext_rel = delta_ext / (1 + np.array(extinc))
-#x = np.take(delta_ext_rel, order)
-#y = np.take(ci_param, order)
-#plt.scatter(x, y, c=z2, cmap=cm, s=z1, zorder=2)
-#plt.axvspan(-0.5, 0.5, facecolor='grey', alpha=0.5, zorder=1)
-## Colorbar
-#cbar = plt.colorbar()
-#cbar.set_ticks([0.5, 1., 3., 5.])
-#cbar.set_ticklabels([0.5, 1., 3., 5.])
-#cbar.set_label('dist (kpc)', fontsize=17, labelpad=-15, y=0.35)
+print '\nEnd.'
