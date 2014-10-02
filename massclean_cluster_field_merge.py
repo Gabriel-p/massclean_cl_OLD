@@ -145,8 +145,11 @@ def error_scatter(id_cl_fl, myfile):
     # Store raw MASSCLEAN values.
     x_raw, y_raw, mag_raw, col_raw = data[i1], data[i2], data[i3], \
     data[i4] - data[i3]
+    if id_cl_fl == 'cluster':
+        mi_raw, ma_raw = data[1], data[2]
 
-    x_data, y_data, mag_data, e_mag, col_data, e_col = [], [], [], [], [], []
+    x_data, y_data, mag_data, e_mag, col_data, e_col, \
+    mi_data, ma_data = [], [], [], [], [], [], [], []
     # Go through all stars to add errors and discard stars outside the mag
     # limit.
     for idx in range(len(x_raw)):
@@ -163,6 +166,12 @@ def error_scatter(id_cl_fl, myfile):
             # Add errors.
             e_mag.append(exp_func(mag_raw[idx]))
             e_col.append(exp_func(mag_raw[idx]))
+
+            if id_cl_fl == 'cluster':
+                mi_data.append(mi_raw[idx])
+                ma_data.append(ma_raw[idx])
+            else:
+                mi_data.append(0.)
 
     # An ID that starts with a 1 identifies the star as a cluster member.
     # An ID that starts with a 2 identifies the star as a field member.
@@ -181,12 +190,14 @@ def error_scatter(id_cl_fl, myfile):
         col_data[idx] = rd.gauss(col_data[idx], e_col[idx])
 
     if id_cl_fl == 'cluster':
-        x_vals, y_vals, mag_vals, col_vals = [x_raw, x_data], [y_raw, y_data],\
-        [mag_raw, mag_data], [col_raw, col_data]
+        x_vals, y_vals, mag_vals, col_vals, mass_vals = [x_raw, x_data], \
+        [y_raw, y_data], [mag_raw, mag_data], [col_raw, col_data], \
+        [mi_raw, ma_raw, mi_data, ma_data]
     else:
-        x_vals, y_vals, mag_vals, col_vals = x_data, y_data, mag_data, col_data
+        x_vals, y_vals, mag_vals, col_vals, mass_vals = x_data, y_data, \
+        mag_data, col_data, mi_data
 
-    return ids, x_vals, y_vals, mag_vals, col_vals, e_mag, e_col
+    return ids, x_vals, y_vals, mag_vals, col_vals, e_mag, e_col, mass_vals
 
 
 '''
@@ -214,16 +225,16 @@ for f_indx, sub_dir in enumerate(dir_files[0]):
     metal, age = float('0.' + clust_name[5:8]), float(clust_name[9:]) / 100.
 
     # Get raw data and error-scattered photometric data for the cluster.
-    id_clust, x_cl, y_cl, mag_cl, col_cl, e_mag_c, e_col_c = \
+    id_clust, x_cl, y_cl, mag_cl, col_cl, e_mag_c, e_col_c, mass_vals = \
     error_scatter('cluster', cl_file)
     x_raw, y_raw, mag_raw, col_raw = x_cl[0], y_cl[0], mag_cl[0], \
     col_cl[0]
-    x_clust, y_clust, mag_clust, col_clust = x_cl[1], y_cl[1], mag_cl[1], \
-    col_cl[1]
+    x_clust, y_clust, mag_clust, col_clust, mass_clust = x_cl[1], y_cl[1], \
+    mag_cl[1], col_cl[1], mass_vals[2]
 
     # Get raw data and error-scattered photometric data for the field.
-    id_field, x_field, y_field, mag_field, col_field, e_mag_f, e_col_f = \
-    error_scatter('field', 'field.plot')
+    id_field, x_field, y_field, mag_field, col_field, e_mag_f, e_col_f, \
+    mass_f = error_scatter('field', 'field.plot')
 
     # Merge cluster and field.
     id_cl_fl_f = np.concatenate([id_clust, id_field])
@@ -233,17 +244,18 @@ for f_indx, sub_dir in enumerate(dir_files[0]):
     e_mag_cl_fl_f = np.concatenate([e_mag_c, e_mag_f])
     col1_cl_fl_f = np.concatenate([col_clust, col_field])
     e_col_cl_fl_f = np.concatenate([e_col_c, e_col_f])
+    mass_cl_fl_f = np.concatenate([mass_clust, mass_f])
 
     # Store lists into single list of merged data.
     region_full = [id_cl_fl_f, x_cl_fl_f, y_cl_fl_f, mag_cl_fl_f, e_mag_cl_fl_f,
-        col1_cl_fl_f, e_col_cl_fl_f]
+        col1_cl_fl_f, e_col_cl_fl_f, mass_cl_fl_f]
 
     # Call completeness removal function.
     region_compl, histos = compl_removal(region_full)
 
     # Unpack lists of data after completeness removal.
     id_cl_fl, x_cl_fl, y_cl_fl, mag_cl_fl, e_mag_cl_fl, col1_cl_fl, \
-    e_col_cl_fl = region_compl
+    e_col_cl_fl, mass_cl_fl = region_compl
 
     # Check if subdir already exists, if not create it
     out_path_sub = join(out_path, sub_dir)
@@ -251,11 +263,12 @@ for f_indx, sub_dir in enumerate(dir_files[0]):
         makedirs(out_path_sub)
     # Store merged cluster+field data to file.
     with open(join(out_path_sub, str(clust_name) + '.DAT'), "w") as f_out:
-        f_out.write('# id  x  y  V  eV  BV  eBV\n')
+        f_out.write('# id  x  y  V  eV  BV  eBV m_ini\n')
         for idx, item in enumerate(id_cl_fl):
-            f_out.write("%d  %f  %f  %f  %f  %f  %f\n" % (item, x_cl_fl[idx],
+            f_out.write("{:<8.0f} {:>8.2f} {:>8.2f} {:>8.2f} {:>8.2f}"
+            " {:>8.2f} {:>8.2f} {:>8.4f}\n".format(item, x_cl_fl[idx],
             y_cl_fl[idx], mag_cl_fl[idx], e_mag_cl_fl[idx], col1_cl_fl[idx],
-            e_col_cl_fl[idx]))
+            e_col_cl_fl[idx], mass_cl_fl[idx]))
 
     # Plot field + cluster.
     # figsize(x1, y1), GridSpec(y2, x2) --> To have square plots: x1/x2 =
@@ -305,9 +318,10 @@ for f_indx, sub_dir in enumerate(dir_files[0]):
     text4 = '$z = %.4f$' '\n' % metal
     text5 = '$dist = %.1f \,kpc$' '\n' % (dist / 1000.)
     text6 = '$A_V = %.1f \, mag$' '\n' % vis_abs
-    text7 = '$M = %d \, M_{\odot}$' % mass
-    text = text1 + text2 + text3 + text4 + text5 + text6 + text7
-    plt.text(0.63, 0.63, text, transform=ax0.transAxes,
+    text7 = '$M = %d \, M_{\odot}$\n' % mass
+    text8 = '$\sum m_i = %d \, M_{\odot}$' % sum(mass_vals[0])
+    text = text1 + text2 + text3 + text4 + text5 + text6 + text7 + text8
+    plt.text(0.63, 0.57, text, transform=ax0.transAxes,
         bbox=dict(facecolor='white', alpha=0.5), fontsize=13)
     # Plot stars.
     plt.scatter(col_raw, mag_raw, marker='o', c='r', s=15., lw=0.3)
@@ -430,8 +444,10 @@ for f_indx, sub_dir in enumerate(dir_files[0]):
     # Set grid
     ax5.grid(b=True, which='major', color='gray', linestyle='--', lw=1)
     # Calculate total number of stars whitin cluster's radius.
-    plt.text(0.65, 0.93, '$N_{cluster} = %d$' % len(col1_data_c),
-             transform=ax5.transAxes,
+    text1 = '$N_{cluster} = %d$\n' % len(col1_data_c)
+    text2 = '$\sum m_i = %d \, M_{\odot}$' % sum(mass_cl_fl)
+    text = text1 + text2
+    plt.text(0.65, 0.87, text, transform=ax5.transAxes,
              bbox=dict(facecolor='white', alpha=0.5), fontsize=13)
     # Plot stars.
     plt.scatter(col1_field_c, mag_field_c, marker='o', c='k', s=12, lw=0.25,
