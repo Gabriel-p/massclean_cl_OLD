@@ -65,8 +65,8 @@ sed -i "36s/.*/0.244    (3)/" $KING_INI
 METAL=('008')
 AGES=('0800')
 INIT_MASS=('500')
-DIST=('1000')
-AV=('1.0')
+DIST=('3000')
+AV=('0.93')
 
 # Get number of elements in the initial metallicity array.
 METAL_n=${#METAL[@]}

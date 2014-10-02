@@ -321,7 +321,7 @@ for f_indx, sub_dir in enumerate(dir_files[0]):
     text7 = '$M = %d \, M_{\odot}$\n' % mass
     text8 = '$\sum m_i = %d \, M_{\odot}$' % sum(mass_vals[0])
     text = text1 + text2 + text3 + text4 + text5 + text6 + text7 + text8
-    plt.text(0.63, 0.57, text, transform=ax0.transAxes,
+    plt.text(0.63, 0.54, text, transform=ax0.transAxes,
         bbox=dict(facecolor='white', alpha=0.5), fontsize=13)
     # Plot stars.
     plt.scatter(col_raw, mag_raw, marker='o', c='r', s=15., lw=0.3)
