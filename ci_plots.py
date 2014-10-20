@@ -86,7 +86,7 @@ clust_memb_num = get_true_memb_n()
 
 # Read ocaat_output.dat file to obtain the MASSCLEAN clusters actual
 # data and parameters.
-out_file = '/media/rest/github/ocaat/output/massclean/ocaat_output.dat'
+out_file = '/media/rest/github/asteca/output/ASteCA - paper/massclean/ocaat_output.dat'
 f = open(out_file)
 names, params = [], []
 for line in skip_comments(f):
@@ -219,6 +219,13 @@ print '<90', float(sum(abs(i) < 90. for i in rad_diff_i)) / len(rad_diff_i)
 # Number of members, relative error.
 memb_diff_i = (np.array(memb_ocaat_i) - np.array(memb_true_i)) / \
     np.array(memb_true_i)
+
+# Print names, number of members and CI.
+# print '\n'
+# for i, nm_t in enumerate(memb_true_i):
+#     print names_i[i], memb_ocaat_i[i], nm_t, ci_i[i]
+# raw_input()
+
 val_memb = sorted(abs(memb_diff_i))[int(0.5 * len(memb_diff_i))]
 print '\n 50% limit:', val_memb
 val_memb_90 = sorted(abs(memb_diff_i))[int(0.9 * len(memb_diff_i))]
