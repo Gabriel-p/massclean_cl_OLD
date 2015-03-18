@@ -3,7 +3,7 @@
 This set of bash/python scripts is intended to generate synthetic open
 clusters (SOCs) by making use of the [MASSCLEAN](http://www.physics.uc.edu/~bogdan/massclean/)
 package and to compare their real parameters (center, radius, metallicity, age,
-distance, extinction) with those obtained by the [OCAAT](https://github.com/Gabriel-p/ocaat) code applied to each one of them.
+distance, extinction) with those obtained by the [ASteCA](https://github.com/asteca) code applied to each one of them.
 
 ## Generation of SOCs
 The bash script `massclean_run_all.sh` calls *MASSCLEAN* to generate a number of synthetic open clusters along with fields of stars created with the same parameter values.
@@ -20,13 +20,13 @@ This script can also be run separately, provided the *MASSCLEAN* cluster and fie
 
 
 ## Decontamination algorithm
-The `massclean_member_index.py` script is used to establish the accuracy of the decontamination algorithm applied on the synthetic clusters by *OCAAT*. It calculates the members indexes (MI) defined (which estimates how good real cluster members were recovered by the algorithm) and plots the output as a contamination index (CI) vs MI diagram for all synthetic clusters.
+The `massclean_member_index.py` script is used to establish the accuracy of the decontamination algorithm applied on the synthetic clusters by **ASteCA**. It calculates the members indexes (MI) defined (which estimates how good real cluster members were recovered by the algorithm) and plots the output as a contamination index (CI) vs MI diagram for all synthetic clusters.
 
 
 ## Cluster parameters
 
 ### Plot summary
-The `ci_plots.py` script compares the real *MASSCLEAN* cluster parameters (center, radius, metallicity, age, distance, extinction) with those obtained by the *OCAAT* code and returns a parameter versus CI plot.
+The `ci_plots.py` script compares the real *MASSCLEAN* cluster parameters (center, radius, metallicity, age, distance, extinction) with those obtained by the **ASteCA** code and returns a parameter versus CI plot.
 
 ### Table summary
 The `ci-table.py` script generates the values to fill the table that summarizes
