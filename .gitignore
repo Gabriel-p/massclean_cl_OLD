@@ -1,5 +1,5 @@
 massclean2.013/
-synth_clusters/
+# synth_clusters/
 *.dat
 *.png
 
