@@ -1,7 +1,7 @@
 massclean2.013/
 # synth_clusters/
-*.dat
-*.png
+# *.DAT
+# *.png
 
 *.py[cod]
 

@@ -34,4 +34,4 @@ the results obtained for the cluster parameters.
 
 
 ##Deprecated
-`massclean_avrg_MI_algors.py` is SEMI-DEPRECATED. It plots the average member_index values for all the decontamination algorithms used, for each of the member indexes defined.
+`massclean_avrg_MI_algors.py` is DEPRECATED. It plots the average member_index values for all the decontamination algorithms used, for each of the member indexes defined.
