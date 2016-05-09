@@ -47,7 +47,7 @@ sed -i "36s/.*/2      (3)/" $FIELD_INI
 # Minimum magnitude.
 sed -i "37s/.*/61        (4)/" $FIELD_INI
 # Maximum magnitude.
-sed -i "38s/.*/1         (5)/" $FIELD_INI
+sed -i "38s/.*/-15         (5)/" $FIELD_INI
 
 # Set field size.
 sed -i "47s/.*/4.8    (4)/" $CLUSTER_INI
@@ -66,8 +66,8 @@ sed -i "36s/.*/0.244    (3)/" $KING_INI
 
 METAL=('015')
 AGES=('0900')
-INIT_MASS=('20000')
-DIST=('10')
+INIT_MASS=('10000')
+DIST=('55000')
 AV=('0.0')
 
 # Get number of elements in the initial metallicity array.
