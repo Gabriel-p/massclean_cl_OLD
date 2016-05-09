@@ -120,7 +120,7 @@ def exp_func(x):
     return min(0.1, a * np.exp(b * x) + c)
 
 
-def error_scatter(id_cl_fl, myfile, max_mag_lim):
+def error_scatter(sc_path, sub_dir, myfile, id_cl_fl, max_mag_lim):
     '''
     Reject stars in either the cluster or a field according to the magnitude
     limit set, add errors to the photometric data and scatter in mag and color
@@ -195,12 +195,42 @@ def error_scatter(id_cl_fl, myfile, max_mag_lim):
     return ids, x_vals, y_vals, mag_vals, col_vals, e_mag, e_col, mass_vals
 
 
+def write_out_file(out_path_sub, clust_name, region_compl):
+    """
+    Write synthetic cluster data to file.
+    """
+    # Unpack lists of data after completeness removal.
+    id_cl_fl, x_cl_fl, y_cl_fl, mag_cl_fl, e_mag_cl_fl, col1_cl_fl, \
+        e_col_cl_fl, mass_cl_fl = region_compl
+
+    # Check if subdir already exists, if not create it
+    if not exists(out_path_sub):
+        makedirs(out_path_sub)
+    # Store merged cluster+field data to file.
+    with open(join(out_path_sub, str(clust_name) + '.DAT'), "w") as f_out:
+        f_out.write('# id  x  y  V  eV  BV  eBV m_ini\n')
+        for idx, item in enumerate(id_cl_fl):
+            f_out.write("{:<8.0f} {:>8.2f} {:>8.2f} {:>8.2f} {:>8.2f}"
+                        " {:>8.2f} {:>8.2f} {:>8.4f}\n".format(
+                            item, x_cl_fl[idx], y_cl_fl[idx],
+                            mag_cl_fl[idx], e_mag_cl_fl[idx],
+                            col1_cl_fl[idx], e_col_cl_fl[idx],
+                            mass_cl_fl[idx]))
+
+
 def make_plots(plot_params):
     """
     Plot synthetic clusters.
     """
 
-    a = plot_params
+    max_mag_lim, metal, age, x_raw, y_raw, mag_raw, col_raw, mag_clust,\
+        col1_cl_fl, dist, vis_abs, mass, mass_vals, id_cl_fl_f,\
+        mag_cl_fl_f, e_mag_cl_fl_f, e_col_cl_fl_f, mag_cl_fl, e_mag_cl_fl,\
+        e_col_cl_fl, region_full, histos, mass_cl_fl,\
+        col1_field_c, mag_field_c, col1_data_c, mag_data_c,\
+        x_field_c, y_field_c, x_data_c, y_data_c, out_path_sub, clust_name =\
+        plot_params
+
     # Plot field + cluster.
     # figsize(x1, y1), GridSpec(y2, x2) --> To have square plots: x1/x2 =
     # y1/y2 = 2.5
@@ -424,7 +454,7 @@ def main():
 
         # Get raw data and error-scattered photometric data for the cluster.
         id_clust, x_cl, y_cl, mag_cl, col_cl, e_mag_c, e_col_c, mass_vals = \
-            error_scatter('cluster', cl_file, max_mag_lim)
+            error_scatter(sc_path, sub_dir, cl_file, 'cluster', max_mag_lim)
         x_raw, y_raw, mag_raw, col_raw = x_cl[0], y_cl[0], mag_cl[0],\
             col_cl[0]
         x_clust, y_clust, mag_clust, col_clust, mass_clust = x_cl[1], y_cl[1],\
@@ -432,7 +462,8 @@ def main():
 
         # Get raw data and error-scattered photometric data for the field.
         id_field, x_field, y_field, mag_field, col_field, e_mag_f, e_col_f, \
-            mass_f = error_scatter('field', 'field.plot', max_mag_lim)
+            mass_f = error_scatter(sc_path, sub_dir, 'field.plot', 'field',
+                                   max_mag_lim)
 
         # Merge cluster and field.
         id_cl_fl_f = np.concatenate([id_clust, id_field])
@@ -446,7 +477,8 @@ def main():
 
         # Store lists into single list of merged data.
         region_full = [id_cl_fl_f, x_cl_fl_f, y_cl_fl_f, mag_cl_fl_f,
-                       e_mag_cl_fl_f, col1_cl_fl_f, e_col_cl_fl_f, mass_cl_fl_f]
+                       e_mag_cl_fl_f, col1_cl_fl_f, e_col_cl_fl_f,
+                       mass_cl_fl_f]
 
         # Call completeness removal function.
         # Magnitude value below the minimum magnitude where the completeness
@@ -458,25 +490,11 @@ def main():
         id_cl_fl, x_cl_fl, y_cl_fl, mag_cl_fl, e_mag_cl_fl, col1_cl_fl, \
             e_col_cl_fl, mass_cl_fl = region_compl
 
-        # Check if subdir already exists, if not create it
-        out_path_sub = join(out_path, sub_dir)
-        if not exists(out_path_sub):
-            makedirs(out_path_sub)
-        # Store merged cluster+field data to file.
-        with open(join(out_path_sub, str(clust_name) + '.DAT'), "w") as f_out:
-            f_out.write('# id  x  y  V  eV  BV  eBV m_ini\n')
-            for idx, item in enumerate(id_cl_fl):
-                f_out.write("{:<8.0f} {:>8.2f} {:>8.2f} {:>8.2f} {:>8.2f}"
-                            " {:>8.2f} {:>8.2f} {:>8.4f}\n".format(
-                                item, x_cl_fl[idx], y_cl_fl[idx], mag_cl_fl[idx],
-                                e_mag_cl_fl[idx], col1_cl_fl[idx],
-                                e_col_cl_fl[idx], mass_cl_fl[idx]))
-
-
         # Separate cluster from field stars AFTER completeness function.
-        x_data_c, y_data_c, mag_data_c, e_mag_data_c, col1_data_c, e_col_data_c,\
-            x_field_c, y_field_c, mag_field_c, e_mag_field_c, col1_field_c, \
-            e_col_field_c = [], [], [], [], [], [], [], [], [], [], [], []
+        x_data_c, y_data_c, mag_data_c, e_mag_data_c, col1_data_c,\
+            e_col_data_c, x_field_c, y_field_c, mag_field_c, e_mag_field_c,\
+            col1_field_c, e_col_field_c =\
+            [], [], [], [], [], [], [], [], [], [], [], []
         for idx, id_star in enumerate(id_cl_fl):
             # Cluster star.
             if str(id_star)[0] == '1':
@@ -495,6 +513,16 @@ def main():
                 col1_field_c.append(col1_cl_fl[idx])
                 e_col_field_c.append(e_col_cl_fl[idx])
 
+        out_path_sub = join(out_path, sub_dir)
+        write_out_file(out_path_sub, clust_name, region_compl)
+
+        plot_params = [
+            max_mag_lim, metal, age, x_raw, y_raw, mag_raw, col_raw, mag_clust,
+            col1_cl_fl, dist, vis_abs, mass, mass_vals, id_cl_fl_f,
+            mag_cl_fl_f, e_mag_cl_fl_f, e_col_cl_fl_f, mag_cl_fl, e_mag_cl_fl,
+            e_col_cl_fl, region_full, histos, mass_cl_fl, col1_field_c,
+            mag_field_c, col1_data_c, mag_data_c, x_field_c, y_field_c,
+            x_data_c, y_data_c, out_path_sub, clust_name]
         make_plots(plot_params)
 
     print 'End.'
