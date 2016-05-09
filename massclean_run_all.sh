@@ -40,12 +40,14 @@ rm -rfv clusters/*
 # Set maximum magnitude for field stars.
 # Use J band as per Popescus' recommendation.
 sed -i "34s/.*/J         (1)/" $FIELD_INI
-# Number of stars.
-sed -i "36s/.*/12000      (3)/" $FIELD_INI
+# Number of field stars.
+#sed -i "36s/.*/12000      (3)/" $FIELD_INI
+# v No field stars.
+sed -i "36s/.*/2      (3)/" $FIELD_INI
 # Minimum magnitude.
-sed -i "37s/.*/21        (4)/" $FIELD_INI
+sed -i "37s/.*/61        (4)/" $FIELD_INI
 # Maximum magnitude.
-sed -i "38s/.*/9         (5)/" $FIELD_INI
+sed -i "38s/.*/1         (5)/" $FIELD_INI
 
 # Set field size.
 sed -i "47s/.*/4.8    (4)/" $CLUSTER_INI
@@ -62,11 +64,11 @@ sed -i "36s/.*/0.244    (3)/" $KING_INI
 # DIST=('500' '1000' '3000' '5000')
 # AV=('0.1' '0.5' '1.0' '3.0')
 
-METAL=('008')
-AGES=('0800')
-INIT_MASS=('500')
-DIST=('3000')
-AV=('0.93')
+METAL=('015')
+AGES=('0900')
+INIT_MASS=('20000')
+DIST=('10')
+AV=('0.0')
 
 # Get number of elements in the initial metallicity array.
 METAL_n=${#METAL[@]}

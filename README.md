@@ -1,9 +1,6 @@
 # MASSCLEAN cluster generator
 
-This set of bash/python scripts is intended to generate synthetic open
-clusters (SOCs) by making use of the [MASSCLEAN](http://www.physics.uc.edu/~bogdan/massclean/)
-package and to compare their real parameters (center, radius, metallicity, age,
-distance, extinction) with those obtained by the [ASteCA](https://github.com/asteca) code applied to each one of them.
+This set of bash/python scripts is intended to generate synthetic open clusters (SOCs) by making use of the [MASSCLEAN](http://www.physics.uc.edu/~bogdan/massclean/) package, and to compare their real parameters (center, radius, metallicity, age, distance, extinction) with those obtained by the [ASteCA](https://github.com/asteca) code applied to each one of them.
 
 ## Generation of SOCs
 The bash script `massclean_run_all.sh` calls *MASSCLEAN* to generate a number of synthetic open clusters along with fields of stars created with the same parameter values.
