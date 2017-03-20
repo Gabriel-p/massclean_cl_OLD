@@ -30,5 +30,5 @@ The `ci-table.py` script generates the values to fill the table that summarizes
 the results obtained for the cluster parameters.
 
 
-##Deprecated
+## Deprecated
 `massclean_avrg_MI_algors.py` is DEPRECATED. It plots the average member_index values for all the decontamination algorithms used, for each of the member indexes defined.
