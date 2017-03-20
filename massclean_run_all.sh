@@ -3,51 +3,52 @@
 
 ##  MASSCLEAN V2.0123 ##
 
-# This script generates the synthetic clusters for the specified initial mass, distance,
-# age and metallicity ranges and stores the files in the corresponding folders.
-
-# A field plot is also created for wach 
+# This script generates the synthetic clusters for the specified initial mass,
+# distance, age and metallicity ranges and stores the files in the
+# corresponding folders.
 
 
 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-# 1- The 'massclean2.013' folder should be a sub-folder of the one where this
+# 1- The 'massclean2.01X' folder should be a sub-folder of the one where this
 #    script is located.
-# 2- The convention for the names of the created folders is xx_yyyy where 'xx' is the initial mass
-#    of the clusters (2 chars) and 'yyyy' is the distance in parsecs (3 or 4 chars)
-# 3- A field plot is generated for each distance although this could probably be improved
-#    by moving the ./gofield2 command outside of the for loops.
-# 4- The file 'field.ini' should use the J band as reference in (1) since apparently the V band
-#    causes troubles. The max_J mag can be set as: max_J = max_V- 3 in (4). 
+# 2- The convention for the names of the created folders is xx_yyyy where 'xx'
+#    is the initial mass of the clusters (2 chars) and 'yyyy' is the distance in
+#    parsecs (3 or 4 chars)
+# 3- A field plot is generated for each distance although this could probably
+#    be improved by moving the ./gofield2 command outside of the for loops.
+# 4- The file 'field.ini' should use the J band as reference in (1) since
+#    apparently the V band causes troubles. The max_J mag can be set as:
+#    max_J = max_V - 3 in (5). 
 
 
 
 # Current directory.
 CDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+# MASSCLEAN version
+ver="2.014"
 # Location of the cluster.ini file.
-CLUSTER_INI=$CDIR"/massclean2.013/ini.files/cluster.ini"
-KING_INI=$CDIR"/massclean2.013/ini.files/king.ini"
-FIELD_INI=$CDIR"/massclean2.013/ini.files/field.ini"
+CLUSTER_INI=$CDIR"/massclean${ver}/ini.files/cluster.ini"
+KING_INI=$CDIR"/massclean${ver}/ini.files/king.ini"
+FIELD_INI=$CDIR"/massclean${ver}/ini.files/field.ini"
 
 # Change to code directory.
-cd $CDIR"/massclean2.013"
+cd $CDIR"/massclean${ver}"
 
-# Remove *ALL* previous synth clusters created.
+# Remove *ALL* previous synthetic clusters created.
 rm -rfv clusters/*
 
 # Clean left over files from previous run.
 ./clean.all
 
-# Set maximum magnitude for field stars.
+# Set parameters for field stars.
 # Use J band as per Popescus' recommendation.
 sed -i "34s/.*/J         (1)/" $FIELD_INI
 # Number of field stars.
-#sed -i "36s/.*/12000      (3)/" $FIELD_INI
-# v No field stars.
-sed -i "36s/.*/2      (3)/" $FIELD_INI
+sed -i "36s/.*/12000      (3)/" $FIELD_INI
 # Minimum magnitude.
-sed -i "37s/.*/61        (4)/" $FIELD_INI
+sed -i "37s/.*/22        (4)/" $FIELD_INI
 # Maximum magnitude.
-sed -i "38s/.*/-15         (5)/" $FIELD_INI
+sed -i "38s/.*/8         (5)/" $FIELD_INI
 
 # Set field size.
 sed -i "47s/.*/4.8    (4)/" $CLUSTER_INI
@@ -65,10 +66,10 @@ sed -i "36s/.*/0.244    (3)/" $KING_INI
 # AV=('0.1' '0.5' '1.0' '3.0')
 
 METAL=('015')
-AGES=('0900')
-INIT_MASS=('10000')
-DIST=('10')
-AV=('0.0')
+AGES=('0800')
+INIT_MASS=('1000')
+DIST=('5000')
+AV=('0.5')
 
 # Get number of elements in the initial metallicity array.
 METAL_n=${#METAL[@]}
@@ -129,14 +130,16 @@ for (( i=0;i<$METAL_n;i++)); do
             # Create sub-folder if it does not exist.
             mkdir -p $CODE_DIR
 
-            #read -p "1 Press [Enter] key to continue..."
+            # echo $CODE_DIR
+            # read -p "1 Press [Enter] key to continue..."
 
             # Copy synth clusters files to output folder.
             cp ./data/iso.trek/*.trek $CODE_DIR
             # Copy field stars file to output folder.
             cp ./data/field.plot $CODE_DIR
-            # Copy used cluster.ini file to folder.
+            # Copy used cluster.ini and field.ini files to folder.
             cp $CLUSTER_INI $CODE_DIR
+            cp $FIELD_INI $CODE_DIR
 
         done
     done
